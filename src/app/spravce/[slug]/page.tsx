@@ -75,7 +75,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
     address: formData.address ?? baseCoworking?.address ?? '',
     city: formData.city ?? baseCoworking?.city ?? '',
     zipCode: formData.zipCode ?? (baseCoworking as any)?.zipCode ?? '',
-    openingHours: formData.openingHours ?? (baseCoworking?.openingHours as Record<string, string>) ?? {},
+    openingHours: formData.openingHours ?? (baseCoworking?.openingHours as unknown as Record<string, string>) ?? {},
     amenities: formData.amenities ?? baseCoworking?.amenities ?? [],
     priceDayPass: formData.priceDayPass ?? baseCoworking?.priceDayPass ?? null,
     priceMonthly: formData.priceMonthly ?? baseCoworking?.priceMonthly ?? null,
