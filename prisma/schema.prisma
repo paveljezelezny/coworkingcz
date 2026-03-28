@@ -3,33 +3,77 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ==========================================
-// AUTH & USERS
+// NEXTAUTH - Required models
+// ==========================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ==========================================
+// USERS
 // ==========================================
 
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
-  password      String
+  emailVerified DateTime?
+  password      String?   // Optional - OAuth users don't have password
   name          String?
+  image         String?
   role          String    @default("coworker") // coworker | coworking_admin | super_admin
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // Coworker profile
-  coworkerProfile CoworkerProfile?
+  // NextAuth relations
+  accounts      Account[]
+  sessions      Session[]
 
-  // Coworking admin
-  managedSpaces   CoworkingSpace[]
+  // Platform relations
+  coworkerProfile     CoworkerProfile?
+  listings            MarketplaceListing[]
+  bookings            Booking[]
+  eventRegistrations  EventRegistration[]
 
-  // Marketplace
-  listings        MarketplaceListing[]
-  bookings        Booking[]
-  eventRegistrations EventRegistration[]
+  // Owner relations
+  claims              CoworkingClaim[]
+  ownedCoworkings     CoworkingEdit[]
 }
 
 // ==========================================
@@ -41,25 +85,20 @@ model CoworkerProfile {
   userId          String   @unique
   user            User     @relation(fields: [userId], references: [id])
 
-  bio             String?
+  bio             String?  @db.Text
   profession      String?
-  skills          String?  // comma-separated
+  skills          String?
   linkedinUrl     String?
   websiteUrl      String?
   avatarUrl       String?
   isPublic        Boolean  @default(true)
-  services        String?  // what services they offer
+  services        String?  @db.Text
 
-  // Membership
-  membershipTier  String?  // free | premium
+  membershipTier  String?
   membershipStart DateTime?
   membershipEnd   DateTime?
 
-  // Home coworking
   homeCoworkingId String?
-  homeCoworking   CoworkingSpace? @relation("HomeCoworking", fields: [homeCoworkingId], references: [id])
-
-  // Free monthly visit tracking
   freeVisits      FreeVisit[]
 
   createdAt       DateTime @default(now())
@@ -70,8 +109,7 @@ model FreeVisit {
   id              String   @id @default(cuid())
   profileId       String
   profile         CoworkerProfile @relation(fields: [profileId], references: [id])
-  coworkingId     String
-  coworking       CoworkingSpace @relation(fields: [coworkingId], references: [id])
+  coworkingSlug   String
   visitDate       DateTime
   month           Int
   year            Int
@@ -79,93 +117,35 @@ model FreeVisit {
 }
 
 // ==========================================
-// COWORKING SPACES
+// COWORKING OWNERSHIP & EDITS
 // ==========================================
 
-model CoworkingSpace {
-  id              String   @id @default(cuid())
-  slug            String   @unique
-  name            String
-  description     String?
-  shortDescription String?
+// Claim request from owner
+model CoworkingClaim {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  coworkingSlug String
+  coworkingName String
+  status        String   @default("approved") // pending | approved | rejected
+  businessEmail String?
+  message       String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  // Admin
-  adminId         String?
-  admin           User?    @relation(fields: [adminId], references: [id])
-
-  // Location
-  city            String
-  region          String?  // Praha, Brno, Ostrava, etc.
-  address         String?
-  zipCode         String?
-  latitude        Float?
-  longitude       Float?
-
-  // Details
-  capacity        Int?     // number of seats
-  areaM2          Int?     // area in m2
-  phone           String?
-  email           String?
-  website         String?
-
-  // Business hours (JSON string)
-  openingHours    String?
-
-  // Pricing
-  priceDayPass    Float?
-  priceMonthly    Float?
-  priceHourly     Float?
-
-  // Platform subscription
-  platformTier    String?  // small | medium | large
-  platformActive  Boolean  @default(false)
-
-  // Status
-  isActive        Boolean  @default(true)
-  isVerified      Boolean  @default(false)
-  isFeatured      Boolean  @default(false)
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relations
-  amenities       CoworkingAmenity[]
-  photos          CoworkingPhoto[]
-  locations       CoworkingLocation[]
-  events          Event[]
-  bookings        Booking[]
-  homeCoworkers   CoworkerProfile[] @relation("HomeCoworking")
-  freeVisits      FreeVisit[]
+  @@unique([userId, coworkingSlug])
 }
 
-model CoworkingAmenity {
+// Editable content for each coworking (JSON overrides on top of static data)
+model CoworkingEdit {
   id            String   @id @default(cuid())
-  coworkingId   String
-  coworking     CoworkingSpace @relation(fields: [coworkingId], references: [id], onDelete: Cascade)
-  amenity       String   // wifi | meeting_rooms | kitchen | parking | printer | phone_booth | shower | locker | reception | 24h_access | cafe | terrace | pet_friendly | childcare | workshop_tools
-}
-
-model CoworkingPhoto {
-  id            String   @id @default(cuid())
-  coworkingId   String
-  coworking     CoworkingSpace @relation(fields: [coworkingId], references: [id], onDelete: Cascade)
-  url           String
-  caption       String?
-  isPrimary     Boolean  @default(false)
-  sortOrder     Int      @default(0)
-}
-
-model CoworkingLocation {
-  id            String   @id @default(cuid())
-  coworkingId   String
-  coworking     CoworkingSpace @relation(fields: [coworkingId], references: [id], onDelete: Cascade)
-  name          String?  // e.g. "Pobočka Vinohrady"
-  address       String
-  city          String
-  zipCode       String?
-  latitude      Float?
-  longitude     Float?
-  isPrimary     Boolean  @default(false)
+  coworkingSlug String   @unique
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  data          Json     // All editable fields as JSON
+  publishedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 // ==========================================
@@ -174,12 +154,10 @@ model CoworkingLocation {
 
 model Event {
   id              String   @id @default(cuid())
-  coworkingId     String
-  coworking       CoworkingSpace @relation(fields: [coworkingId], references: [id], onDelete: Cascade)
-
+  coworkingSlug   String
   title           String
-  description     String?
-  eventType       String?  // workshop | networking | meetup | party | conference | other
+  description     String?  @db.Text
+  eventType       String?
   startDate       DateTime
   endDate         DateTime?
   isAllDay        Boolean  @default(false)
@@ -188,9 +166,7 @@ model Event {
   isFree          Boolean  @default(true)
   externalUrl     String?
   imageUrl        String?
-
   registrations   EventRegistration[]
-
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -214,18 +190,15 @@ model Booking {
   id            String   @id @default(cuid())
   userId        String
   user          User     @relation(fields: [userId], references: [id])
-  coworkingId   String
-  coworking     CoworkingSpace @relation(fields: [coworkingId], references: [id])
-
-  bookingType   String   // day_pass | hourly | monthly | meeting_room
+  coworkingSlug String
+  bookingType   String
   date          DateTime
   startTime     String?
   endTime       String?
   seats         Int      @default(1)
   totalPrice    Float?
-  status        String   @default("pending") // pending | confirmed | cancelled
-  notes         String?
-
+  status        String   @default("pending")
+  notes         String?  @db.Text
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -238,18 +211,16 @@ model MarketplaceListing {
   id            String   @id @default(cuid())
   userId        String
   user          User     @relation(fields: [userId], references: [id])
-
   title         String
-  description   String?
-  category      String   // job_offer | job_seeking | service_offer | service_seeking | item_for_sale | item_wanted
-  tags          String?  // comma-separated
+  description   String?  @db.Text
+  category      String
+  tags          String?
   price         Float?
-  priceType     String?  // fixed | hourly | negotiable | free
+  priceType     String?
   location      String?
   isActive      Boolean  @default(true)
   contactEmail  String?
   contactPhone  String?
-
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
