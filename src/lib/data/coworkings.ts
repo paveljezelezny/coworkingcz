@@ -60,12 +60,16 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 80,
     areaM2: 1200,
     website: 'https://www.impacthub.cz',
+  
+    photos: [{ id: 'cw_impact_hub_praha_d10_p1', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', caption: 'Impact Hub Praha D10', isPrimary: true }],
   }),
   createCoworking('cw_locus_workspace', 'Locus Workspace', 'Praha', 'Praha', {
     isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', '24h_access'],
     capacity: 45,
     areaM2: 800,
+  
+    photos: [{ id: 'cw_locus_workspace_p1', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', caption: 'Locus Workspace', isPrimary: true }],
   }),
   createCoworking('cw_opero', 'Opero', 'Praha', 'Praha', {
     isFeatured: true,
@@ -74,22 +78,30 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 60,
     areaM2: 1000,
     website: 'https://www.opero.cz',
+  
+    photos: [{ id: 'cw_opero_p1', url: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&w=800&q=80', caption: 'Opero', isPrimary: true }],
   }),
   createCoworking('cw_svet_hub', 'Svět HUB', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 35,
     areaM2: 600,
+  
+    photos: [{ id: 'cw_svet_hub_p1', url: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80', caption: 'Svět HUB', isPrimary: true }],
   }),
   createCoworking('cw_mo_cha_vista', 'Mo-cha Vista', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'cafe', 'printer'],
     capacity: 25,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_mo_cha_vista_p1', url: 'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=800&q=80', caption: 'Mo-cha Vista', isPrimary: true }],
   }),
   createCoworking('cw_second_culture', 'Second Culture', 'Praha', 'Praha', {
     isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'events'],
     capacity: 50,
     areaM2: 900,
+  
+    photos: [{ id: 'cw_second_culture_p1', url: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&w=800&q=80', caption: 'Second Culture', isPrimary: true }],
   }),
   createCoworking('cw_node5', 'Node5', 'Praha', 'Praha', {
     isFeatured: true,
@@ -98,6 +110,8 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 55,
     areaM2: 850,
     website: 'https://www.node5.cz',
+  
+    photos: [{ id: 'cw_node5_p1', url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80', caption: 'Node5', isPrimary: true }],
   }),
   createCoworking('cw_worklounge', 'WorkLounge', 'Praha', 'Praha', {
     isVerified: true,
@@ -105,17 +119,23 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 70,
     areaM2: 1100,
     website: 'https://www.worklounge.cz',
+  
+    photos: [{ id: 'cw_worklounge_p1', url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80', caption: 'WorkLounge', isPrimary: true }],
   }),
   createCoworking('cw_pracovna_vlkova', 'Pracovna Vlkova 36 a Zlatnická 12', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 40,
     areaM2: 700,
+  
+    photos: [{ id: 'cw_pracovna_vlkova_p1', url: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=800&q=80', caption: 'Pracovna Vlkova 36 a Zlatnická 12', isPrimary: true }],
   }),
   createCoworking('cw_co_labs', 'Co-Labs', 'Praha', 'Praha', {
     isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 30,
     areaM2: 550,
+  
+    photos: [{ id: 'cw_co_labs_p1', url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80', caption: 'Co-Labs', isPrimary: true }],
   }),
   createCoworking('cw_scott_weber', 'Scott.Weber', 'Praha', 'Praha', {
     isVerified: true,
@@ -123,16 +143,22 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 100,
     areaM2: 1500,
     website: 'https://www.scottweber.cz',
+  
+    photos: [{ id: 'cw_scott_weber_p1', url: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=800&q=80', caption: 'Scott.Weber', isPrimary: true }],
   }),
   createCoworking('cw_mumraj', 'Mumraj', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'childcare', 'printer', 'reception'],
     capacity: 35,
     areaM2: 650,
+  
+    photos: [{ id: 'cw_mumraj_p1', url: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=800&q=80', caption: 'Mumraj', isPrimary: true }],
   }),
   createCoworking('cw_ponk_space', 'Ponk Space', 'Praha', 'Praha', {
     amenities: ['wifi', 'workshop_tools', 'kitchen', 'printer', 'events'],
     capacity: 25,
     areaM2: 500,
+  
+    photos: [{ id: 'cw_ponk_space_p1', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80', caption: 'Ponk Space', isPrimary: true }],
   }),
   createCoworking('cw_microsoft_coworking', 'Microsoft Coworking Space', 'Praha', 'Praha', {
     isFeatured: true,
@@ -140,31 +166,43 @@ export const coworkingsData: CoworkingSpace[] = [
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', '24h_access', 'reception'],
     capacity: 90,
     areaM2: 1400,
+  
+    photos: [{ id: 'cw_microsoft_coworking_p1', url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80', caption: 'Microsoft Coworking Space', isPrimary: true }],
   }),
   createCoworking('cw_archihub', 'ArchiHUB', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 40,
     areaM2: 750,
+  
+    photos: [{ id: 'cw_archihub_p1', url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80', caption: 'ArchiHUB', isPrimary: true }],
   }),
   createCoworking('cw_komunitni_centrum_jahoda', 'Komunitní rodinné centrum Jahoda Albertov', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'childcare', 'events'],
     capacity: 30,
     areaM2: 600,
+  
+    photos: [{ id: 'cw_komunitni_centrum_jahoda_p1', url: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80', caption: 'Komunitní rodinné centrum Jahoda Albertov', isPrimary: true }],
   }),
   createCoworking('cw_lamparna_lidicka', 'Lampárna Lidická', 'Praha', 'Praha', {
     amenities: ['wifi', 'kitchen', 'printer', 'events'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_lamparna_lidicka_p1', url: 'https://images.unsplash.com/photo-1572025442646-866d16c84a54?auto=format&fit=crop&w=800&q=80', caption: 'Lampárna Lidická', isPrimary: true }],
   }),
   createCoworking('cw_meandr_revnice', 'Meandr Řevnice', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 15,
     areaM2: 350,
+  
+    photos: [{ id: 'cw_meandr_revnice_p1', url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80', caption: 'Meandr Řevnice', isPrimary: true }],
   }),
   createCoworking('cw_coworking33', 'Coworking33', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_coworking33_p1', url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80', caption: 'Coworking33', isPrimary: true }],
   }),
   createCoworking('cw_clubco_praha', 'Clubco', 'Praha', 'Praha', {
     isVerified: true,
@@ -172,42 +210,58 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 50,
     areaM2: 900,
     website: 'https://www.clubco.cz',
+  
+    photos: [{ id: 'cw_clubco_praha_p1', url: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80', caption: 'Clubco', isPrimary: true }],
   }),
   createCoworking('cw_dum_radost', 'Dům Radost', 'Praha', 'Praha', {
     amenities: ['wifi', 'kitchen', 'printer', 'events'],
     capacity: 20,
     areaM2: 380,
+  
+    photos: [{ id: 'cw_dum_radost_p1', url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80', caption: 'Dům Radost', isPrimary: true }],
   }),
   createCoworking('cw_salounova_vila', 'Šalounova vila', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 35,
     areaM2: 650,
+  
+    photos: [{ id: 'cw_salounova_vila_p1', url: 'https://images.unsplash.com/photo-1564069114553-7215e1ff1890?auto=format&fit=crop&w=800&q=80', caption: 'Šalounova vila', isPrimary: true }],
   }),
   createCoworking('cw_jednacky_hradcanska', 'Jednačky Hradčanská', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 550,
+  
+    photos: [{ id: 'cw_jednacky_hradcanska_p1', url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80', caption: 'Jednačky Hradčanská', isPrimary: true }],
   }),
   createCoworking('cw_zenwork_palac_ara', 'Zenwork Palác ARA', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', '24h_access'],
     capacity: 45,
     areaM2: 800,
+  
+    photos: [{ id: 'cw_zenwork_palac_ara_p1', url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80', caption: 'Zenwork Palác ARA', isPrimary: true }],
   }),
   createCoworking('cw_vysehradska_49', 'Vyšehradská 49', 'Praha', 'Praha', {
     amenities: ['wifi', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_vysehradska_49_p1', url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80', caption: 'Vyšehradská 49', isPrimary: true }],
   }),
   createCoworking('cw_yottabe_praha', 'Yottabe', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 40,
     areaM2: 700,
+  
+    photos: [{ id: 'cw_yottabe_praha_p1', url: 'https://images.unsplash.com/photo-1564069114553-7215e1ff1890?auto=format&fit=crop&w=800&q=80', caption: 'Yottabe', isPrimary: true }],
   }),
   createCoworking('cw_wework_drn', 'Wework DRN', 'Praha', 'Praha', {
     isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 60,
     areaM2: 1000,
+  
+    photos: [{ id: 'cw_wework_drn_p1', url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80', caption: 'Wework DRN', isPrimary: true }],
   }),
   createCoworking('cw_spaces_praha', 'Spaces', 'Praha', 'Praha', {
     isVerified: true,
@@ -215,31 +269,43 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 75,
     areaM2: 1200,
     website: 'https://www.spacesworks.com',
+  
+    photos: [{ id: 'cw_spaces_praha_p1', url: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80', caption: 'Spaces', isPrimary: true }],
   }),
   createCoworking('cw_moovin_space', 'Moovin Space', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 35,
     areaM2: 650,
+  
+    photos: [{ id: 'cw_moovin_space_p1', url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&q=80', caption: 'Moovin Space', isPrimary: true }],
   }),
   createCoworking('cw_praha_hygge', 'Praha.Hygge', 'Praha', 'Praha', {
     amenities: ['wifi', 'kitchen', 'cafe', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_praha_hygge_p1', url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80', caption: 'Praha.Hygge', isPrimary: true }],
   }),
   createCoworking('cw_effectix_hub', 'Effectix Hub', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 30,
     areaM2: 550,
+  
+    photos: [{ id: 'cw_effectix_hub_p1', url: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80', caption: 'Effectix Hub', isPrimary: true }],
   }),
   createCoworking('cw_hasicarna', 'Komunitní centrum Hasičárna', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'events', 'printer'],
     capacity: 40,
     areaM2: 750,
+  
+    photos: [{ id: 'cw_hasicarna_p1', url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80', caption: 'Komunitní centrum Hasičárna', isPrimary: true }],
   }),
   createCoworking('cw_coworking_idea_fair', 'Coworking Idea Fair – VŠE', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 35,
     areaM2: 600,
+  
+    photos: [{ id: 'cw_coworking_idea_fair_p1', url: 'https://images.unsplash.com/photo-1416339134316-0e91dc9ded92?auto=format&fit=crop&w=800&q=80', caption: 'Coworking Idea Fair – VŠE', isPrimary: true }],
   }),
   createCoworking('cw_impact_hub_brno', 'Impact Hub Brno', 'Brno', 'Jihomoravský kraj', {
     isFeatured: true,
@@ -248,60 +314,82 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 70,
     areaM2: 1100,
     website: 'https://www.impacthub.cz',
+  
+    photos: [{ id: 'cw_impact_hub_brno_p1', url: 'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=800&q=80', caption: 'Impact Hub Brno', isPrimary: true }],
   }),
   createCoworking('cw_brain_farm', 'Brain Farm', 'Brno', 'Jihomoravský kraj', {
     isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 50,
     areaM2: 900,
+  
+    photos: [{ id: 'cw_brain_farm_p1', url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&q=80', caption: 'Brain Farm', isPrimary: true }],
   }),
   createCoworking('cw_edunesto', 'EDUnesto', 'Brno', 'Jihomoravský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 40,
     areaM2: 700,
+  
+    photos: [{ id: 'cw_edunesto_p1', url: 'https://images.unsplash.com/photo-1453928582365-b6ad33cbcf64?auto=format&fit=crop&w=800&q=80', caption: 'EDUnesto', isPrimary: true }],
   }),
   createCoworking('cw_branta_workspace', 'Branta Workspace', 'Brno', 'Jihomoravský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 550,
+  
+    photos: [{ id: 'cw_branta_workspace_p1', url: 'https://images.unsplash.com/photo-1547496502-affa22d38842?auto=format&fit=crop&w=800&q=80', caption: 'Branta Workspace', isPrimary: true }],
   }),
   createCoworking('cw_cowo_brno', 'Cowo Brno', 'Brno', 'Jihomoravský kraj', {
     isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 45,
     areaM2: 800,
+  
+    photos: [{ id: 'cw_cowo_brno_p1', url: 'https://images.unsplash.com/photo-1547496502-affa22d38842?auto=format&fit=crop&w=800&q=80', caption: 'Cowo Brno', isPrimary: true }],
   }),
   createCoworking('cw_kumst', 'KUMST', 'Brno', 'Jihomoravský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'workshop_tools'],
     capacity: 35,
     areaM2: 650,
+  
+    photos: [{ id: 'cw_kumst_p1', url: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80', caption: 'KUMST', isPrimary: true }],
   }),
   createCoworking('cw_clubco_brno', 'Clubco', 'Brno', 'Jihomoravský kraj', {
     isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 50,
     areaM2: 900,
+  
+    photos: [{ id: 'cw_clubco_brno_p1', url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80', caption: 'Clubco', isPrimary: true }],
   }),
   createCoworking('cw_coworking_na_paluby', 'Coworking na Palubě', 'Brno', 'Jihomoravský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_coworking_na_paluby_p1', url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80', caption: 'Coworking na Palubě', isPrimary: true }],
   }),
   createCoworking('cw_jic_cowork_brno', 'JIC cowork Brno', 'Brno', 'Jihomoravský kraj', {
     isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 40,
     areaM2: 700,
+  
+    photos: [{ id: 'cw_jic_cowork_brno_p1', url: 'https://images.unsplash.com/photo-1573167243872-43c6433b9d40?auto=format&fit=crop&w=800&q=80', caption: 'JIC cowork Brno', isPrimary: true }],
   }),
   createCoworking('cw_simpl_kancl', 'Simpl Kancl', 'Brno', 'Jihomoravský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_simpl_kancl_p1', url: 'https://images.unsplash.com/photo-1588702547954-4800fd33382a?auto=format&fit=crop&w=800&q=80', caption: 'Simpl Kancl', isPrimary: true }],
   }),
   createCoworking('cw_minicowork_lemur', 'Minicowork Lemur', 'Brno', 'Jihomoravský kraj', {
     amenities: ['wifi', 'kitchen', 'printer'],
     capacity: 15,
     areaM2: 300,
+  
+    photos: [{ id: 'cw_minicowork_lemur_p1', url: 'https://images.unsplash.com/photo-1565514024059-aa13af9a1bf7?auto=format&fit=crop&w=800&q=80', caption: 'Minicowork Lemur', isPrimary: true }],
   }),
   createCoworking('cw_impact_hub_ostrava', 'Impact Hub Ostrava', 'Ostrava', 'Moravskoslezský kraj', {
     isFeatured: true,
@@ -309,305 +397,425 @@ export const coworkingsData: CoworkingSpace[] = [
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'events'],
     capacity: 60,
     areaM2: 1000,
+  
+    photos: [{ id: 'cw_impact_hub_ostrava_p1', url: 'https://images.unsplash.com/photo-1572025442646-866d16c84a54?auto=format&fit=crop&w=800&q=80', caption: 'Impact Hub Ostrava', isPrimary: true }],
   }),
   createCoworking('cw_clubco_ostrava', 'Clubco', 'Ostrava', 'Moravskoslezský kraj', {
     isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 45,
     areaM2: 800,
+  
+    photos: [{ id: 'cw_clubco_ostrava_p1', url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80', caption: 'Clubco', isPrimary: true }],
   }),
   createCoworking('cw_fajna_dilna', 'Fajna dilna', 'Ostrava', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'workshop_tools', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 600,
+  
+    photos: [{ id: 'cw_fajna_dilna_p1', url: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80', caption: 'Fajna dilna', isPrimary: true }],
   }),
   createCoworking('cw_mamahub_koutek_sveta', 'Mamahub Koutek světa', 'Ostrava', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'kitchen', 'childcare', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_mamahub_koutek_sveta_p1', url: 'https://images.unsplash.com/photo-1550305080-4e021e297698?auto=format&fit=crop&w=800&q=80', caption: 'Mamahub Koutek světa', isPrimary: true }],
   }),
   createCoworking('cw_hnizdo_ostrava', 'Hnízdo', 'Ostrava', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_hnizdo_ostrava_p1', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', caption: 'Hnízdo', isPrimary: true }],
   }),
   createCoworking('cw_ostrava_hygge', 'Ostrava.Hygge', 'Ostrava', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'kitchen', 'cafe', 'printer'],
     capacity: 20,
     areaM2: 380,
+  
+    photos: [{ id: 'cw_ostrava_hygge_p1', url: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80', caption: 'Ostrava.Hygge', isPrimary: true }],
   }),
   createCoworking('cw_cowo_cb', 'Cowo CB', 'České Budějovice', 'Jihočeský kraj', {
     isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 35,
     areaM2: 650,
+  
+    photos: [{ id: 'cw_cowo_cb_p1', url: 'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=800&q=80', caption: 'Cowo CB', isPrimary: true }],
   }),
   createCoworking('cw_pracovna_r51', 'Pracovna R51', 'České Budějovice', 'Jihočeský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_pracovna_r51_p1', url: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&w=800&q=80', caption: 'Pracovna R51', isPrimary: true }],
   }),
   createCoworking('cw_coworking_vste', 'Coworking VŠTE', 'České Budějovice', 'Jihočeský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 550,
+  
+    photos: [{ id: 'cw_coworking_vste_p1', url: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=800&q=80', caption: 'Coworking VŠTE', isPrimary: true }],
   }),
   createCoworking('cw_budehub', 'BudeHub', 'České Budějovice', 'Jihočeský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 40,
     areaM2: 700,
+  
+    photos: [{ id: 'cw_budehub_p1', url: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=800&q=80', caption: 'BudeHub', isPrimary: true }],
   }),
   createCoworking('cw_coworking_tchk', 'Coworking TCHK', 'Hradec Králové', 'Královéhradecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 550,
+  
+    photos: [{ id: 'cw_coworking_tchk_p1', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80', caption: 'Coworking TCHK', isPrimary: true }],
   }),
   createCoworking('cw_bio_central', 'Bio Central', 'Hradec Králové', 'Královéhradecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 35,
     areaM2: 600,
+  
+    photos: [{ id: 'cw_bio_central_p1', url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80', caption: 'Bio Central', isPrimary: true }],
   }),
   createCoworking('cw_cowork_cityhub_jihlava', 'COWORK:S CityHUB Jihlava', 'Jihlava', 'Kraj Vysočina', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 40,
     areaM2: 700,
+  
+    photos: [{ id: 'cw_cowork_cityhub_jihlava_p1', url: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80', caption: 'COWORK:S CityHUB Jihlava', isPrimary: true }],
   }),
   createCoworking('cw_yottabe_jihlava', 'Yottabe Space', 'Jihlava', 'Kraj Vysočina', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 30,
     areaM2: 550,
+  
+    photos: [{ id: 'cw_yottabe_jihlava_p1', url: 'https://images.unsplash.com/photo-1572025442646-866d16c84a54?auto=format&fit=crop&w=800&q=80', caption: 'Yottabe Space', isPrimary: true }],
   }),
   createCoworking('cw_kanov', 'Kanov', 'Karlovy Vary', 'Karlovarský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_kanov_p1', url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80', caption: 'Kanov', isPrimary: true }],
   }),
   createCoworking('cw_lipo_ink', 'Lipo.ink', 'Liberec', 'Liberecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'workshop_tools'],
     capacity: 35,
     areaM2: 650,
+  
+    photos: [{ id: 'cw_lipo_ink_p1', url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80', caption: 'Lipo.ink', isPrimary: true }],
   }),
   createCoworking('cw_teamwork', 'TeamWork', 'Liberec', 'Liberecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 550,
+  
+    photos: [{ id: 'cw_teamwork_p1', url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80', caption: 'TeamWork', isPrimary: true }],
   }),
   createCoworking('cw_hub_mb', 'Hub MB', 'Mladá Boleslav', 'Středočeský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 35,
     areaM2: 600,
+  
+    photos: [{ id: 'cw_hub_mb_p1', url: 'https://images.unsplash.com/photo-1564069114553-7215e1ff1890?auto=format&fit=crop&w=800&q=80', caption: 'Hub MB', isPrimary: true }],
   }),
   createCoworking('cw_vault_42', 'Vault 42', 'Olomouc', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', '24h_access'],
     capacity: 40,
     areaM2: 750,
+  
+    photos: [{ id: 'cw_vault_42_p1', url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80', caption: 'Vault 42', isPrimary: true }],
   }),
   createCoworking('cw_coworking_olomouc', 'Coworking Olomouc', 'Olomouc', 'Olomoucký kraj', {
     isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 35,
     areaM2: 650,
+  
+    photos: [{ id: 'cw_coworking_olomouc_p1', url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80', caption: 'Coworking Olomouc', isPrimary: true }],
   }),
   createCoworking('cw_telegraph_hub', 'Telegraph Hub', 'Olomouc', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 30,
     areaM2: 550,
+  
+    photos: [{ id: 'cw_telegraph_hub_p1', url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80', caption: 'Telegraph Hub', isPrimary: true }],
   }),
   createCoworking('cw_ohub', 'Ohub', 'Olomouc', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_ohub_p1', url: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80', caption: 'Ohub', isPrimary: true }],
   }),
   createCoworking('cw_element_coworking', 'Element Coworking', 'Olomouc', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_element_coworking_p1', url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80', caption: 'Element Coworking', isPrimary: true }],
   }),
   createCoworking('cw_freework_envelopa', 'Freework Envelopa', 'Olomouc', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 30,
     areaM2: 550,
+  
+    photos: [{ id: 'cw_freework_envelopa_p1', url: 'https://images.unsplash.com/photo-1416339134316-0e91dc9ded92?auto=format&fit=crop&w=800&q=80', caption: 'Freework Envelopa', isPrimary: true }],
   }),
   createCoworking('cw_p_pink', 'P-PINK', 'Pardubice', 'Pardubický kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 35,
     areaM2: 650,
+  
+    photos: [{ id: 'cw_p_pink_p1', url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&q=80', caption: 'P-PINK', isPrimary: true }],
   }),
   createCoworking('cw_druzstvo_coworking', 'Družstvo: Coworking v Domě služeb', 'Pardubice', 'Pardubický kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 550,
+  
+    photos: [{ id: 'cw_druzstvo_coworking_p1', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', caption: 'Družstvo: Coworking v Domě služeb', isPrimary: true }],
   }),
   createCoworking('cw_sit_port', 'SIT Port', 'Plzeň', 'Plzeňský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 45,
     areaM2: 800,
+  
+    photos: [{ id: 'cw_sit_port_p1', url: 'https://images.unsplash.com/photo-1547496502-affa22d38842?auto=format&fit=crop&w=800&q=80', caption: 'SIT Port', isPrimary: true }],
   }),
   createCoworking('cw_techheaven_hub', 'TechHeaven HUB', 'Plzeň', 'Plzeňský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 40,
     areaM2: 700,
+  
+    photos: [{ id: 'cw_techheaven_hub_p1', url: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80', caption: 'TechHeaven HUB', isPrimary: true }],
   }),
   createCoworking('cw_kolektiv_hub', 'Kolektiv Hub', 'Plzeň', 'Plzeňský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 35,
     areaM2: 650,
+  
+    photos: [{ id: 'cw_kolektiv_hub_p1', url: 'https://images.unsplash.com/photo-1536240478613-bf1c37736de1?auto=format&fit=crop&w=800&q=80', caption: 'Kolektiv Hub', isPrimary: true }],
   }),
   createCoworking('cw_strom_offices', 'Strom Offices', 'Plzeň', 'Plzeňský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'parking'],
     capacity: 40,
     areaM2: 700,
+  
+    photos: [{ id: 'cw_strom_offices_p1', url: 'https://images.unsplash.com/photo-1573167243872-43c6433b9d40?auto=format&fit=crop&w=800&q=80', caption: 'Strom Offices', isPrimary: true }],
   }),
   createCoworking('cw_bic_plzen', 'BIC', 'Plzeň', 'Plzeňský kraj', {
     isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 50,
     areaM2: 900,
+  
+    photos: [{ id: 'cw_bic_plzen_p1', url: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80', caption: 'BIC', isPrimary: true }],
   }),
   createCoworking('cw_hub_hax', 'hub HAX', 'Zlín', 'Zlínský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 35,
     areaM2: 650,
+  
+    photos: [{ id: 'cw_hub_hax_p1', url: 'https://images.unsplash.com/photo-1565514024059-aa13af9a1bf7?auto=format&fit=crop&w=800&q=80', caption: 'hub HAX', isPrimary: true }],
   }),
   createCoworking('cw_zlin_hygge', 'Zlin.Hygge', 'Zlín', 'Zlínský kraj', {
     amenities: ['wifi', 'kitchen', 'cafe', 'printer'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_zlin_hygge_p1', url: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80', caption: 'Zlin.Hygge', isPrimary: true }],
   }),
   createCoworking('cw_retreat_beskydy', 'Retreat.cz', 'Beskydy', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_retreat_beskydy_p1', url: 'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=800&q=80', caption: 'Retreat.cz', isPrimary: true }],
   }),
   createCoworking('cw_coworking_bobr', 'CoWorking BoBr', 'Brandýs nad Labem', 'Středočeský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_coworking_bobr_p1', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', caption: 'CoWorking BoBr', isPrimary: true }],
   }),
   createCoworking('cw_coworking_cesky_tesin', 'Co-working Český Těšín', 'Český Těšín', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 380,
+  
+    photos: [{ id: 'cw_coworking_cesky_tesin_p1', url: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80', caption: 'Co-working Český Těšín', isPrimary: true }],
   }),
   createCoworking('cw_cowo_libre', 'Cowo Libre', 'Frýdek-Místek', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_cowo_libre_p1', url: 'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=800&q=80', caption: 'Cowo Libre', isPrimary: true }],
   }),
   createCoworking('cw_centrum_podpory_podnikani', 'Centrum pro podporu podnikání', 'Havířov', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 550,
+  
+    photos: [{ id: 'cw_centrum_podpory_podnikani_p1', url: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&w=800&q=80', caption: 'Centrum pro podporu podnikání', isPrimary: true }],
   }),
   createCoworking('cw_hubbr', 'Hubbr', 'Havlíčkův Brod', 'Kraj Vysočina', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_hubbr_p1', url: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=800&q=80', caption: 'Hubbr', isPrimary: true }],
   }),
   createCoworking('cw_kanov_cheb', 'Kanov', 'Cheb', 'Karlovarský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_kanov_cheb_p1', url: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=800&q=80', caption: 'Kanov', isPrimary: true }],
   }),
   createCoworking('cw_cowork_jes', 'Cowork Jes', 'Jeseník', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_cowork_jes_p1', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80', caption: 'Cowork Jes', isPrimary: true }],
   }),
   createCoworking('cw_businessgate', 'BusinessGate', 'Karviná', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_businessgate_p1', url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80', caption: 'BusinessGate', isPrimary: true }],
   }),
   createCoworking('cw_coworking_kolin', 'Coworking Kolín', 'Kolín', 'Středočeský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 550,
+  
+    photos: [{ id: 'cw_coworking_kolin_p1', url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80', caption: 'Coworking Kolín', isPrimary: true }],
   }),
   createCoworking('cw_volny_stul', 'Volný stůl', 'Kolín', 'Středočeský kraj', {
     amenities: ['wifi', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_volny_stul_p1', url: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80', caption: 'Volný stůl', isPrimary: true }],
   }),
   createCoworking('cw_litohub', 'Litohub', 'Litoměřice', 'Ústecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_litohub_p1', url: 'https://images.unsplash.com/photo-1572025442646-866d16c84a54?auto=format&fit=crop&w=800&q=80', caption: 'Litohub', isPrimary: true }],
   }),
   createCoworking('cw_kocarovna', 'Kočárovna', 'Litomyšl', 'Pardubický kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_kocarovna_p1', url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80', caption: 'Kočárovna', isPrimary: true }],
   }),
   createCoworking('cw_bridge_714', 'Bridge 714', 'Most', 'Ústecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_bridge_714_p1', url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80', caption: 'Bridge 714', isPrimary: true }],
   }),
   createCoworking('cw_coworking_most_como', 'Coworking Most – COMO', 'Most', 'Ústecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 550,
+  
+    photos: [{ id: 'cw_coworking_most_como_p1', url: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=800&q=80', caption: 'Coworking Most – COMO', isPrimary: true }],
   }),
   createCoworking('cw_lovecowork', 'LoveCoWork', 'Opava', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_lovecowork_p1', url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80', caption: 'LoveCoWork', isPrimary: true }],
   }),
   createCoworking('cw_nase_hnizdo', 'Naše hnízdo', 'Orlová', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_nase_hnizdo_p1', url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80', caption: 'Naše hnízdo', isPrimary: true }],
   }),
   createCoworking('cw_blaho_work', 'Blaho&work', 'Ostrov', 'Karlovarský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_blaho_work_p1', url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80', caption: 'Blaho&work', isPrimary: true }],
   }),
   createCoworking('cw_prstework', 'ProstěWork', 'Prostějov', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_prstework_p1', url: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=800&q=80', caption: 'ProstěWork', isPrimary: true }],
   }),
   createCoworking('cw_in_hub', 'IN-HUB', 'Přerov', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_in_hub_p1', url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80', caption: 'IN-HUB', isPrimary: true }],
   }),
   createCoworking('cw_cwrk_jzd', 'Cwrk JzD', 'Roudnice nad Labem', 'Středočeský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_cwrk_jzd_p1', url: 'https://images.unsplash.com/photo-1416339134316-0e91dc9ded92?auto=format&fit=crop&w=800&q=80', caption: 'Cwrk JzD', isPrimary: true }],
   }),
   createCoworking('cw_cowork_svitavy', 'Cowork', 'Svitavy', 'Pardubický kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_cowork_svitavy_p1', url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&q=80', caption: 'Cowork', isPrimary: true }],
   }),
   createCoworking('cw_cowosedlice', 'Cowosedlice', 'Teplice', 'Ústecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_cowosedlice_p1', url: 'https://images.unsplash.com/photo-1453928582365-b6ad33cbcf64?auto=format&fit=crop&w=800&q=80', caption: 'Cowosedlice', isPrimary: true }],
   }),
   createCoworking('cw_sdilene_kancelar_teplice', 'Sdílené kanceláře Teplice', 'Teplice', 'Ústecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 550,
+  
+    photos: [{ id: 'cw_sdilene_kancelar_teplice_p1', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80', caption: 'Sdílené kanceláře Teplice', isPrimary: true }],
   }),
   createCoworking('cw_hnizdo_uherske_hradiste', 'Hnízdo', 'Uherské Hradiště', 'Zlínský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
+  
+    photos: [{ id: 'cw_hnizdo_uherske_hradiste_p1', url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80', caption: 'Hnízdo', isPrimary: true }],
   }),
   createCoworking('cw_hub_123', 'HUB 123', 'Uherské Hradiště', 'Zlínský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_hub_123_p1', url: 'https://images.unsplash.com/photo-1536240478613-bf1c37736de1?auto=format&fit=crop&w=800&q=80', caption: 'HUB 123', isPrimary: true }],
   }),
   createCoworking('cw_hopspot_cowork', 'Hopspot Cowork', 'Žatec', 'Ústecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
+  
+    photos: [{ id: 'cw_hopspot_cowork_p1', url: 'https://images.unsplash.com/photo-1573167243872-43c6433b9d40?auto=format&fit=crop&w=800&q=80', caption: 'Hopspot Cowork', isPrimary: true }],
   }),
 ];
 
