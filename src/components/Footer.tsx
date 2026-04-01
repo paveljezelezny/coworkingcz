@@ -113,10 +113,10 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/admin"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Dashboard
+                  Admin panel
                 </Link>
               </li>
               <li>

@@ -36,6 +36,9 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
     ? { ...base, ...overrides }
     : base;
 
+  // Check if deleted via admin panel
+  if ((coworking as any).deleted) notFound();
+
   const relatedEvents = eventsData.filter((e) => e.coworkingId === base.id);
 
   return (

@@ -53,16 +53,6 @@ const createCoworking = (
 };
 
 export const coworkingsData: CoworkingSpace[] = [
-  createCoworking('cw_impact_hub_praha_d10', 'Impact Hub Praha D10', 'Praha', 'Praha', {
-    isFeatured: true,
-    isVerified: true,
-    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'events', 'cafe'],
-    capacity: 80,
-    areaM2: 1200,
-    website: 'https://www.impacthub.cz',
-  
-    photos: [{ id: 'cw_impact_hub_praha_d10_p1', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', caption: 'Impact Hub Praha D10', isPrimary: true }],
-  }),
   createCoworking('cw_locus_workspace', 'Locus Workspace', 'Praha', 'Praha', {
     isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', '24h_access'],
@@ -81,27 +71,12 @@ export const coworkingsData: CoworkingSpace[] = [
   
     photos: [{ id: 'cw_opero_p1', url: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&w=800&q=80', caption: 'Opero', isPrimary: true }],
   }),
-  createCoworking('cw_svet_hub', 'Svět HUB', 'Praha', 'Praha', {
-    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
-    capacity: 35,
-    areaM2: 600,
-  
-    photos: [{ id: 'cw_svet_hub_p1', url: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80', caption: 'Svět HUB', isPrimary: true }],
-  }),
   createCoworking('cw_mo_cha_vista', 'Mo-cha Vista', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'cafe', 'printer'],
     capacity: 25,
     areaM2: 400,
   
     photos: [{ id: 'cw_mo_cha_vista_p1', url: 'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=800&q=80', caption: 'Mo-cha Vista', isPrimary: true }],
-  }),
-  createCoworking('cw_second_culture', 'Second Culture', 'Praha', 'Praha', {
-    isVerified: true,
-    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'events'],
-    capacity: 50,
-    areaM2: 900,
-  
-    photos: [{ id: 'cw_second_culture_p1', url: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&w=800&q=80', caption: 'Second Culture', isPrimary: true }],
   }),
   createCoworking('cw_node5', 'Node5', 'Praha', 'Praha', {
     isFeatured: true,
@@ -822,8 +797,8 @@ export const coworkingsData: CoworkingSpace[] = [
 export const eventsData: Event[] = [
   {
     id: 'evt_1',
-    coworkingId: 'cw_impact_hub_praha_d10',
-    coworkingName: 'Impact Hub Praha D10',
+    coworkingId: 'cw_node5',
+    coworkingName: 'Node5',
     title: 'Networking pro startupery',
     description: 'Setkání zaměřené na networking mezi startupy a investory. Seznamte se s novými partnery a inspirujte se příběhy ostatních podnikatelů.',
     eventType: 'networking',

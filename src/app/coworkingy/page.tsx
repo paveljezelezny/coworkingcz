@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search, Filter, X, MapPin, DollarSign } from 'lucide-react';
 import CoworkingCard from '@/components/CoworkingCard';
 import { coworkingsData, getCitiesWithCount } from '@/lib/data/coworkings';
-import { AMENITY_LABELS, FilterOptions } from '@/lib/types';
+import { AMENITY_LABELS, FilterOptions, CoworkingSpace } from '@/lib/types';
 
 export default function CoworkingyPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -14,12 +14,39 @@ export default function CoworkingyPage() {
   const [minCapacity, setMinCapacity] = useState(0);
   const [sortBy, setSortBy] = useState('featured');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [coworkings, setCoworkings] = useState<CoworkingSpace[]>(coworkingsData);
+  const [loading, setLoading] = useState(true);
 
-  const cities = getCitiesWithCount();
+  // Fetch coworkings with DB overrides (to filter deleted ones)
+  useEffect(() => {
+    const fetchCoworkings = async () => {
+      try {
+        const response = await fetch('/api/admin/coworkings');
+        const data = await response.json();
+        setCoworkings(data);
+      } catch (error) {
+        console.error('Failed to fetch coworkings:', error);
+        // Fallback to static data
+        setCoworkings(coworkingsData);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCoworkings();
+  }, []);
+
+  const cities = useMemo(() => {
+    const citiesWithCount: Record<string, number> = {};
+    coworkings.forEach((cw) => {
+      citiesWithCount[cw.city] = (citiesWithCount[cw.city] || 0) + 1;
+    });
+    return Object.entries(citiesWithCount).map(([city, count]) => ({ city, count }));
+  }, [coworkings]);
+
   const amenities = Object.keys(AMENITY_LABELS);
 
   const filteredCoworkings = useMemo(() => {
-    let results = coworkingsData;
+    let results = coworkings;
 
     // Search query filter
     if (searchQuery) {
@@ -64,7 +91,7 @@ export default function CoworkingyPage() {
     }
 
     return results;
-  }, [searchQuery, selectedCity, selectedAmenities, maxPrice, minCapacity, sortBy]);
+  }, [coworkings, searchQuery, selectedCity, selectedAmenities, maxPrice, minCapacity, sortBy]);
 
   const toggleAmenity = (amenity: string) => {
     setSelectedAmenities((prev) =>
@@ -83,7 +110,7 @@ export default function CoworkingyPage() {
             Všechny coworkingy
           </h1>
           <p className="text-gray-600">
-            Procházej a filtruj {coworkingsData.length} coworkingových prostorů
+            Procházej a filtruj {coworkings.length} coworkingových prostorů
           </p>
         </div>
 
