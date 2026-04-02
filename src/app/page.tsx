@@ -1,6 +1,7 @@
 import { Search, MapPin, Users, Zap, BarChart3, Award, Globe, ArrowRight, Calendar, Tag, DollarSign, Plus } from 'lucide-react';
 import Link from 'next/link';
 import CoworkingCard from '@/components/CoworkingCard';
+import HeroPhotoRotator from '@/components/HeroPhotoRotator';
 import {
   getFeaturedCoworkings,
   getCitiesWithCount,
@@ -19,36 +20,34 @@ export default function Home() {
     <div className="w-full">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-        {/* Background Gradient */}
-        <div className="absolute inset-0 gradient-primary opacity-10" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-orange-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+        {/* Rotating photo background with crossfade */}
+        <HeroPhotoRotator />
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
           <div className="text-center animate-fade-in">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full mb-6">
-              <span className="w-2 h-2 bg-blue-600 rounded-full" />
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-sm text-white border border-white/30 rounded-full mb-6">
+              <span className="w-2 h-2 bg-orange-400 rounded-full" />
               <span className="text-sm font-semibold">Objev svůj ideální coworking</span>
             </div>
 
             {/* Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
               Najdi svůj coworking
               <br />
-              <span className="text-gradient bg-gradient-to-r from-blue-600 to-orange-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-300 to-orange-300 bg-clip-text text-transparent">
                 v celém Česku
               </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-white/85 mb-8 max-w-2xl mx-auto drop-shadow">
               Propojujeme coworkery s moderními prostory pro práci. Vybírej z 90+ coworkingů v 15+ městech a najdi si místo, kde ti bude práce létat.
             </p>
 
             {/* Search Bar */}
             <div className="max-w-3xl mx-auto mb-12">
-              <form method="get" action="/coworkingy" className="glass-effect rounded-xl p-4 space-y-4 sm:space-y-0 sm:flex gap-4">
+              <form method="get" action="/coworkingy" className="bg-white/10 backdrop-blur-md border border-white/25 rounded-xl p-4 space-y-4 sm:space-y-0 sm:flex gap-4 shadow-2xl">
                 <div className="flex-1 relative">
                   <MapPin className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
                   <select name="city" className="input-field pl-10 bg-white">
@@ -79,16 +78,16 @@ export default function Home() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-4 sm:gap-8">
               <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
-                <div className="text-3xl sm:text-4xl font-bold text-blue-600">90+</div>
-                <p className="text-sm text-gray-600 mt-1">coworkingů</p>
+                <div className="text-3xl sm:text-4xl font-bold text-white drop-shadow">90+</div>
+                <p className="text-sm text-white/75 mt-1">coworkingů</p>
               </div>
               <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
-                <div className="text-3xl sm:text-4xl font-bold text-blue-600">15+</div>
-                <p className="text-sm text-gray-600 mt-1">měst</p>
+                <div className="text-3xl sm:text-4xl font-bold text-white drop-shadow">15+</div>
+                <p className="text-sm text-white/75 mt-1">měst</p>
               </div>
               <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
-                <div className="text-3xl sm:text-4xl font-bold text-blue-600">5000+</div>
-                <p className="text-sm text-gray-600 mt-1">členů</p>
+                <div className="text-3xl sm:text-4xl font-bold text-white drop-shadow">5000+</div>
+                <p className="text-sm text-white/75 mt-1">členů</p>
               </div>
             </div>
           </div>

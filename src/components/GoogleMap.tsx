@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Loader } from '@googlemaps/js-api-loader';
+import { setOptions, importLibrary } from '@googlemaps/js-api-loader';
 
 interface MarkerData {
   id: string;
@@ -66,13 +66,10 @@ export default function GoogleMap({ markers, selectedId, onSelect }: GoogleMapPr
       return;
     }
 
-    const loader = new Loader({
-      apiKey,
-      version: 'weekly',
-      libraries: ['places'],
-    });
+    // v2 API: setOptions + importLibrary (Loader class was removed in v2)
+    setOptions({ apiKey, version: 'weekly' });
 
-    loader.load().then(() => {
+    importLibrary('maps').then(() => {
       if (!mapRef.current) return;
 
       const map = new google.maps.Map(mapRef.current, {
@@ -90,7 +87,7 @@ export default function GoogleMap({ markers, selectedId, onSelect }: GoogleMapPr
       mapInstanceRef.current = map;
       infoWindowRef.current = new google.maps.InfoWindow();
       setIsLoading(false);
-    }).catch((err) => {
+    }).catch((err: unknown) => {
       console.error('Google Maps load error:', err);
       setLoadError('Nepodařilo se načíst Google Maps. Zkontroluj API klíč.');
       setIsLoading(false);
@@ -142,6 +139,7 @@ export default function GoogleMap({ markers, selectedId, onSelect }: GoogleMapPr
 
   // Highlight selected marker
   useEffect(() => {
+    if (isLoading || !mapInstanceRef.current) return;
     markersRef.current.forEach((marker, id) => {
       marker.setIcon({
         path: google.maps.SymbolPath.CIRCLE,
@@ -157,7 +155,7 @@ export default function GoogleMap({ markers, selectedId, onSelect }: GoogleMapPr
         if (data) openInfoWindow(data, marker, mapInstanceRef.current!);
       }
     });
-  }, [selectedId, markers]);
+  }, [selectedId, markers, isLoading]);
 
   function openInfoWindow(
     m: MarkerData,
