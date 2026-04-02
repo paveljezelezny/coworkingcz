@@ -29,6 +29,13 @@ export interface CoworkingSpace {
   locations: Location[];
   youtubeUrl?: string;
   matterportUrl?: string;
+  // Workspace details
+  officeCount?: number | null;
+  fixedDesks?: number | null;
+  hotDesks?: number | null;
+  // Event / venue
+  hasEventSpace?: boolean;
+  venueTypes?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -198,6 +205,52 @@ export const AMENITY_LABELS: Record<string, string> = {
   events: 'Eventy',
   mail_service: 'Poštovní služby',
   virtual_office: 'Virtuální kancelář',
+  air_conditioning: 'Klimatizace',
+  projector: 'Projektor / TV',
+  standing_desk: 'Výškově stavitelné stoly',
+  phone_line: 'Pevná linka',
+  bike_storage: 'Úložiště kol',
+  electric_car: 'Nabíjení EV',
+  accessibility: 'Bezbariérový přístup',
+  soundproof: 'Zvukotěsné místnosti',
+};
+
+export const VENUE_TYPE_LABELS: Record<string, string> = {
+  yoga: 'Jóga / meditace',
+  party: 'Oslava / večírek',
+  coworking: 'Coworking',
+  workshop: 'Školení / workshop',
+  teambuilding: 'Teambuilding',
+  leisure: 'Volnočasové aktivity',
+  exhibition: 'Výstava / vernisáž',
+  filming: 'Filmování / focení',
+  meeting: 'Meeting',
+  wedding: 'Svatba',
+  conference: 'Konference',
+  sport: 'Sport',
+  streaming: 'Streaming',
+  tasting: 'Degustace',
+  concert: 'Koncert',
+  fashion: 'Módní přehlídka',
+};
+
+export const VENUE_TYPE_EMOJIS: Record<string, string> = {
+  yoga: '🧘',
+  party: '🎉',
+  coworking: '💼',
+  workshop: '📚',
+  teambuilding: '🤝',
+  leisure: '🎯',
+  exhibition: '🖼️',
+  filming: '📸',
+  meeting: '💼',
+  wedding: '💒',
+  conference: '🎤',
+  sport: '⚽',
+  streaming: '📡',
+  tasting: '🍷',
+  concert: '🎸',
+  fashion: '👗',
 };
 
 export const CITY_REGIONS: Record<string, string> = {

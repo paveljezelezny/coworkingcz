@@ -2,10 +2,11 @@ import { notFound } from 'next/navigation';
 import {
   MapPin, Phone, Mail, Globe, Users, Clock,
   Calendar, Star, Wifi, MessageSquare, Youtube, Boxes,
+  ExternalLink, Building2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { coworkingsData, eventsData } from '@/lib/data/coworkings';
-import { AMENITY_LABELS } from '@/lib/types';
+import { AMENITY_LABELS, VENUE_TYPE_LABELS, VENUE_TYPE_EMOJIS } from '@/lib/types';
 import ClaimButton from '@/components/ClaimButton';
 import PhotoGallery from '@/components/PhotoGallery';
 import { prisma } from '@/lib/prisma';
@@ -28,6 +29,13 @@ async function getDbOverrides(slug: string) {
   } catch {
     return null;
   }
+}
+
+/** Ensure URL is absolute (adds https:// if missing) */
+function ensureAbsoluteUrl(url: string): string {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `https://${url}`;
 }
 
 /** Convert any YouTube URL format to an embed URL */
@@ -65,6 +73,9 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
 
   const youtubeEmbed = coworking.youtubeUrl ? toYoutubeEmbed(coworking.youtubeUrl) : null;
   const matterportUrl: string | null = coworking.matterportUrl || null;
+  const websiteUrl = coworking.website ? ensureAbsoluteUrl(coworking.website) : null;
+  const venueTypes: string[] = coworking.venueTypes || [];
+  const hasEventSpace: boolean = coworking.hasEventSpace || false;
 
   return (
     <div className="w-full bg-white">
@@ -235,6 +246,49 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
               </div>
             </section>
 
+            {/* Venue types */}
+            {venueTypes.length > 0 && (
+              <section className="mb-12">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Hodí se také pro</h2>
+                <p className="text-gray-500 text-sm mb-6">Prostor je vhodný pro tyto typy akcí a aktivit.</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {venueTypes.map((type) => (
+                    <div
+                      key={type}
+                      className="flex flex-col items-center gap-2 p-4 bg-gray-50 rounded-xl border border-gray-100 text-center hover:bg-blue-50 hover:border-blue-200 transition-colors"
+                    >
+                      <span className="text-3xl">{VENUE_TYPE_EMOJIS[type] || '📌'}</span>
+                      <span className="text-xs font-semibold text-gray-700 leading-tight">
+                        {VENUE_TYPE_LABELS[type] || type}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                {hasEventSpace && (
+                  <div className="mt-6 p-5 bg-purple-50 border border-purple-200 rounded-xl flex items-center justify-between gap-4 flex-wrap">
+                    <div>
+                      <p className="font-bold text-purple-900 flex items-center gap-2">
+                        <Building2 className="w-5 h-5" />
+                        Eventový prostor k pronájmu
+                      </p>
+                      <p className="text-sm text-purple-700 mt-1">
+                        Tento prostor nabízí prostory k pronájmu pro vaše akce.
+                      </p>
+                    </div>
+                    <a
+                      href="https://www.prostorna.cz"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-shrink-0 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg text-sm flex items-center gap-2 transition-colors"
+                    >
+                      Zobrazit na Prostorna.cz
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </div>
+                )}
+              </section>
+            )}
+
             {/* Pricing */}
             <section className="mb-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Ceny</h2>
@@ -350,9 +404,9 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
                     </div>
                   </a>
                 )}
-                {coworking.website && (
+                {websiteUrl && (
                   <a
-                    href={coworking.website}
+                    href={websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg transition-colors"
@@ -360,7 +414,9 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
                     <Globe className="w-5 h-5 text-blue-600" />
                     <div>
                       <p className="text-xs text-gray-600">Web</p>
-                      <p className="text-sm font-semibold text-blue-600">Navštívit</p>
+                      <p className="text-sm font-semibold text-blue-600 flex items-center gap-1">
+                        Navštívit <ExternalLink className="w-3 h-3" />
+                      </p>
                     </div>
                   </a>
                 )}
@@ -369,11 +425,29 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
               <div className="bg-gray-50 rounded-lg p-4 space-y-3 mb-6 border border-gray-100">
                 {coworking.capacity && (
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600">Kapacita</span>
+                    <span className="text-xs text-gray-600">Celková kapacita</span>
                     <span className="text-sm font-bold text-gray-900 flex items-center gap-1">
                       <Users className="w-4 h-4 text-blue-600" />
                       {coworking.capacity} míst
                     </span>
+                  </div>
+                )}
+                {coworking.hotDesks != null && coworking.hotDesks > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Volné židle (hot desk)</span>
+                    <span className="text-sm font-bold text-gray-900">{coworking.hotDesks}</span>
+                  </div>
+                )}
+                {coworking.fixedDesks != null && coworking.fixedDesks > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Fix desks</span>
+                    <span className="text-sm font-bold text-gray-900">{coworking.fixedDesks}</span>
+                  </div>
+                )}
+                {coworking.officeCount != null && coworking.officeCount > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Kanceláře</span>
+                    <span className="text-sm font-bold text-gray-900">{coworking.officeCount}</span>
                   </div>
                 )}
                 {coworking.areaM2 && (
@@ -399,6 +473,20 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
                   </div>
                 )}
               </div>
+
+              {/* Event space banner */}
+              {hasEventSpace && (
+                <a
+                  href="https://www.prostorna.cz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block mb-3 w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all flex items-center justify-center gap-2 text-sm"
+                >
+                  <Building2 className="w-4 h-4" />
+                  Pronajmout eventový prostor
+                  <ExternalLink className="w-3 h-3 opacity-70" />
+                </a>
+              )}
 
               <div className="space-y-3">
                 <button className="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">

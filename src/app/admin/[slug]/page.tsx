@@ -12,9 +12,13 @@ import {
   Youtube,
   Boxes,
   Star,
+  Building2,
+  Users,
+  Armchair,
+  ExternalLink,
 } from 'lucide-react';
 import Link from 'next/link';
-import { CoworkingSpace, Photo, AMENITY_LABELS } from '@/lib/types';
+import { CoworkingSpace, Photo, AMENITY_LABELS, VENUE_TYPE_LABELS, VENUE_TYPE_EMOJIS } from '@/lib/types';
 
 interface EditPageProps {
   params: { slug: string };
@@ -76,6 +80,18 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
           ? amenities.filter((a) => a !== amenity)
           : [...amenities, amenity],
       };
+    });
+  };
+
+  const handleVenueTypeChange = (type: string) => {
+    setFormData((prev) => {
+      const types: string[] = (prev as any).venueTypes || [];
+      return {
+        ...prev,
+        venueTypes: types.includes(type)
+          ? types.filter((t) => t !== type)
+          : [...types, type],
+      } as any;
     });
   };
 
@@ -452,6 +468,61 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
           </div>
         </div>
 
+        {/* ── PRACOVNÍ PROSTORY ───────────────────────────────────────── */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
+            <Users className="w-5 h-5 text-blue-600" />
+            Pracovní místa
+          </h2>
+          <p className="text-sm text-gray-500 mb-5">
+            Upřesni, kolik máš různých typů pracovních míst. Zobrazí se v detailu prostoru.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+                <Armchair className="w-4 h-4 text-orange-500" />
+                Volné židle (hot desk)
+              </label>
+              <input
+                type="number"
+                name="hotDesks"
+                value={(formData as any).hotDesks ?? ''}
+                onChange={handleInputChange}
+                placeholder="0"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-gray-400 mt-1">Flexibilní místa bez rezervace</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Fix desks</label>
+              <input
+                type="number"
+                name="fixedDesks"
+                value={(formData as any).fixedDesks ?? ''}
+                onChange={handleInputChange}
+                placeholder="0"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-gray-400 mt-1">Dedikovaná stálá místa</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+                <Building2 className="w-4 h-4 text-purple-500" />
+                Počet kanceláří
+              </label>
+              <input
+                type="number"
+                name="officeCount"
+                value={(formData as any).officeCount ?? ''}
+                onChange={handleInputChange}
+                placeholder="0"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-gray-400 mt-1">Uzavřené kanceláře k pronájmu</p>
+            </div>
+          </div>
+        </div>
+
         {/* ── POPIS ───────────────────────────────────────────────────── */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Popis</h2>
@@ -574,6 +645,66 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
                 <span className="text-sm text-gray-700">{AMENITY_LABELS[amenity] || amenity}</span>
               </label>
             ))}
+          </div>
+        </div>
+
+        {/* ── TYPY AKCÍ / VENUE ───────────────────────────────────────── */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-1">Hodí se pro tyto akce</h2>
+          <p className="text-sm text-gray-500 mb-5">
+            Zaklikni, na jaké aktivity je váš prostor vhodný. Zákazníci to uvidí v detailu.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            {Object.entries(VENUE_TYPE_LABELS).map(([key, label]) => {
+              const checked = ((formData as any).venueTypes || []).includes(key);
+              return (
+                <label
+                  key={key}
+                  className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all text-center ${
+                    checked
+                      ? 'border-purple-500 bg-purple-50'
+                      : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50/40'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => handleVenueTypeChange(key)}
+                    className="sr-only"
+                  />
+                  <span className="text-2xl">{VENUE_TYPE_EMOJIS[key] || '📌'}</span>
+                  <span className="text-xs font-medium text-gray-700 leading-tight">{label}</span>
+                </label>
+              );
+            })}
+          </div>
+
+          {/* Event space toggle */}
+          <div className="border-t border-gray-100 pt-5">
+            <label className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+              (formData as any).hasEventSpace ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'
+            }`}>
+              <input
+                type="checkbox"
+                name="hasEventSpace"
+                checked={(formData as any).hasEventSpace || false}
+                onChange={handleCheckboxChange}
+                className="w-5 h-5 mt-0.5 rounded accent-purple-600 flex-shrink-0"
+              />
+              <div>
+                <p className="font-semibold text-gray-900 flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-purple-600" />
+                  Nabízím eventový prostor k pronájmu
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Pokud je zaškrtnuto, zobrazí se tlačítko odkazující na{' '}
+                  <a href="https://www.prostorna.cz" target="_blank" rel="noopener noreferrer" className="text-purple-600 underline">
+                    prostorna.cz <ExternalLink className="w-3 h-3 inline" />
+                  </a>{' '}
+                  v detailu vašeho coworkingu.
+                </p>
+              </div>
+            </label>
           </div>
         </div>
 

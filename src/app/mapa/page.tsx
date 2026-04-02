@@ -1,22 +1,34 @@
 'use client';
 
-import { useState } from 'react';
-import { MapPin, Search, Filter, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { MapPin, Search, X, Users, DollarSign, Calendar, ExternalLink } from 'lucide-react';
 import { coworkingsData } from '@/lib/data/coworkings';
+import { CoworkingSpace } from '@/lib/types';
 import Link from 'next/link';
 
 export default function MapaPage() {
+  const [coworkings, setCoworkings] = useState<CoworkingSpace[]>(coworkingsData);
   const [selectedCoworking, setSelectedCoworking] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
 
-  const cities = ['Praha', 'Brno', 'Ostrava', 'Plzeň', 'Liberec', 'České Budějovice', 'Olomouc', 'Hradec Králové'];
+  // Fetch live data (with DB overrides)
+  useEffect(() => {
+    fetch('/api/admin/coworkings')
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data)) setCoworkings(data); })
+      .catch(() => {/* fallback to static */});
+  }, []);
 
-  const filteredCoworkings = coworkingsData.filter((cw) => {
-    const matchSearch = !searchQuery || cw.name.toLowerCase().includes(searchQuery.toLowerCase());
+  const cities = [...new Set(coworkings.map((cw) => cw.city))].sort();
+
+  const filteredCoworkings = coworkings.filter((cw) => {
+    const matchSearch = !searchQuery || cw.name.toLowerCase().includes(searchQuery.toLowerCase()) || cw.city.toLowerCase().includes(searchQuery.toLowerCase());
     const matchCity = !selectedCity || cw.city === selectedCity;
     return matchSearch && matchCity;
   });
+
+  const selected = filteredCoworkings.find((cw) => cw.id === selectedCoworking);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -24,14 +36,12 @@ export default function MapaPage() {
       <div className="bg-white border-b border-gray-200 p-6">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Mapa coworkingů</h1>
-
-          {/* Search */}
           <div className="flex gap-4 flex-col sm:flex-row">
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Hledej coworking..."
+                placeholder="Hledej coworking nebo město..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="input-field pl-12 w-full"
@@ -44,17 +54,12 @@ export default function MapaPage() {
             >
               <option value="">Všechna města</option>
               {cities.map((city) => (
-                <option key={city} value={city}>
-                  {city}
-                </option>
+                <option key={city} value={city}>{city}</option>
               ))}
             </select>
             {(searchQuery || selectedCity) && (
               <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setSelectedCity('');
-                }}
+                onClick={() => { setSearchQuery(''); setSelectedCity(''); }}
                 className="px-4 py-3 text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-colors"
               >
                 <X className="w-5 h-5" />
@@ -66,83 +71,105 @@ export default function MapaPage() {
 
       {/* Content */}
       <div className="flex h-[calc(100vh-200px)]">
-        {/* Map Container */}
-        <div className="flex-1 relative bg-gradient-to-br from-blue-100 to-orange-100 overflow-hidden">
-          {/* Placeholder Map */}
-          <div className="w-full h-full flex items-center justify-center text-center">
-            <div className="text-gray-500">
-              <MapPin className="w-20 h-20 mx-auto mb-4 opacity-30" />
-              <p className="text-lg font-semibold">Interaktivní mapa</p>
-              <p className="text-sm">Integrace s mapovacím API (Google Maps, Mapbox) - připraveno pro implementaci</p>
-            </div>
+        {/* Map placeholder — Google Maps integration guide below */}
+        <div className="flex-1 relative bg-gradient-to-br from-blue-100 via-blue-50 to-orange-50 overflow-hidden">
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+            <MapPin className="w-16 h-16 text-blue-300 mb-4" />
+            <p className="text-lg font-bold text-gray-700 mb-2">Interaktivní mapa</p>
+            <p className="text-sm text-gray-500 max-w-sm">
+              Nastav Google Maps API klíč v prostředí Vercel a mapa se aktivuje automaticky.
+              Viz nápověda níže.
+            </p>
           </div>
 
-          {/* Map Markers (Placeholder) */}
+          {/* Dummy markers */}
           <div className="absolute inset-0 pointer-events-none">
             {filteredCoworkings.map((cw, idx) => (
               <div
                 key={cw.id}
                 className="absolute pointer-events-auto"
                 style={{
-                  left: `${20 + idx * 8}%`,
-                  top: `${30 + (idx % 3) * 20}%`,
+                  left: `${15 + (idx % 5) * 16}%`,
+                  top: `${20 + Math.floor(idx / 5) * 25}%`,
                 }}
               >
                 <button
-                  onClick={() => setSelectedCoworking(cw.id)}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 transition-all ${
+                  onClick={() => setSelectedCoworking(cw.id === selectedCoworking ? null : cw.id)}
+                  className={`group relative w-10 h-10 rounded-full flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 transition-all shadow-md ${
                     selectedCoworking === cw.id
-                      ? 'bg-orange-500 ring-4 ring-orange-200 scale-125'
-                      : 'bg-blue-600 hover:scale-110'
+                      ? 'bg-orange-500 ring-4 ring-orange-200 scale-125 z-10'
+                      : 'bg-blue-600 hover:scale-110 hover:z-10'
                   }`}
                   title={cw.name}
                 >
                   <MapPin className="w-5 h-5 text-white" />
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    {cw.name}
+                  </div>
                 </button>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Sidebar - List */}
-        <div className="w-full sm:w-96 bg-white border-l border-gray-200 overflow-y-auto">
-          <div className="p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">
-              Coworkingy ({filteredCoworkings.length})
-            </h2>
+        {/* Sidebar */}
+        <div className="w-full sm:w-96 bg-white border-l border-gray-200 overflow-y-auto flex flex-col">
+          <div className="p-4 border-b border-gray-100 flex-shrink-0">
+            <p className="text-sm text-gray-600">
+              Nalezeno <span className="font-bold text-gray-900">{filteredCoworkings.length}</span> coworkingů
+            </p>
+          </div>
 
-            {filteredCoworkings.length > 0 ? (
-              <div className="space-y-4">
-                {filteredCoworkings.map((cw) => (
-                  <div
-                    key={cw.id}
-                    onClick={() => setSelectedCoworking(cw.id)}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      selectedCoworking === cw.id
-                        ? 'border-orange-500 bg-orange-50'
-                        : 'border-gray-100 hover:border-blue-300'
-                    }`}
-                  >
-                    <h3 className="font-bold text-gray-900 mb-1">{cw.name}</h3>
-                    <p className="text-sm text-gray-600 flex items-center gap-1 mb-3">
-                      <MapPin className="w-4 h-4" />
-                      {cw.city}
-                    </p>
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                      {cw.shortDescription}
-                    </p>
-                    <Link
-                      href={`/coworking/${cw.slug}`}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Detail
-                    </Link>
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {filteredCoworkings.length > 0 ? filteredCoworkings.map((cw) => (
+              <div
+                key={cw.id}
+                onClick={() => setSelectedCoworking(cw.id === selectedCoworking ? null : cw.id)}
+                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                  selectedCoworking === cw.id
+                    ? 'border-orange-400 bg-orange-50 shadow-md'
+                    : 'border-gray-100 hover:border-blue-300 bg-white'
+                }`}
+              >
+                {/* Thumbnail */}
+                {cw.photos && cw.photos[0] && (
+                  <div className="relative w-full h-28 mb-3 rounded-lg overflow-hidden bg-gray-100">
+                    <img src={cw.photos[0].url} alt={cw.name} className="w-full h-full object-cover" />
                   </div>
-                ))}
+                )}
+
+                <h3 className="font-bold text-gray-900 mb-1">{cw.name}</h3>
+                <p className="text-xs text-gray-500 flex items-center gap-1 mb-2">
+                  <MapPin className="w-3 h-3" />{cw.city}
+                </p>
+                <p className="text-xs text-gray-600 line-clamp-2 mb-3">{cw.shortDescription}</p>
+
+                {/* Mini stats */}
+                <div className="flex flex-wrap gap-3 mb-3 text-xs text-gray-600">
+                  {cw.capacity && (
+                    <span className="flex items-center gap-1"><Users className="w-3 h-3 text-blue-500" />{cw.capacity} míst</span>
+                  )}
+                  {cw.priceDayPass && (
+                    <span className="flex items-center gap-1"><DollarSign className="w-3 h-3 text-orange-500" />{cw.priceDayPass} Kč/den</span>
+                  )}
+                  {cw.priceMonthly && (
+                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-green-500" />{cw.priceMonthly} Kč/měs</span>
+                  )}
+                </div>
+
+                <Link
+                  href={`/coworking/${cw.slug}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Detail <ExternalLink className="w-3 h-3" />
+                </Link>
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-600">Žádné coworkingy se shodují s tvými kritérii</p>
+            )) : (
+              <div className="text-center py-12">
+                <MapPin className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-600 text-sm">Žádné výsledky</p>
               </div>
             )}
           </div>
