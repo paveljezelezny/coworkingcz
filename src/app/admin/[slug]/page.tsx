@@ -1,13 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Save, Trash2, Loader } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import {
+  ArrowLeft,
+  Save,
+  Trash2,
+  Loader,
+  Upload,
+  X,
+  ImageIcon,
+  Youtube,
+  Boxes,
+  Star,
+} from 'lucide-react';
 import Link from 'next/link';
-import { CoworkingSpace, AMENITY_LABELS } from '@/lib/types';
+import { CoworkingSpace, Photo, AMENITY_LABELS } from '@/lib/types';
 
 interface EditPageProps {
   params: { slug: string };
 }
+
+const MAX_PHOTO_SIZE = 3 * 1024 * 1024; // 3 MB
 
 export default function EditCoworkingPage({ params }: EditPageProps) {
   const [coworking, setCoworking] = useState<CoworkingSpace | null>(null);
@@ -18,6 +31,9 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
   const [formData, setFormData] = useState<Partial<CoworkingSpace>>({});
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch coworking on mount
   useEffect(() => {
@@ -33,42 +49,119 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
         setLoading(false);
       }
     };
-
     fetchCoworking();
   }, [params.slug]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'number' ? parseInt(value) || 0 : value,
+      [name]: type === 'number' ? (value === '' ? null : parseInt(value)) : value,
     }));
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: checked,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: checked }));
   };
 
   const handleAmenityChange = (amenity: string) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const amenities = prev.amenities || [];
-      if (amenities.includes(amenity)) {
-        return {
-          ...prev,
-          amenities: amenities.filter(a => a !== amenity),
-        };
-      } else {
-        return {
-          ...prev,
-          amenities: [...amenities, amenity],
-        };
-      }
+      return {
+        ...prev,
+        amenities: amenities.includes(amenity)
+          ? amenities.filter((a) => a !== amenity)
+          : [...amenities, amenity],
+      };
     });
   };
+
+  // ── Photo upload ──────────────────────────────────────────────────────────
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    setPhotoError(null);
+
+    files.forEach((file) => {
+      if (!file.type.startsWith('image/')) {
+        setPhotoError('Pouze obrázkové soubory jsou povoleny.');
+        return;
+      }
+      if (file.size > MAX_PHOTO_SIZE) {
+        setPhotoError(`Soubor "${file.name}" přesahuje limit 3 MB.`);
+        return;
+      }
+
+      setUploadingPhoto(true);
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const url = ev.target?.result as string;
+        const newPhoto: Photo = {
+          id: `photo_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+          url,
+          caption: file.name.replace(/\.[^.]+$/, ''),
+          isPrimary: false,
+        };
+        setFormData((prev) => {
+          const existing = prev.photos || [];
+          // Mark first photo as primary if none is primary
+          const hasPrimary = existing.some((p) => p.isPrimary);
+          return {
+            ...prev,
+            photos: [
+              ...existing,
+              { ...newPhoto, isPrimary: !hasPrimary && existing.length === 0 },
+            ],
+          };
+        });
+        setUploadingPhoto(false);
+      };
+      reader.onerror = () => {
+        setPhotoError('Nepodařilo se načíst soubor.');
+        setUploadingPhoto(false);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // reset input so same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleRemovePhoto = (photoId: string) => {
+    setFormData((prev) => {
+      const remaining = (prev.photos || []).filter((p) => p.id !== photoId);
+      // If we removed the primary, promote the first remaining
+      const hasPrimary = remaining.some((p) => p.isPrimary);
+      if (!hasPrimary && remaining.length > 0) {
+        remaining[0] = { ...remaining[0], isPrimary: true };
+      }
+      return { ...prev, photos: remaining };
+    });
+  };
+
+  const handleSetPrimary = (photoId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      photos: (prev.photos || []).map((p) => ({
+        ...p,
+        isPrimary: p.id === photoId,
+      })),
+    }));
+  };
+
+  const handlePhotoCaptionChange = (photoId: string, caption: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      photos: (prev.photos || []).map((p) =>
+        p.id === photoId ? { ...p, caption } : p
+      ),
+    }));
+  };
+  // ─────────────────────────────────────────────────────────────────────────
 
   const handleSave = async () => {
     if (!coworking) return;
@@ -84,7 +177,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData.error || 'Save failed');
       }
-      // Refresh data
+
       const freshResponse = await fetch(`/api/admin/coworkings/${coworking.slug}`);
       const data = await freshResponse.json();
       setCoworking(data);
@@ -92,7 +185,6 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
       setSaveStatus('success');
       setTimeout(() => setSaveStatus('idle'), 3000);
     } catch (error: any) {
-      console.error('Failed to save:', error);
       setSaveError(error?.message || 'Chyba při ukládání');
       setSaveStatus('error');
       setTimeout(() => setSaveStatus('idle'), 5000);
@@ -108,11 +200,9 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
       const response = await fetch(`/api/admin/coworkings/${coworking.slug}`, {
         method: 'DELETE',
       });
-
       if (!response.ok) throw new Error('Delete failed');
       window.location.href = '/admin';
     } catch (error) {
-      console.error('Failed to delete:', error);
       alert('Chyba při mazání');
       setDeleting(false);
     }
@@ -121,7 +211,8 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Načítám...</div>
+        <Loader className="w-6 h-6 animate-spin text-blue-600 mr-2" />
+        <span className="text-gray-600">Načítám...</span>
       </div>
     );
   }
@@ -135,6 +226,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
   }
 
   const amenities = Object.keys(AMENITY_LABELS);
+  const currentPhotos = formData.photos || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -148,87 +240,234 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
             <ArrowLeft className="w-5 h-5" />
             Zpět
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">{coworking.name}</h1>
-          <div className="w-24" />
+          <h1 className="text-xl font-bold text-gray-900 truncate max-w-xs">
+            {coworking.name}
+          </h1>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors text-sm"
+          >
+            {saving ? (
+              <><Loader className="w-4 h-4 animate-spin" />Ukládám...</>
+            ) : (
+              <><Save className="w-4 h-4" />Uložit</>
+            )}
+          </button>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Form Container */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 sm:p-8">
-          {/* Basics Section */}
-          <div className="mb-8">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Základní informace</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Název
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Město
-                </label>
-                <input
-                  type="text"
-                  name="city"
-                  value={formData.city || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Kapacita (počet míst)
-                </label>
-                <input
-                  type="number"
-                  name="capacity"
-                  value={formData.capacity || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Plocha (m²)
-                </label>
-                <input
-                  type="number"
-                  name="areaM2"
-                  value={formData.areaM2 || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+        {/* Save status banners */}
+        {saveStatus === 'success' && (
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 font-medium flex items-center gap-2">
+            ✓ Uloženo úspěšně
+          </div>
+        )}
+        {saveStatus === 'error' && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+            <strong>Chyba při ukládání:</strong> {saveError}
+          </div>
+        )}
+
+        {/* ── FOTOGRAFIE ─────────────────────────────────────────────── */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
+            <ImageIcon className="w-5 h-5 text-blue-600" />
+            Fotografie
+          </h2>
+          <p className="text-sm text-gray-500 mb-5">
+            Maximálně 3 MB na fotku. Fotky se zobrazí na kartě coworkingu i na jeho stránce.
+            Přetahování fotek mění pořadí — první fotka je hlavní.
+          </p>
+
+          {/* Photo grid */}
+          {currentPhotos.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-5">
+              {currentPhotos.map((photo) => (
+                <div
+                  key={photo.id}
+                  className={`relative group rounded-lg overflow-hidden border-2 ${
+                    photo.isPrimary ? 'border-blue-500' : 'border-gray-200'
+                  }`}
+                >
+                  <img
+                    src={photo.url}
+                    alt={photo.caption}
+                    className="w-full h-36 object-cover"
+                  />
+                  {/* Primary badge */}
+                  {photo.isPrimary && (
+                    <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Star className="w-3 h-3" />
+                      Hlavní
+                    </div>
+                  )}
+                  {/* Overlay controls */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                    {!photo.isPrimary && (
+                      <button
+                        onClick={() => handleSetPrimary(photo.id)}
+                        className="px-3 py-1 bg-blue-600 text-white text-xs rounded-full font-medium hover:bg-blue-700"
+                      >
+                        Nastavit jako hlavní
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleRemovePhoto(photo.id)}
+                      className="px-3 py-1 bg-red-600 text-white text-xs rounded-full font-medium hover:bg-red-700 flex items-center gap-1"
+                    >
+                      <X className="w-3 h-3" /> Odebrat
+                    </button>
+                  </div>
+                  {/* Caption input */}
+                  <input
+                    type="text"
+                    value={photo.caption}
+                    onChange={(e) => handlePhotoCaptionChange(photo.id, e.target.value)}
+                    placeholder="Popisek (volitelné)"
+                    className="w-full px-2 py-1.5 text-xs border-0 border-t border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Upload button */}
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handlePhotoSelect}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingPhoto}
+              className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-colors text-sm font-medium disabled:opacity-50"
+            >
+              {uploadingPhoto ? (
+                <><Loader className="w-4 h-4 animate-spin" />Načítám...</>
+              ) : (
+                <><Upload className="w-4 h-4" />Přidat fotky (max 3 MB/kus)</>
+              )}
+            </button>
+            {photoError && (
+              <p className="mt-2 text-sm text-red-600">{photoError}</p>
+            )}
+          </div>
+        </div>
+
+        {/* ── MÉDIA (YouTube + Matterport) ────────────────────────────── */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-5">Média &amp; virtuální prohlídka</h2>
+          <div className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <Youtube className="w-4 h-4 text-red-500" />
+                YouTube video URL
+              </label>
+              <input
+                type="url"
+                name="youtubeUrl"
+                value={formData.youtubeUrl || ''}
+                onChange={handleInputChange}
+                placeholder="https://www.youtube.com/watch?v=..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Videoukázka prostoru, která se zobrazí na stránce coworkingu.
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <Boxes className="w-4 h-4 text-purple-500" />
+                Matterport 3D prohlídka URL
+              </label>
+              <input
+                type="url"
+                name="matterportUrl"
+                value={formData.matterportUrl || ''}
+                onChange={handleInputChange}
+                placeholder="https://my.matterport.com/show/?m=..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Odkaz na interaktivní 3D prohlídku prostoru (Matterport).
+              </p>
             </div>
           </div>
+        </div>
 
-          {/* Description Section */}
-          <div className="mb-8">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Popis</h2>
+        {/* ── ZÁKLADNÍ INFORMACE ──────────────────────────────────────── */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Základní informace</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Název</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name || ''}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Město</label>
+              <input
+                type="text"
+                name="city"
+                value={formData.city || ''}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Krátký popis
+                Kapacita (počet míst)
               </label>
+              <input
+                type="number"
+                name="capacity"
+                value={formData.capacity ?? ''}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Plocha (m²)</label>
+              <input
+                type="number"
+                name="areaM2"
+                value={formData.areaM2 ?? ''}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ── POPIS ───────────────────────────────────────────────────── */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Popis</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Krátký popis</label>
               <input
                 type="text"
                 name="shortDescription"
                 value={formData.shortDescription || ''}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Detailní popis
-              </label>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Detailní popis</label>
               <textarea
                 name="description"
                 value={formData.description || ''}
@@ -238,220 +477,186 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
               />
             </div>
           </div>
+        </div>
 
-          {/* Contact Section */}
-          <div className="mb-8">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Kontakt</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Telefon
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Web
-                </label>
-                <input
-                  type="url"
-                  name="website"
-                  value={formData.website || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+        {/* ── KONTAKT ─────────────────────────────────────────────────── */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Kontakt</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email || ''}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
-          </div>
-
-          {/* Pricing Section */}
-          <div className="mb-8">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Ceny</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cena za hodinu (Kč)
-                </label>
-                <input
-                  type="number"
-                  name="priceHourly"
-                  value={formData.priceHourly || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cena za den (Kč)
-                </label>
-                <input
-                  type="number"
-                  name="priceDayPass"
-                  value={formData.priceDayPass || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cena za měsíc (Kč)
-                </label>
-                <input
-                  type="number"
-                  name="priceMonthly"
-                  value={formData.priceMonthly || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Telefon</label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone || ''}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
-          </div>
-
-          {/* Amenities Section */}
-          <div className="mb-8">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Vybavení</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {amenities.map(amenity => (
-                <label key={amenity} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={(formData.amenities || []).includes(amenity)}
-                    onChange={() => handleAmenityChange(amenity)}
-                    className="w-4 h-4 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">
-                    {AMENITY_LABELS[amenity] || amenity}
-                  </span>
-                </label>
-              ))}
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Web</label>
+              <input
+                type="url"
+                name="website"
+                value={formData.website || ''}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
-          </div>
-
-          {/* Status Section */}
-          <div className="mb-8">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Status</h2>
-            <div className="space-y-3">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="isVerified"
-                  checked={formData.isVerified || false}
-                  onChange={handleCheckboxChange}
-                  className="w-4 h-4 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">Ověřený coworking</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="isFeatured"
-                  checked={formData.isFeatured || false}
-                  onChange={handleCheckboxChange}
-                  className="w-4 h-4 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">Zvýrazněný coworking</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Save Status Toast */}
-          {saveStatus === 'success' && (
-            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 font-medium flex items-center gap-2">
-              ✓ Uloženo úspěšně
-            </div>
-          )}
-          {saveStatus === 'error' && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
-              <strong>Chyba při ukládání:</strong> {saveError}
-            </div>
-          )}
-
-          {/* Action Buttons */}
-          <div className="border-t border-gray-200 pt-6 flex gap-3">
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
-            >
-              {saving ? (
-                <>
-                  <Loader className="w-5 h-5 animate-spin" />
-                  Ukládám...
-                </>
-              ) : (
-                <>
-                  <Save className="w-5 h-5" />
-                  Uložit
-                </>
-              )}
-            </button>
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              disabled={deleting}
-              className="flex items-center gap-2 px-6 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition-colors ml-auto"
-            >
-              {deleting ? (
-                <>
-                  <Loader className="w-5 h-5 animate-spin" />
-                  Mažu...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="w-5 h-5" />
-                  Smazat
-                </>
-              )}
-            </button>
           </div>
         </div>
 
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
-                Smazat {coworking.name}?
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Tuto akci nelze vrátit zpět.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors"
-                >
-                  Zrušit
-                </button>
-                <button
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 font-medium transition-colors"
-                >
-                  {deleting ? 'Mažu...' : 'Smazat'}
-                </button>
-              </div>
+        {/* ── CENY ────────────────────────────────────────────────────── */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Ceny</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Cena za hodinu (Kč)
+              </label>
+              <input
+                type="number"
+                name="priceHourly"
+                value={formData.priceHourly ?? ''}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Cena za den (Kč)
+              </label>
+              <input
+                type="number"
+                name="priceDayPass"
+                value={formData.priceDayPass ?? ''}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Cena za měsíc (Kč)
+              </label>
+              <input
+                type="number"
+                name="priceMonthly"
+                value={formData.priceMonthly ?? ''}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
           </div>
-        )}
+        </div>
+
+        {/* ── VYBAVENÍ ────────────────────────────────────────────────── */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Vybavení</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {amenities.map((amenity) => (
+              <label key={amenity} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={(formData.amenities || []).includes(amenity)}
+                  onChange={() => handleAmenityChange(amenity)}
+                  className="w-4 h-4 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">{AMENITY_LABELS[amenity] || amenity}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* ── STATUS ──────────────────────────────────────────────────── */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Status</h2>
+          <div className="space-y-3">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                name="isVerified"
+                checked={formData.isVerified || false}
+                onChange={handleCheckboxChange}
+                className="w-4 h-4 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Ověřený coworking</span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                name="isFeatured"
+                checked={formData.isFeatured || false}
+                onChange={handleCheckboxChange}
+                className="w-4 h-4 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Zvýrazněný coworking</span>
+            </label>
+          </div>
+        </div>
+
+        {/* ── AKCE ────────────────────────────────────────────────────── */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6 flex gap-3">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+          >
+            {saving ? (
+              <><Loader className="w-5 h-5 animate-spin" />Ukládám...</>
+            ) : (
+              <><Save className="w-5 h-5" />Uložit</>
+            )}
+          </button>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={deleting}
+            className="flex items-center gap-2 px-6 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition-colors ml-auto"
+          >
+            {deleting ? (
+              <><Loader className="w-5 h-5 animate-spin" />Mažu...</>
+            ) : (
+              <><Trash2 className="w-5 h-5" />Smazat</>
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              Smazat {coworking.name}?
+            </h3>
+            <p className="text-gray-600 mb-6">Tuto akci nelze vrátit zpět.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+              >
+                Zrušit
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 font-medium transition-colors"
+              >
+                {deleting ? 'Mažu...' : 'Smazat'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

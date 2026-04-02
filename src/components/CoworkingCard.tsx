@@ -1,5 +1,8 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { MapPin, Users, DollarSign, Star } from 'lucide-react';
+import { MapPin, Users, DollarSign, Star, Calendar } from 'lucide-react';
 import { CoworkingSpace, AMENITY_LABELS } from '@/lib/types';
 
 interface CoworkingCardProps {
@@ -7,9 +10,29 @@ interface CoworkingCardProps {
 }
 
 export default function CoworkingCard({ coworking }: CoworkingCardProps) {
-  const amenityLabels = coworking.amenities.slice(0, 3).map(a => AMENITY_LABELS[a] || a);
+  const [isHovered, setIsHovered] = useState(false);
+  const [currentPhotoIdx, setCurrentPhotoIdx] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Generate gradient placeholder color based on first letter
+  const photos = coworking.photos || [];
+  const hasMultiplePhotos = photos.length > 1;
+
+  useEffect(() => {
+    if (isHovered && hasMultiplePhotos) {
+      intervalRef.current = setInterval(() => {
+        setCurrentPhotoIdx((prev) => (prev + 1) % photos.length);
+      }, 1200);
+    } else {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (!isHovered) setCurrentPhotoIdx(0);
+    }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [isHovered, hasMultiplePhotos, photos.length]);
+
+  const amenityLabels = coworking.amenities.slice(0, 3).map((a) => AMENITY_LABELS[a] || a);
+
   const getGradientColor = (name: string) => {
     const letters = name.charCodeAt(0);
     const colors = [
@@ -22,22 +45,48 @@ export default function CoworkingCard({ coworking }: CoworkingCardProps) {
     return colors[letters % colors.length];
   };
 
-  const priceDisplay = coworking.priceDayPass ? `${coworking.priceDayPass} Kč/den` : 'Cena na vyžádání';
-
   return (
     <Link href={`/coworking/${coworking.slug}`}>
-      <div className="card-hover group overflow-hidden rounded-lg bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
-        {/* Image */}
-        <div className={`relative w-full h-48 bg-gradient-to-br ${getGradientColor(coworking.name)} overflow-hidden`}>
-          {coworking.photos && coworking.photos[0] && (
-            <img
-              src={coworking.photos[0].url}
-              alt={coworking.name}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-            />
+      <div
+        className="card-hover group overflow-hidden rounded-lg bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all h-full flex flex-col cursor-pointer"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Image with crossfade slideshow */}
+        <div
+          className={`relative w-full h-48 bg-gradient-to-br ${getGradientColor(coworking.name)} overflow-hidden flex-shrink-0`}
+        >
+          {photos.length > 0 ? (
+            photos.map((photo, idx) => (
+              <img
+                key={photo.id || idx}
+                src={photo.url}
+                alt={photo.caption || coworking.name}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+                  idx === currentPhotoIdx ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+            ))
+          ) : null}
+
+          {/* Photo dot indicators */}
+          {hasMultiplePhotos && (
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+              {photos.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`rounded-full transition-all duration-300 ${
+                    idx === currentPhotoIdx
+                      ? 'bg-white w-3 h-1.5'
+                      : 'bg-white/60 w-1.5 h-1.5'
+                  }`}
+                />
+              ))}
+            </div>
           )}
+
           {coworking.isVerified && (
-            <div className="absolute top-3 right-3 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+            <div className="absolute top-3 right-3 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 z-10">
               <Star className="w-3 h-3" />
               Ověřeno
             </div>
@@ -46,22 +95,24 @@ export default function CoworkingCard({ coworking }: CoworkingCardProps) {
 
         {/* Content */}
         <div className="p-4 flex flex-col flex-grow">
-          {/* Name and Location */}
-          <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+          {/* Name */}
+          <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors line-clamp-2">
             {coworking.name}
           </h3>
+
+          {/* City */}
           <div className="flex items-center gap-2 text-gray-600 text-sm mb-3">
             <MapPin className="w-4 h-4 flex-shrink-0 text-blue-600" />
             <span className="line-clamp-1">{coworking.city}</span>
           </div>
 
-          {/* Description */}
+          {/* Short description */}
           <p className="text-sm text-gray-600 mb-3 line-clamp-2 flex-grow">
             {coworking.shortDescription}
           </p>
 
           {/* Amenities */}
-          <div className="flex flex-wrap gap-2 mb-3">
+          <div className="flex flex-wrap gap-1.5 mb-3">
             {amenityLabels.map((label, idx) => (
               <span
                 key={idx}
@@ -77,17 +128,39 @@ export default function CoworkingCard({ coworking }: CoworkingCardProps) {
             )}
           </div>
 
-          {/* Info Row */}
-          <div className="flex items-center gap-4 text-sm mb-4 pb-4 border-t border-gray-100 pt-4">
+          {/* Info row: capacity + prices */}
+          <div className="border-t border-gray-100 pt-3 mb-4 space-y-1.5">
             {coworking.capacity && (
-              <div className="flex items-center gap-1 text-gray-600">
-                <Users className="w-4 h-4 text-blue-600" />
+              <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                <Users className="w-4 h-4 text-blue-500 flex-shrink-0" />
                 <span>{coworking.capacity} míst</span>
               </div>
             )}
-            <div className="flex items-center gap-1 text-gray-600">
-              <DollarSign className="w-4 h-4 text-orange-500" />
-              <span className="font-semibold text-gray-900">{priceDisplay}</span>
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              {coworking.priceDayPass ? (
+                <div className="flex items-center gap-1.5 text-sm">
+                  <DollarSign className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                  <span className="font-semibold text-gray-900">
+                    {coworking.priceDayPass.toLocaleString('cs-CZ')} Kč
+                    <span className="text-gray-500 font-normal">/den</span>
+                  </span>
+                </div>
+              ) : null}
+              {coworking.priceMonthly ? (
+                <div className="flex items-center gap-1.5 text-sm">
+                  <Calendar className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  <span className="font-semibold text-gray-900">
+                    {coworking.priceMonthly.toLocaleString('cs-CZ')} Kč
+                    <span className="text-gray-500 font-normal">/měs</span>
+                  </span>
+                </div>
+              ) : null}
+              {!coworking.priceDayPass && !coworking.priceMonthly && (
+                <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                  <DollarSign className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  Cena na vyžádání
+                </div>
+              )}
             </div>
           </div>
 

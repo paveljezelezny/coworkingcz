@@ -27,6 +27,8 @@ export interface CoworkingSpace {
   amenities: string[];
   photos: Photo[];
   locations: Location[];
+  youtubeUrl?: string;
+  matterportUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
