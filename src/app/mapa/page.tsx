@@ -5,6 +5,11 @@ import { MapPin, Search, X, Users, DollarSign, Calendar, ExternalLink } from 'lu
 import { coworkingsData } from '@/lib/data/coworkings';
 import { CoworkingSpace } from '@/lib/types';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import { getMarkerCoords } from '@/components/GoogleMap';
+
+// Dynamically import GoogleMap to avoid SSR issues with the Google Maps JS API
+const GoogleMap = dynamic(() => import('@/components/GoogleMap'), { ssr: false });
 
 export default function MapaPage() {
   const [coworkings, setCoworkings] = useState<CoworkingSpace[]>(coworkingsData);
@@ -28,7 +33,27 @@ export default function MapaPage() {
     return matchSearch && matchCity;
   });
 
-  const selected = filteredCoworkings.find((cw) => cw.id === selectedCoworking);
+  // Build marker data — skip coworkings that have no known coordinates
+  const mapMarkers = filteredCoworkings
+    .map((cw) => {
+      const coords = getMarkerCoords(cw.latitude, cw.longitude, cw.city);
+      if (!coords) return null;
+      return {
+        id: cw.id,
+        name: cw.name,
+        city: cw.city,
+        address: cw.address ?? '',
+        lat: coords.lat,
+        lng: coords.lng,
+        slug: cw.slug,
+        priceDayPass: cw.priceDayPass,
+        priceMonthly: cw.priceMonthly,
+        capacity: cw.capacity,
+        isVerified: cw.isVerified,
+        photoUrl: cw.photos?.[0]?.url,
+      };
+    })
+    .filter((m): m is NonNullable<typeof m> => m !== null);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -71,46 +96,13 @@ export default function MapaPage() {
 
       {/* Content */}
       <div className="flex h-[calc(100vh-200px)]">
-        {/* Map placeholder — Google Maps integration guide below */}
-        <div className="flex-1 relative bg-gradient-to-br from-blue-100 via-blue-50 to-orange-50 overflow-hidden">
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
-            <MapPin className="w-16 h-16 text-blue-300 mb-4" />
-            <p className="text-lg font-bold text-gray-700 mb-2">Interaktivní mapa</p>
-            <p className="text-sm text-gray-500 max-w-sm">
-              Nastav Google Maps API klíč v prostředí Vercel a mapa se aktivuje automaticky.
-              Viz nápověda níže.
-            </p>
-          </div>
-
-          {/* Dummy markers */}
-          <div className="absolute inset-0 pointer-events-none">
-            {filteredCoworkings.map((cw, idx) => (
-              <div
-                key={cw.id}
-                className="absolute pointer-events-auto"
-                style={{
-                  left: `${15 + (idx % 5) * 16}%`,
-                  top: `${20 + Math.floor(idx / 5) * 25}%`,
-                }}
-              >
-                <button
-                  onClick={() => setSelectedCoworking(cw.id === selectedCoworking ? null : cw.id)}
-                  className={`group relative w-10 h-10 rounded-full flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 transition-all shadow-md ${
-                    selectedCoworking === cw.id
-                      ? 'bg-orange-500 ring-4 ring-orange-200 scale-125 z-10'
-                      : 'bg-blue-600 hover:scale-110 hover:z-10'
-                  }`}
-                  title={cw.name}
-                >
-                  <MapPin className="w-5 h-5 text-white" />
-                  {/* Tooltip */}
-                  <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                    {cw.name}
-                  </div>
-                </button>
-              </div>
-            ))}
-          </div>
+        {/* Google Map */}
+        <div className="flex-1 relative overflow-hidden">
+          <GoogleMap
+            markers={mapMarkers}
+            selectedId={selectedCoworking}
+            onSelect={setSelectedCoworking}
+          />
         </div>
 
         {/* Sidebar */}
