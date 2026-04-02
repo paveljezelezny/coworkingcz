@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Edit, Trash2, Plus, ChevronDown } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, ChevronDown, Users, Building2 } from 'lucide-react';
 import Link from 'next/link';
 import { CoworkingSpace, AMENITY_LABELS } from '@/lib/types';
 
@@ -131,6 +131,26 @@ export default function AdminDashboard() {
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
             Super Admin
           </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex gap-1 border-t border-gray-100 pt-0">
+            <Link
+              href="/admin"
+              className="px-4 py-3 text-sm font-medium text-blue-600 border-b-2 border-blue-600 flex items-center gap-2"
+            >
+              <Building2 className="w-4 h-4" />
+              Coworkingy
+            </Link>
+            <Link
+              href="/admin/uzivatele"
+              className="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <Users className="w-4 h-4" />
+              Uživatelé
+            </Link>
+          </nav>
         </div>
       </div>
 
