@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search, Filter, X, MapPin, DollarSign } from 'lucide-react';
 import CoworkingCard from '@/components/CoworkingCard';
 import { coworkingsData, getCitiesWithCount } from '@/lib/data/coworkings';
 import { AMENITY_LABELS, FilterOptions, CoworkingSpace } from '@/lib/types';
 
-export default function CoworkingyPage() {
+function CoworkingyPageInner() {
   const searchParams = useSearchParams();
 
   // Inicializuj filtry z URL params (přesměrování z homepage)
@@ -365,5 +365,13 @@ export default function CoworkingyPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CoworkingyPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-500">Načítám...</div></div>}>
+      <CoworkingyPageInner />
+    </Suspense>
   );
 }
