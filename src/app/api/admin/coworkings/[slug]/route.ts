@@ -4,6 +4,9 @@ import { authOptions } from '@/lib/auth';
 import { coworkingsData } from '@/lib/data/coworkings';
 import { prisma } from '@/lib/prisma';
 
+// Give Vercel 30s — needed when payload contains compressed photo base64
+export const maxDuration = 30;
+
 interface RouteParams {
   params: { slug: string };
 }

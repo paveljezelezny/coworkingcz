@@ -25,7 +25,43 @@ interface EditPageProps {
   params: { slug: string };
 }
 
-const MAX_PHOTO_SIZE = 3 * 1024 * 1024; // 3 MB
+const MAX_PHOTO_SIZE = 10 * 1024 * 1024; // accept up to 10 MB input; canvas compresses to ~200 KB
+
+/**
+ * Compress an image file via Canvas to max 1400px on the longest side,
+ * JPEG quality 0.82. Result is typically 80–250 KB regardless of input size.
+ */
+function compressImage(file: File, maxPx = 1400, quality = 0.82): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxPx || height > maxPx) {
+          if (width >= height) {
+            height = Math.round((height * maxPx) / width);
+            width = maxPx;
+          } else {
+            width = Math.round((width * maxPx) / height);
+            height = maxPx;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Canvas not supported'));
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function EditCoworkingPage({ params }: EditPageProps) {
   const [coworking, setCoworking] = useState<CoworkingSpace | null>(null);
@@ -97,35 +133,36 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
   };
 
   // ── Photo upload ──────────────────────────────────────────────────────────
-  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
     setPhotoError(null);
+    setUploadingPhoto(true);
 
-    files.forEach((file) => {
+    for (const file of files) {
       if (!file.type.startsWith('image/')) {
-        setPhotoError('Pouze obrázkové soubory jsou povoleny.');
-        return;
+        setPhotoError('Pouze obrázkové soubory jsou povoleny (JPG, PNG, WebP…).');
+        continue;
       }
       if (file.size > MAX_PHOTO_SIZE) {
-        setPhotoError(`Soubor "${file.name}" přesahuje limit 3 MB.`);
-        return;
+        setPhotoError(`Soubor "${file.name}" je příliš velký (max 10 MB).`);
+        continue;
       }
 
-      setUploadingPhoto(true);
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const url = ev.target?.result as string;
+      try {
+        // Compress via Canvas → JPEG ~80–250 KB regardless of input size
+        const compressedUrl = await compressImage(file);
+
         const newPhoto: Photo = {
           id: `photo_${Date.now()}_${Math.random().toString(36).slice(2)}`,
-          url,
-          caption: file.name.replace(/\.[^.]+$/, ''),
+          url: compressedUrl,
+          caption: file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
           isPrimary: false,
         };
+
         setFormData((prev) => {
           const existing = prev.photos || [];
-          // Mark first photo as primary if none is primary
           const hasPrimary = existing.some((p) => p.isPrimary);
           return {
             ...prev,
@@ -135,16 +172,13 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
             ],
           };
         });
-        setUploadingPhoto(false);
-      };
-      reader.onerror = () => {
-        setPhotoError('Nepodařilo se načíst soubor.');
-        setUploadingPhoto(false);
-      };
-      reader.readAsDataURL(file);
-    });
+      } catch {
+        setPhotoError(`Nepodařilo se zpracovat soubor "${file.name}".`);
+      }
+    }
 
-    // reset input so same file can be re-selected
+    setUploadingPhoto(false);
+    // Reset input so same file can be re-selected
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -296,8 +330,8 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
             Fotografie
           </h2>
           <p className="text-sm text-gray-500 mb-5">
-            Maximálně 3 MB na fotku. Fotky se zobrazí na kartě coworkingu i na jeho stránce.
-            Přetahování fotek mění pořadí — první fotka je hlavní.
+            Fotky se automaticky komprimují pro rychlé nahrávání. Přijímáme JPG, PNG i WebP do 10 MB.
+            První fotka je hlavní — zobrazí se na kartě a jako náhled.
           </p>
 
           {/* Photo grid */}
@@ -370,7 +404,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
               {uploadingPhoto ? (
                 <><Loader className="w-4 h-4 animate-spin" />Načítám...</>
               ) : (
-                <><Upload className="w-4 h-4" />Přidat fotky (max 3 MB/kus)</>
+                <><Upload className="w-4 h-4" />Přidat fotky (JPG, PNG, WebP — do 10 MB)</>
               )}
             </button>
             {photoError && (
