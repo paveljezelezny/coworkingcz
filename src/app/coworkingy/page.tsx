@@ -1,14 +1,18 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Search, Filter, X, MapPin, DollarSign } from 'lucide-react';
 import CoworkingCard from '@/components/CoworkingCard';
 import { coworkingsData, getCitiesWithCount } from '@/lib/data/coworkings';
 import { AMENITY_LABELS, FilterOptions, CoworkingSpace } from '@/lib/types';
 
 export default function CoworkingyPage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
+  const searchParams = useSearchParams();
+
+  // Inicializuj filtry z URL params (přesměrování z homepage)
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') ?? '');
+  const [selectedCity, setSelectedCity] = useState(searchParams.get('city') ?? '');
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [maxPrice, setMaxPrice] = useState(10000);
   const [minCapacity, setMinCapacity] = useState(0);

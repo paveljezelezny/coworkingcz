@@ -6,6 +6,9 @@ import { AMENITY_LABELS } from '@/lib/types';
 import ClaimButton from '@/components/ClaimButton';
 import { prisma } from '@/lib/prisma';
 
+// Vždy renderovat server-side (ne staticky) — aby se DB overrides zobrazily live
+export const dynamic = 'force-dynamic';
+
 interface CoworkingDetailPageProps {
   params: { slug: string };
 }

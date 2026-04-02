@@ -48,10 +48,10 @@ export default function Home() {
 
             {/* Search Bar */}
             <div className="max-w-3xl mx-auto mb-12">
-              <div className="glass-effect rounded-xl p-4 space-y-4 sm:space-y-0 sm:flex gap-4">
+              <form method="get" action="/coworkingy" className="glass-effect rounded-xl p-4 space-y-4 sm:space-y-0 sm:flex gap-4">
                 <div className="flex-1 relative">
                   <MapPin className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
-                  <select className="input-field pl-10 bg-white">
+                  <select name="city" className="input-field pl-10 bg-white">
                     <option value="">Vyber město</option>
                     {cities.map((c) => (
                       <option key={c.city} value={c.city}>
@@ -64,15 +64,16 @@ export default function Home() {
                   <Search className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
                   <input
                     type="text"
+                    name="q"
                     placeholder="Hledej coworking..."
                     className="input-field pl-10 bg-white"
                   />
                 </div>
-                <button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                <button type="submit" className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
                   <Search className="w-5 h-5" />
                   <span className="hidden sm:inline">Hledat</span>
                 </button>
-              </div>
+              </form>
             </div>
 
             {/* Stats */}
