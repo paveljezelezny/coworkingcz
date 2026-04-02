@@ -16,6 +16,8 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [formData, setFormData] = useState<Partial<CoworkingSpace>>({});
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Fetch coworking on mount
   useEffect(() => {
@@ -78,16 +80,22 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) throw new Error('Save failed');
-      alert('Uloženo!');
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || 'Save failed');
+      }
       // Refresh data
       const freshResponse = await fetch(`/api/admin/coworkings/${coworking.slug}`);
       const data = await freshResponse.json();
       setCoworking(data);
       setFormData(data);
-    } catch (error) {
+      setSaveStatus('success');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    } catch (error: any) {
       console.error('Failed to save:', error);
-      alert('Chyba při ukládání');
+      setSaveError(error?.message || 'Chyba při ukládání');
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 5000);
     } finally {
       setSaving(false);
     }
@@ -363,6 +371,18 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
               </label>
             </div>
           </div>
+
+          {/* Save Status Toast */}
+          {saveStatus === 'success' && (
+            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 font-medium flex items-center gap-2">
+              ✓ Uloženo úspěšně
+            </div>
+          )}
+          {saveStatus === 'error' && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+              <strong>Chyba při ukládání:</strong> {saveError}
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="border-t border-gray-200 pt-6 flex gap-3">
