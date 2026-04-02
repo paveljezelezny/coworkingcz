@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { coworkingsData } from '@/lib/data/coworkings';
 import { prisma } from '@/lib/prisma';
 
@@ -14,13 +16,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const base = coworkingsData.find((cw) => cw.slug === params.slug);
     if (!base) {
-      return NextResponse.json(
-        { error: 'Coworking not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Coworking not found' }, { status: 404 });
     }
 
-    // Try to fetch DB overrides
     let override = null;
     try {
       const edit = await prisma.coworkingEdit.findUnique({
@@ -33,58 +31,58 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       console.warn('DB unavailable, using static data only:', dbError);
     }
 
-    // Merge and return
-    const result = override ? { ...base, ...override } : base;
+    const result = override ? { ...base, ...(override as object) } : base;
     return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching coworking:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
 /**
  * PUT /api/admin/coworkings/[slug]
- * Saves edits to the CoworkingEdit table (upsert)
+ * Saves edits — vyžaduje super_admin session
  */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    // Auth: pouze super_admin
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user as any)?.role !== 'super_admin') {
+      return NextResponse.json({ error: 'Přístup odmítnut' }, { status: 403 });
+    }
+
+    const userId = (session.user as any)?.id as string;
+    if (!userId) {
+      return NextResponse.json({ error: 'Chybí userId v session' }, { status: 401 });
+    }
+
     const body = await request.json();
 
-    // Verify coworking exists
     const base = coworkingsData.find((cw) => cw.slug === params.slug);
     if (!base) {
-      return NextResponse.json(
-        { error: 'Coworking not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Coworking not found' }, { status: 404 });
     }
 
-    // Try to save to DB
-    try {
-      await prisma.coworkingEdit.upsert({
-        where: { coworkingSlug: params.slug },
-        update: { data: body },
-        create: {
-          coworkingSlug: params.slug,
-          data: body,
-          userId: 'super-admin', // Placeholder user ID
-        },
-      });
-    } catch (dbError) {
-      console.warn('DB unavailable, edit not persisted:', dbError);
-      // Still return success since we validated the data
-    }
+    // Uložit do DB s reálným userId ze session — žádné tiché spolknutí chyby
+    await prisma.coworkingEdit.upsert({
+      where: { coworkingSlug: params.slug },
+      update: {
+        data: body,
+        userId,
+      },
+      create: {
+        coworkingSlug: params.slug,
+        data: body,
+        userId,
+      },
+    });
 
-    // Return updated coworking
     const merged = { ...base, ...body };
     return NextResponse.json(merged);
-  } catch (error) {
-    console.error('Error updating coworking:', error);
+  } catch (error: any) {
+    console.error('PUT coworking error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: error?.message ?? 'Chyba při ukládání' },
       { status: 500 }
     );
   }
@@ -92,38 +90,36 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 /**
  * DELETE /api/admin/coworkings/[slug]
- * Marks coworking as deleted by setting { deleted: true } in DB
+ * Marks coworking as deleted — vyžaduje super_admin session
  */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user as any)?.role !== 'super_admin') {
+      return NextResponse.json({ error: 'Přístup odmítnut' }, { status: 403 });
+    }
+
+    const userId = (session.user as any)?.id as string;
+    if (!userId) {
+      return NextResponse.json({ error: 'Chybí userId v session' }, { status: 401 });
+    }
+
     const base = coworkingsData.find((cw) => cw.slug === params.slug);
     if (!base) {
-      return NextResponse.json(
-        { error: 'Coworking not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Coworking not found' }, { status: 404 });
     }
 
-    // Try to save deletion flag to DB
-    try {
-      await prisma.coworkingEdit.upsert({
-        where: { coworkingSlug: params.slug },
-        update: { data: { deleted: true } },
-        create: {
-          coworkingSlug: params.slug,
-          data: { deleted: true },
-          userId: 'super-admin', // Placeholder user ID
-        },
-      });
-    } catch (dbError) {
-      console.warn('DB unavailable, deletion not persisted:', dbError);
-    }
+    await prisma.coworkingEdit.upsert({
+      where: { coworkingSlug: params.slug },
+      update: { data: { deleted: true }, userId },
+      create: { coworkingSlug: params.slug, data: { deleted: true }, userId },
+    });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting coworking:', error);
+  } catch (error: any) {
+    console.error('DELETE coworking error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: error?.message ?? 'Chyba při mazání' },
       { status: 500 }
     );
   }
