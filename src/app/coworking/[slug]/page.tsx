@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import {
   MapPin, Phone, Mail, Globe, Users, Clock,
-  Calendar, Star, Wifi, MessageSquare, Youtube, Boxes,
+  Calendar, Star, MessageSquare, Youtube, Boxes,
   ExternalLink, Building2,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -9,6 +9,8 @@ import { coworkingsData, eventsData } from '@/lib/data/coworkings';
 import { AMENITY_LABELS, VENUE_TYPE_LABELS, VENUE_TYPE_EMOJIS } from '@/lib/types';
 import ClaimButton from '@/components/ClaimButton';
 import PhotoGallery from '@/components/PhotoGallery';
+import CoworkingTabs from '@/components/CoworkingTabs';
+import AmenityGrid from '@/components/AmenityGrid';
 import { prisma } from '@/lib/prisma';
 
 // Vždy renderovat server-side — aby se DB overrides zobrazily live
@@ -104,8 +106,8 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
               </div>
               <h1 className="text-4xl sm:text-5xl font-bold mb-3">{coworking.name}</h1>
               <p className="text-blue-50 flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
-                {coworking.address}, {coworking.city}
+                <MapPin className="w-5 h-5 flex-shrink-0" />
+                {[coworking.address, coworking.zipCode, coworking.city].filter(Boolean).join(', ')}
               </p>
             </div>
           </div>
@@ -126,8 +128,8 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold">{coworking.name}</h1>
               <p className="text-blue-100 flex items-center gap-1.5 text-sm mt-1">
-                <MapPin className="w-4 h-4" />
-                {coworking.address ? `${coworking.address}, ` : ''}{coworking.city}
+                <MapPin className="w-4 h-4 flex-shrink-0" />
+                {[coworking.address, coworking.zipCode, coworking.city].filter(Boolean).join(', ')}
               </p>
             </div>
           </div>
@@ -139,26 +141,11 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
 
           {/* ── Main Content ─────────────────────────────────────────── */}
           <div className="lg:col-span-2">
-            {/* Tabs (visual only) */}
-            <div className="border-b border-gray-200 mb-8 overflow-x-auto">
-              <div className="flex gap-8">
-                {['Přehled', 'Vybavení', 'Ceny', 'Eventy'].map((t, i) => (
-                  <button
-                    key={t}
-                    className={`py-4 px-2 font-semibold border-b-2 whitespace-nowrap ${
-                      i === 0
-                        ? 'text-blue-600 border-blue-600'
-                        : 'text-gray-600 border-transparent hover:text-blue-600'
-                    }`}
-                  >
-                    {t}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* Scrollable tabs — client component */}
+            <CoworkingTabs hasEvents={relatedEvents.length > 0} />
 
             {/* Description */}
-            <section className="mb-12">
+            <section id="sekce-prehled" className="mb-12 scroll-mt-24">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">O coworkingu</h2>
               <p className="text-gray-600 leading-relaxed mb-6">{coworking.description}</p>
 
@@ -229,21 +216,9 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
             )}
 
             {/* Amenities */}
-            <section className="mb-12">
+            <section id="sekce-vybaveni" className="mb-12 scroll-mt-24">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Vybavení</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {(coworking.amenities || []).map((amenity: string) => (
-                  <div
-                    key={amenity}
-                    className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-100"
-                  >
-                    <Wifi className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                    <span className="text-sm font-medium text-gray-900">
-                      {AMENITY_LABELS[amenity] || amenity}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <AmenityGrid amenities={coworking.amenities || []} />
             </section>
 
             {/* Venue types */}
@@ -290,7 +265,7 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
             )}
 
             {/* Pricing */}
-            <section className="mb-12">
+            <section id="sekce-ceny" className="mb-12 scroll-mt-24">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Ceny</h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {coworking.priceHourly && (
@@ -325,7 +300,7 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
 
             {/* Events */}
             {relatedEvents.length > 0 && (
-              <section className="mb-12">
+              <section id="sekce-eventy" className="mb-12 scroll-mt-24">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
                   Eventy v tomto coworkingu
                 </h2>

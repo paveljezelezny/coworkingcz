@@ -100,10 +100,17 @@ export default function CoworkingCard({ coworking }: CoworkingCardProps) {
             {coworking.name}
           </h3>
 
-          {/* City */}
-          <div className="flex items-center gap-2 text-gray-600 text-sm mb-3">
-            <MapPin className="w-4 h-4 flex-shrink-0 text-blue-600" />
-            <span className="line-clamp-1">{coworking.city}</span>
+          {/* City + address */}
+          <div className="flex items-start gap-2 text-gray-600 text-sm mb-3">
+            <MapPin className="w-4 h-4 flex-shrink-0 text-blue-600 mt-0.5" />
+            <div className="min-w-0">
+              <span className="font-medium">{coworking.city}</span>
+              {coworking.address && (
+                <span className="block text-xs text-gray-400 line-clamp-1">
+                  {[coworking.address, coworking.zipCode].filter(Boolean).join(', ')}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Short description */}

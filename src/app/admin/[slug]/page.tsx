@@ -16,6 +16,7 @@ import {
   Users,
   Armchair,
   ExternalLink,
+  MapPin,
 } from 'lucide-react';
 import Link from 'next/link';
 import { CoworkingSpace, Photo, AMENITY_LABELS, VENUE_TYPE_LABELS, VENUE_TYPE_EMOJIS } from '@/lib/types';
@@ -443,9 +444,34 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-blue-500" />
+                Ulice a číslo popisné
+              </label>
+              <input
+                type="text"
+                name="address"
+                value={formData.address || ''}
+                onChange={handleInputChange}
+                placeholder="např. Vinohradská 123"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">PSČ</label>
+              <input
+                type="text"
+                name="zipCode"
+                value={formData.zipCode || ''}
+                onChange={handleInputChange}
+                placeholder="např. 120 00"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Kapacita (počet míst)
+                Kapacita (počet míst celkem)
               </label>
               <input
                 type="number"
