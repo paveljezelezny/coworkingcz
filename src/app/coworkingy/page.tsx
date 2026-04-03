@@ -69,7 +69,10 @@ function CoworkingyPageInner() {
       );
     }
 
-    if (selectedCity) results = results.filter((cw) => cw.city === selectedCity);
+    // Použij substring match — "Praha" najde i "Praha 3", "Praha 1" atd.
+    if (selectedCity) results = results.filter((cw) =>
+      cw.city.toLowerCase().includes(selectedCity.toLowerCase())
+    );
 
     if (selectedAmenities.length > 0) {
       results = results.filter((cw) => selectedAmenities.every((a) => cw.amenities.includes(a)));

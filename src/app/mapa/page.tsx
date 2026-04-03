@@ -29,7 +29,7 @@ export default function MapaPage() {
 
   const filteredCoworkings = coworkings.filter((cw) => {
     const matchSearch = !searchQuery || cw.name.toLowerCase().includes(searchQuery.toLowerCase()) || cw.city.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchCity = !selectedCity || cw.city === selectedCity;
+    const matchCity = !selectedCity || cw.city.toLowerCase().includes(selectedCity.toLowerCase());
     return matchSearch && matchCity;
   });
 
