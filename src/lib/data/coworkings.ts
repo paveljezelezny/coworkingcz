@@ -60,6 +60,13 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 800,
   
     photos: [{ id: 'cw_locus_workspace_p1', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', caption: 'Locus Workspace', isPrimary: true }],
+  
+    address: 'Slezská 857/45',
+    zipCode: '130 00',
+    priceDayPass: 200,
+    priceMonthly: 1300,
+    shortDescription: 'Komunitní coworkingový prostor na Žižkově s flexibilními tarify a přátelskou atmosférou.',
+    website: 'https://www.locusworkspace.cz',
   }),
   createCoworking('cw_opero', 'Opero', 'Praha', 'Praha', {
     isFeatured: true,
@@ -70,6 +77,11 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.opero.cz',
   
     photos: [{ id: 'cw_opero_p1', url: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&w=800&q=80', caption: 'Opero', isPrimary: true }],
+  
+    address: 'Salvátorská 931/8',
+    zipCode: '110 00',
+    priceMonthly: 6000,
+    shortDescription: 'Prémiový coworking v centru Prahy s terasou, event prostorem a inspirativní komunitou.',
   }),
   createCoworking('cw_mo_cha_vista', 'Mo-cha Vista', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'cafe', 'printer'],
@@ -77,6 +89,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_mo_cha_vista_p1', url: 'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=800&q=80', caption: 'Mo-cha Vista', isPrimary: true }],
+  
+    address: 'Na Pankráci 30',
+    zipCode: '140 00',
+    shortDescription: 'Útulný coworkingový prostor s kavárnou v moderní budově na Pankráci.',
   }),
   createCoworking('cw_node5', 'Node5', 'Praha', 'Praha', {
     isFeatured: true,
@@ -87,6 +103,12 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.node5.cz',
   
     photos: [{ id: 'cw_node5_p1', url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80', caption: 'Node5', isPrimary: true }],
+  
+    address: 'Radlická 180/50',
+    zipCode: '150 00',
+    priceMonthly: 1300,
+    priceDayPass: 200,
+    shortDescription: 'Velký technologický hub v Praze 5 s flexibilními kancelářemi a startupovou atmosférou.',
   }),
   createCoworking('cw_worklounge', 'WorkLounge', 'Praha', 'Praha', {
     isVerified: true,
@@ -96,6 +118,12 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.worklounge.cz',
   
     photos: [{ id: 'cw_worklounge_p1', url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80', caption: 'WorkLounge', isPrimary: true }],
+  
+    address: 'Na Příkopě 14',
+    zipCode: '110 00',
+    priceDayPass: 490,
+    priceMonthly: 3900,
+    shortDescription: 'Prémiový coworking na Příkopě s recepcí, zasedacími místnostmi a flexibilními tarify.',
   }),
   createCoworking('cw_pracovna_vlkova', 'Pracovna Vlkova 36 a Zlatnická 12', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
@@ -103,6 +131,12 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 700,
   
     photos: [{ id: 'cw_pracovna_vlkova_p1', url: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=800&q=80', caption: 'Pracovna Vlkova 36 a Zlatnická 12', isPrimary: true }],
+  
+    address: 'Vlkova 628/36',
+    zipCode: '130 00',
+    priceMonthly: 950,
+    shortDescription: 'Dostupný a přátelský coworking na Žižkově pro freelancery a malé týmy.',
+    website: 'https://www.pracovna.co',
   }),
   createCoworking('cw_co_labs', 'Co-Labs', 'Praha', 'Praha', {
     isVerified: true,
@@ -111,6 +145,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 550,
   
     photos: [{ id: 'cw_co_labs_p1', url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80', caption: 'Co-Labs', isPrimary: true }],
+  
+    address: 'Korunní 2569/108',
+    zipCode: '101 00',
+    shortDescription: 'Co-Labs – profesionální coworkingový prostor v Praze 10 pro jednotlivce a menší firmy.',
+    website: 'https://www.co-labs.cz',
   }),
   createCoworking('cw_scott_weber', 'Scott.Weber', 'Praha', 'Praha', {
     isVerified: true,
@@ -120,6 +159,11 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.scottweber.cz',
   
     photos: [{ id: 'cw_scott_weber_p1', url: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=800&q=80', caption: 'Scott.Weber', isPrimary: true }],
+  
+    address: 'Pernerova 697/35',
+    zipCode: '186 00',
+    priceMonthly: 5000,
+    shortDescription: 'Prémiové coworkingové prostory na 6 lokacích po Praze s full servisem.',
   }),
   createCoworking('cw_mumraj', 'Mumraj', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'childcare', 'printer', 'reception'],
@@ -127,6 +171,12 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 650,
   
     photos: [{ id: 'cw_mumraj_p1', url: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=800&q=80', caption: 'Mumraj', isPrimary: true }],
+  
+    address: 'Mezilesí 2058/6',
+    zipCode: '193 00',
+    priceHourly: 170,
+    shortDescription: 'Rodinné centrum s coworkingem a hlídáním dětí v Horních Počernicích.',
+    website: 'https://www.domumraje.cz',
   }),
   createCoworking('cw_ponk_space', 'Ponk Space', 'Praha', 'Praha', {
     amenities: ['wifi', 'workshop_tools', 'kitchen', 'printer', 'events'],
@@ -134,6 +184,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 500,
   
     photos: [{ id: 'cw_ponk_space_p1', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80', caption: 'Ponk Space', isPrimary: true }],
+  
+    address: 'Drtinova 10',
+    zipCode: '150 00',
+    shortDescription: 'Ponk Space – komunitní dílna a makerspace pro tvůrce a designéry v Praze.',
   }),
   createCoworking('cw_microsoft_coworking', 'Microsoft Coworking Space', 'Praha', 'Praha', {
     isFeatured: true,
@@ -143,6 +197,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 1400,
   
     photos: [{ id: 'cw_microsoft_coworking_p1', url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80', caption: 'Microsoft Coworking Space', isPrimary: true }],
+  
+    address: 'Vyskočilova 1561/4a',
+    zipCode: '140 00',
+    shortDescription: 'Microsoft Coworking Space – moderní pracovní prostor v kampusu Microsoftu v Praze.',
   }),
   createCoworking('cw_archihub', 'ArchiHUB', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
@@ -150,6 +208,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 750,
   
     photos: [{ id: 'cw_archihub_p1', url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80', caption: 'ArchiHUB', isPrimary: true }],
+  
+    address: 'Puškinovo nám. 681/3',
+    zipCode: '160 00',
+    shortDescription: 'Architektonicky inspirativní coworking na Puškinově náměstí v Bubenči.',
+    website: 'https://archihub.cz',
   }),
   createCoworking('cw_komunitni_centrum_jahoda', 'Komunitní rodinné centrum Jahoda Albertov', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'childcare', 'events'],
@@ -157,6 +220,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 600,
   
     photos: [{ id: 'cw_komunitni_centrum_jahoda_p1', url: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80', caption: 'Komunitní rodinné centrum Jahoda Albertov', isPrimary: true }],
+  
+    address: 'Albertov 2059/7',
+    zipCode: '128 00',
+    shortDescription: 'Komunitní centrum Jahoda Albertov – rodinný prostor s coworkingem pro pracující rodiče.',
   }),
   createCoworking('cw_lamparna_lidicka', 'Lampárna Lidická', 'Praha', 'Praha', {
     amenities: ['wifi', 'kitchen', 'printer', 'events'],
@@ -164,6 +231,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_lamparna_lidicka_p1', url: 'https://images.unsplash.com/photo-1572025442646-866d16c84a54?auto=format&fit=crop&w=800&q=80', caption: 'Lampárna Lidická', isPrimary: true }],
+  
+    address: 'Lidická 1200/53',
+    zipCode: '150 00',
+    shortDescription: 'Lampárna Lidická – komunitní prostor s coworkingem a kreativním programem v Praze 5.',
   }),
   createCoworking('cw_meandr_revnice', 'Meandr Řevnice', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -171,6 +242,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 350,
   
     photos: [{ id: 'cw_meandr_revnice_p1', url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80', caption: 'Meandr Řevnice', isPrimary: true }],
+  
+    address: 'Okružní 1233',
+    zipCode: '252 30',
+    shortDescription: 'Meandr Řevnice – coworking a kreativní prostor u řeky Berounky.',
   }),
   createCoworking('cw_coworking33', 'Coworking33', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -178,6 +253,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_coworking33_p1', url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80', caption: 'Coworking33', isPrimary: true }],
+  
+    address: 'Bělohorská 1667/58',
+    zipCode: '169 00',
+    shortDescription: 'Coworking33 – flexibilní pracovní prostor na Bílé Hoře v Praze 6.',
   }),
   createCoworking('cw_clubco_praha', 'Clubco', 'Praha', 'Praha', {
     isVerified: true,
@@ -187,6 +266,10 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.clubco.cz',
   
     photos: [{ id: 'cw_clubco_praha_p1', url: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80', caption: 'Clubco', isPrimary: true }],
+  
+    address: 'Nupaky 148',
+    zipCode: '251 01',
+    shortDescription: 'Moderní coworking Clubco u Prahy s event prostorem a plným servisem.',
   }),
   createCoworking('cw_dum_radost', 'Dům Radost', 'Praha', 'Praha', {
     amenities: ['wifi', 'kitchen', 'printer', 'events'],
@@ -194,6 +277,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 380,
   
     photos: [{ id: 'cw_dum_radost_p1', url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80', caption: 'Dům Radost', isPrimary: true }],
+  
+    address: 'Mánesova 872/28',
+    zipCode: '120 00',
+    shortDescription: 'Dům Radost – multifunkční prostor s coworkingem, kavárnou a kulturním programem na Vinohradech.',
   }),
   createCoworking('cw_salounova_vila', 'Šalounova vila', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -201,6 +288,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 650,
   
     photos: [{ id: 'cw_salounova_vila_p1', url: 'https://images.unsplash.com/photo-1564069114553-7215e1ff1890?auto=format&fit=crop&w=800&q=80', caption: 'Šalounova vila', isPrimary: true }],
+  
+    address: 'Na Příkopě 583/15',
+    zipCode: '110 00',
+    shortDescription: 'Šalounova vila – jedinečný historický prostor pro práci a setkávání v Praze.',
   }),
   createCoworking('cw_jednacky_hradcanska', 'Jednačky Hradčanská', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -208,6 +299,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 550,
   
     photos: [{ id: 'cw_jednacky_hradcanska_p1', url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80', caption: 'Jednačky Hradčanská', isPrimary: true }],
+  
+    address: 'Dejvická 308/1',
+    zipCode: '160 00',
+    shortDescription: 'Jednačky Hradčanská – komunitní coworking zaměřený na rodiče a ženy podnikatelky.',
   }),
   createCoworking('cw_zenwork_palac_ara', 'Zenwork Palác ARA', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', '24h_access'],
@@ -215,6 +310,12 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 800,
   
     photos: [{ id: 'cw_zenwork_palac_ara_p1', url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80', caption: 'Zenwork Palác ARA', isPrimary: true }],
+  
+    address: 'Perlová 371/5',
+    zipCode: '110 00',
+    priceMonthly: 5850,
+    shortDescription: 'Luxusní coworking v historickém Paláci ARA v centru Prahy.',
+    website: 'https://www.zenwork.cz',
   }),
   createCoworking('cw_vysehradska_49', 'Vyšehradská 49', 'Praha', 'Praha', {
     amenities: ['wifi', 'kitchen', 'printer'],
@@ -222,6 +323,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_vysehradska_49_p1', url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80', caption: 'Vyšehradská 49', isPrimary: true }],
+  
+    address: 'Vyšehradská 49',
+    zipCode: '128 00',
+    shortDescription: 'Sdílený coworkingový prostor ve Vyšehradské ulici v Praze 2.',
   }),
   createCoworking('cw_yottabe_praha', 'Yottabe', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
@@ -229,6 +334,13 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 700,
   
     photos: [{ id: 'cw_yottabe_praha_p1', url: 'https://images.unsplash.com/photo-1564069114553-7215e1ff1890?auto=format&fit=crop&w=800&q=80', caption: 'Yottabe', isPrimary: true }],
+  
+    address: 'Vinohradská 2396/184',
+    zipCode: '130 00',
+    priceDayPass: 200,
+    priceHourly: 100,
+    shortDescription: 'Yottabe Praha – sdílený prostor pro produktivní práci s kancelářským vybavením.',
+    website: 'https://www.yottabe.com',
   }),
   createCoworking('cw_wework_drn', 'Wework DRN', 'Praha', 'Praha', {
     isVerified: true,
@@ -237,6 +349,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 1000,
   
     photos: [{ id: 'cw_wework_drn_p1', url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80', caption: 'Wework DRN', isPrimary: true }],
+  
+    address: 'Národní 135/14',
+    zipCode: '110 00',
+    shortDescription: 'WeWork v ikonické budově DRN s flexibilními kancelářemi a moderním zázemím.',
+    website: 'https://www.wework.com/buildings/drn--prague',
   }),
   createCoworking('cw_spaces_praha', 'Spaces', 'Praha', 'Praha', {
     isVerified: true,
@@ -246,6 +363,11 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.spacesworks.com',
   
     photos: [{ id: 'cw_spaces_praha_p1', url: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80', caption: 'Spaces', isPrimary: true }],
+  
+    address: 'Náměstí Republiky 1a',
+    zipCode: '110 00',
+    priceMonthly: 5000,
+    shortDescription: 'Globální síť flexibilních kancelářských prostorů Spaces v centru Prahy.',
   }),
   createCoworking('cw_moovin_space', 'Moovin Space', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -253,6 +375,12 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 650,
   
     photos: [{ id: 'cw_moovin_space_p1', url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&q=80', caption: 'Moovin Space', isPrimary: true }],
+  
+    address: 'Újezd 412/17',
+    zipCode: '118 00',
+    priceMonthly: 5500,
+    shortDescription: 'Síť sdílených kanceláří v prémiových lokacích po celé Praze s okamžitým nastěhováním.',
+    website: 'https://moovin.space',
   }),
   createCoworking('cw_praha_hygge', 'Praha.Hygge', 'Praha', 'Praha', {
     amenities: ['wifi', 'kitchen', 'cafe', 'printer'],
@@ -260,6 +388,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_praha_hygge_p1', url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80', caption: 'Praha.Hygge', isPrimary: true }],
+  
+    address: 'Korunní 104',
+    zipCode: '101 00',
+    shortDescription: 'Praha.Hygge – útulné soukromé kanceláře a coworking ve vinohradském stylu.',
+    website: 'https://praha.hygge.cz',
   }),
   createCoworking('cw_effectix_hub', 'Effectix Hub', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
@@ -267,6 +400,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 550,
   
     photos: [{ id: 'cw_effectix_hub_p1', url: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80', caption: 'Effectix Hub', isPrimary: true }],
+  
+    address: 'Kodaňská 1441/46',
+    zipCode: '101 00',
+    shortDescription: 'Effectix Hub – coworking a kreativní prostor v Praze 10 pro digitální profesionály.',
   }),
   createCoworking('cw_hasicarna', 'Komunitní centrum Hasičárna', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'events', 'printer'],
@@ -274,6 +411,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 750,
   
     photos: [{ id: 'cw_hasicarna_p1', url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80', caption: 'Komunitní centrum Hasičárna', isPrimary: true }],
+  
+    address: 'K Lučinám 2591/23',
+    zipCode: '130 00',
+    shortDescription: 'Komunitní centrum v bývalé hasičárně na Žižkově s coworkingem a kavárnou.',
+    website: 'https://www.ulita.cz/hasicarna',
   }),
   createCoworking('cw_coworking_idea_fair', 'Coworking Idea Fair – VŠE', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
@@ -281,6 +423,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 600,
   
     photos: [{ id: 'cw_coworking_idea_fair_p1', url: 'https://images.unsplash.com/photo-1416339134316-0e91dc9ded92?auto=format&fit=crop&w=800&q=80', caption: 'Coworking Idea Fair – VŠE', isPrimary: true }],
+  
+    address: 'nám. Winstona Churchilla 4',
+    zipCode: '130 67',
+    shortDescription: 'Coworkingový prostor v budově Vysoké školy ekonomické v Praze.',
+    website: 'https://coworking.vse.cz',
   }),
   createCoworking('cw_impact_hub_brno', 'Impact Hub Brno', 'Brno', 'Jihomoravský kraj', {
     isFeatured: true,
@@ -291,6 +438,11 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.impacthub.cz',
   
     photos: [{ id: 'cw_impact_hub_brno_p1', url: 'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=800&q=80', caption: 'Impact Hub Brno', isPrimary: true }],
+  
+    address: 'Cyrilská 7',
+    zipCode: '602 00',
+    priceMonthly: 2990,
+    shortDescription: 'Největší a nejzavedenější coworking v Brně s bohatou komunitou a pravidelnými akcemi.',
   }),
   createCoworking('cw_brain_farm', 'Brain Farm', 'Brno', 'Jihomoravský kraj', {
     isVerified: true,
@@ -299,6 +451,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 900,
   
     photos: [{ id: 'cw_brain_farm_p1', url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&q=80', caption: 'Brain Farm', isPrimary: true }],
+  
+    address: 'Moravské nám. 4',
+    zipCode: '602 00',
+    shortDescription: 'Intimní coworking pro ~15 lidí v samotném srdci Brna.',
+    website: 'https://www.brainfarm.cz',
   }),
   createCoworking('cw_edunesto', 'EDUnesto', 'Brno', 'Jihomoravský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
@@ -306,6 +463,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 700,
   
     photos: [{ id: 'cw_edunesto_p1', url: 'https://images.unsplash.com/photo-1453928582365-b6ad33cbcf64?auto=format&fit=crop&w=800&q=80', caption: 'EDUnesto', isPrimary: true }],
+  
+    address: 'Josefská 7',
+    zipCode: '602 00',
+    shortDescription: 'EDUnesto – vzdělávací a coworkingový prostor v centru Brna.',
   }),
   createCoworking('cw_branta_workspace', 'Branta Workspace', 'Brno', 'Jihomoravský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -313,6 +474,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 550,
   
     photos: [{ id: 'cw_branta_workspace_p1', url: 'https://images.unsplash.com/photo-1547496502-affa22d38842?auto=format&fit=crop&w=800&q=80', caption: 'Branta Workspace', isPrimary: true }],
+  
+    address: 'Cejl 509/41',
+    zipCode: '602 00',
+    shortDescription: 'Moderní workspace v Zábrdovicích s flexibilními kancelářemi a kreativní atmosférou.',
   }),
   createCoworking('cw_cowo_brno', 'Cowo Brno', 'Brno', 'Jihomoravský kraj', {
     isVerified: true,
@@ -321,6 +486,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 800,
   
     photos: [{ id: 'cw_cowo_brno_p1', url: 'https://images.unsplash.com/photo-1547496502-affa22d38842?auto=format&fit=crop&w=800&q=80', caption: 'Cowo Brno', isPrimary: true }],
+  
+    address: 'Moravské nám. 3',
+    zipCode: '602 00',
+    shortDescription: 'Útulný sdílený coworking přímo na Moravském náměstí v centru Brna.',
+    website: 'https://www.cowobrno.cz',
   }),
   createCoworking('cw_kumst', 'KUMST', 'Brno', 'Jihomoravský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'workshop_tools'],
@@ -328,6 +498,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 650,
   
     photos: [{ id: 'cw_kumst_p1', url: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80', caption: 'KUMST', isPrimary: true }],
+  
+    address: 'Údolní 495/19',
+    zipCode: '602 00',
+    shortDescription: 'Kreativní hub v historické budově na Údolní s FabLabem a coworkingem.',
+    website: 'https://www.kumstbrno.cz',
   }),
   createCoworking('cw_clubco_brno', 'Clubco', 'Brno', 'Jihomoravský kraj', {
     isVerified: true,
@@ -336,6 +511,12 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 900,
   
     photos: [{ id: 'cw_clubco_brno_p1', url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80', caption: 'Clubco', isPrimary: true }],
+  
+    address: 'Vlněná 5',
+    zipCode: '602 00',
+    priceMonthly: 3900,
+    shortDescription: 'Moderní a živý coworking ve Vlněna business parku s event prostorem a barevným designem.',
+    website: 'https://clubco.cz/brno',
   }),
   createCoworking('cw_coworking_na_paluby', 'Coworking na Palubě', 'Brno', 'Jihomoravský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -343,6 +524,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_coworking_na_paluby_p1', url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80', caption: 'Coworking na Palubě', isPrimary: true }],
+  
+    address: 'Příční 4',
+    zipCode: '603 00',
+    shortDescription: 'Coworking na Palubě – sdílený pracovní prostor v centru Brna.',
   }),
   createCoworking('cw_jic_cowork_brno', 'JIC cowork Brno', 'Brno', 'Jihomoravský kraj', {
     isVerified: true,
@@ -351,6 +536,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 700,
   
     photos: [{ id: 'cw_jic_cowork_brno_p1', url: 'https://images.unsplash.com/photo-1573167243872-43c6433b9d40?auto=format&fit=crop&w=800&q=80', caption: 'JIC cowork Brno', isPrimary: true }],
+  
+    address: 'Purkyňova 127',
+    zipCode: '612 00',
+    shortDescription: 'Coworking Jihomoravského inovačního centra pro technologické firmy a inovativní startupy.',
+    website: 'https://www.jic.cz',
   }),
   createCoworking('cw_simpl_kancl', 'Simpl Kancl', 'Brno', 'Jihomoravský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -358,6 +548,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_simpl_kancl_p1', url: 'https://images.unsplash.com/photo-1588702547954-4800fd33382a?auto=format&fit=crop&w=800&q=80', caption: 'Simpl Kancl', isPrimary: true }],
+  
+    address: 'V Újezdech 569/7',
+    zipCode: '621 00',
+    shortDescription: 'Flexibilní kancelářský prostor v Medlánkách pro jednotlivce a malé týmy.',
   }),
   createCoworking('cw_minicowork_lemur', 'Minicowork Lemur', 'Brno', 'Jihomoravský kraj', {
     amenities: ['wifi', 'kitchen', 'printer'],
@@ -365,6 +559,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 300,
   
     photos: [{ id: 'cw_minicowork_lemur_p1', url: 'https://images.unsplash.com/photo-1565514024059-aa13af9a1bf7?auto=format&fit=crop&w=800&q=80', caption: 'Minicowork Lemur', isPrimary: true }],
+  
+    address: 'nám. 28. dubna 36',
+    zipCode: '635 00',
+    shortDescription: 'Mini coworking s dětskou herničkou – pracujte, zatímco vaše děti si bezpečně hrají.',
+    website: 'http://minicowork.cz',
   }),
   createCoworking('cw_impact_hub_ostrava', 'Impact Hub Ostrava', 'Ostrava', 'Moravskoslezský kraj', {
     isFeatured: true,
@@ -374,6 +573,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 1000,
   
     photos: [{ id: 'cw_impact_hub_ostrava_p1', url: 'https://images.unsplash.com/photo-1572025442646-866d16c84a54?auto=format&fit=crop&w=800&q=80', caption: 'Impact Hub Ostrava', isPrimary: true }],
+  
+    address: 'Sokolská třída 1263/24',
+    zipCode: '702 00',
+    shortDescription: 'Impact Hub Ostrava – místo pro inovátory a podnikatele v centru Ostravy.',
+    website: 'https://impacthub.cz/ostrava',
   }),
   createCoworking('cw_clubco_ostrava', 'Clubco', 'Ostrava', 'Moravskoslezský kraj', {
     isVerified: true,
@@ -382,6 +586,12 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 800,
   
     photos: [{ id: 'cw_clubco_ostrava_p1', url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80', caption: 'Clubco', isPrimary: true }],
+  
+    address: '28. října 3346/91',
+    zipCode: '702 00',
+    priceMonthly: 4900,
+    shortDescription: 'Premium coworking Clubco v centru Ostravy v moderním IQ parku.',
+    website: 'https://clubco.cz/ostrava',
   }),
   createCoworking('cw_fajna_dilna', 'Fajna dilna', 'Ostrava', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'workshop_tools', 'kitchen', 'printer'],
@@ -389,6 +599,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 600,
   
     photos: [{ id: 'cw_fajna_dilna_p1', url: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80', caption: 'Fajna dilna', isPrimary: true }],
+  
+    address: 'Sokolská třída 581/1',
+    zipCode: '702 00',
+    shortDescription: 'Fajna dilna – první otevřená dílna v Ostravě s 5 plně vybavenými workshopy.',
   }),
   createCoworking('cw_mamahub_koutek_sveta', 'Mamahub Koutek světa', 'Ostrava', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'kitchen', 'childcare', 'printer'],
@@ -396,6 +610,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_mamahub_koutek_sveta_p1', url: 'https://images.unsplash.com/photo-1550305080-4e021e297698?auto=format&fit=crop&w=800&q=80', caption: 'Mamahub Koutek světa', isPrimary: true }],
+  
+    address: 'Zámecká 480/9',
+    zipCode: '702 00',
+    shortDescription: 'Mamahub Koutek světa – coworking s hlídáním dětí pro pracující rodiče v Ostravě.',
   }),
   createCoworking('cw_hnizdo_ostrava', 'Hnízdo', 'Ostrava', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -403,6 +621,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_hnizdo_ostrava_p1', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', caption: 'Hnízdo', isPrimary: true }],
+  
+    address: 'Střelniční 75/8',
+    zipCode: '702 00',
+    shortDescription: 'Komunitní coworking a studio v Ostravě pro kreativce a freelancery.',
+    website: 'https://www.hnizdoostrava.cz',
   }),
   createCoworking('cw_ostrava_hygge', 'Ostrava.Hygge', 'Ostrava', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'kitchen', 'cafe', 'printer'],
@@ -410,6 +633,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 380,
   
     photos: [{ id: 'cw_ostrava_hygge_p1', url: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80', caption: 'Ostrava.Hygge', isPrimary: true }],
+  
+    address: 'Stodolní 16',
+    zipCode: '702 00',
+    shortDescription: 'Ostrava.Hygge – soukromé kanceláře, coworking a zasedačky v centru Ostravy.',
+    website: 'https://ostrava.hygge.cz',
   }),
   createCoworking('cw_cowo_cb', 'Cowo CB', 'České Budějovice', 'Jihočeský kraj', {
     isVerified: true,
@@ -418,6 +646,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 650,
   
     photos: [{ id: 'cw_cowo_cb_p1', url: 'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=800&q=80', caption: 'Cowo CB', isPrimary: true }],
+  
+    address: 'Široká 443/19',
+    zipCode: '370 01',
+    shortDescription: 'Sdílená kancelář v centru Českých Budějovic s přátelskou komunitou.',
+    website: 'https://www.cowocb.cz',
   }),
   createCoworking('cw_pracovna_r51', 'Pracovna R51', 'České Budějovice', 'Jihočeský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -425,6 +658,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_pracovna_r51_p1', url: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&w=800&q=80', caption: 'Pracovna R51', isPrimary: true }],
+  
+    address: 'Riegrova 1756/51',
+    zipCode: '370 01',
+    shortDescription: 'Moderní coworking ve strategické poloze v Českých Budějovicích.',
   }),
   createCoworking('cw_coworking_vste', 'Coworking VŠTE', 'České Budějovice', 'Jihočeský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -432,6 +669,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 550,
   
     photos: [{ id: 'cw_coworking_vste_p1', url: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=800&q=80', caption: 'Coworking VŠTE', isPrimary: true }],
+  
+    address: 'Kněžská 5',
+    zipCode: '370 01',
+    shortDescription: 'Coworking na Vysoké škole technické a ekonomické v Českých Budějovicích.',
+    website: 'https://www.coworkingvste.cz',
   }),
   createCoworking('cw_budehub', 'BudeHub', 'České Budějovice', 'Jihočeský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
@@ -439,6 +681,13 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 700,
   
     photos: [{ id: 'cw_budehub_p1', url: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=800&q=80', caption: 'BudeHub', isPrimary: true }],
+  
+    address: 'Rudolfovská tř. 64/34',
+    zipCode: '370 01',
+    priceDayPass: 350,
+    priceMonthly: 2000,
+    shortDescription: 'Moderní coworking s podcast studiem a 1Gb/s internetem v srdci Budějovic.',
+    website: 'https://www.budehub.cz',
   }),
   createCoworking('cw_coworking_tchk', 'Coworking TCHK', 'Hradec Králové', 'Královéhradecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -446,6 +695,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 550,
   
     photos: [{ id: 'cw_coworking_tchk_p1', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80', caption: 'Coworking TCHK', isPrimary: true }],
+  
+    address: 'Eliščino nábřeží 842',
+    zipCode: '500 02',
+    shortDescription: 'Coworking v Technologickém centru Hradec Králové pro startupy a začínající podnikatele.',
+    website: 'https://www.tchk.cz/coworking',
   }),
   createCoworking('cw_bio_central', 'Bio Central', 'Hradec Králové', 'Královéhradecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
@@ -453,6 +707,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 600,
   
     photos: [{ id: 'cw_bio_central_p1', url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80', caption: 'Bio Central', isPrimary: true }],
+  
+    address: 'třída Karla IV. 774',
+    zipCode: '500 02',
+    shortDescription: 'Kulturní centrum Bio Central s kavárnou a coworkingovou zónou v Hradci Králové.',
+    website: 'https://www.biocentral.cz',
   }),
   createCoworking('cw_cowork_cityhub_jihlava', 'COWORK:S CityHUB Jihlava', 'Jihlava', 'Kraj Vysočina', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
@@ -460,6 +719,12 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 700,
   
     photos: [{ id: 'cw_cowork_cityhub_jihlava_p1', url: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80', caption: 'COWORK:S CityHUB Jihlava', isPrimary: true }],
+  
+    address: 'Úzká 1',
+    zipCode: '586 01',
+    priceDayPass: 250,
+    shortDescription: 'CityHUB Jihlava – flexibilní coworking v centru krajského města Vysočiny.',
+    website: 'https://www.hubjihlava.cz',
   }),
   createCoworking('cw_yottabe_jihlava', 'Yottabe Space', 'Jihlava', 'Kraj Vysočina', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
@@ -467,6 +732,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 550,
   
     photos: [{ id: 'cw_yottabe_jihlava_p1', url: 'https://images.unsplash.com/photo-1572025442646-866d16c84a54?auto=format&fit=crop&w=800&q=80', caption: 'Yottabe Space', isPrimary: true }],
+  
+    address: 'Matky Boží 1186/1',
+    zipCode: '586 01',
+    shortDescription: 'Multifunkční prostor na Masarykově náměstí s coworkingem, zasedacími místnostmi a podcast studiem.',
+    website: 'https://www.yottabespace.cz',
   }),
   createCoworking('cw_kanov', 'Kanov', 'Karlovy Vary', 'Karlovarský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -474,6 +744,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_kanov_p1', url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80', caption: 'Kanov', isPrimary: true }],
+  
+    address: 'Závodní 278',
+    zipCode: '360 18',
+    shortDescription: 'Podnikatelský inkubátor KANOV v Tašovicích s kancelářskými a výrobními prostory.',
+    website: 'https://www.kanov.cz',
   }),
   createCoworking('cw_lipo_ink', 'Lipo.ink', 'Liberec', 'Liberecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'workshop_tools'],
@@ -481,6 +756,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 650,
   
     photos: [{ id: 'cw_lipo_ink_p1', url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80', caption: 'Lipo.ink', isPrimary: true }],
+  
+    address: 'U Jezu 525/4',
+    zipCode: '460 01',
+    shortDescription: 'Kreativní a komunitní coworking v centru Liberce s pravidelným programem.',
+    website: 'https://lipo.ink',
   }),
   createCoworking('cw_teamwork', 'TeamWork', 'Liberec', 'Liberecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -488,6 +768,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 550,
   
     photos: [{ id: 'cw_teamwork_p1', url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80', caption: 'TeamWork', isPrimary: true }],
+  
+    address: 'náměstí Dr. E. Beneše 23',
+    zipCode: '460 01',
+    shortDescription: 'TeamWork Liberec – coworking v centru Liberce s vysokými stropy a designovým interiérem.',
+    website: 'https://coworking-liberec.cz',
   }),
   createCoworking('cw_hub_mb', 'Hub MB', 'Mladá Boleslav', 'Středočeský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
@@ -495,6 +780,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 600,
   
     photos: [{ id: 'cw_hub_mb_p1', url: 'https://images.unsplash.com/photo-1564069114553-7215e1ff1890?auto=format&fit=crop&w=800&q=80', caption: 'Hub MB', isPrimary: true }],
+  
+    address: 'tř. Václava Klementa 601/13',
+    zipCode: '293 01',
+    shortDescription: 'HUB MB – komunita a coworking v centru Mladé Boleslavi pro pozitivní změnu regionu.',
+    website: 'https://hubmb.cz',
   }),
   createCoworking('cw_vault_42', 'Vault 42', 'Olomouc', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', '24h_access'],
@@ -502,6 +792,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 750,
   
     photos: [{ id: 'cw_vault_42_p1', url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80', caption: 'Vault 42', isPrimary: true }],
+  
+    address: 'Koželužská 945/31',
+    zipCode: '779 00',
+    shortDescription: 'Industriální coworking ve Vault 42 v Olomouci s kreativní atmosférou.',
   }),
   createCoworking('cw_coworking_olomouc', 'Coworking Olomouc', 'Olomouc', 'Olomoucký kraj', {
     isVerified: true,
@@ -510,6 +804,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 650,
   
     photos: [{ id: 'cw_coworking_olomouc_p1', url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80', caption: 'Coworking Olomouc', isPrimary: true }],
+  
+    address: 'Jakoubka ze Stříbra 44',
+    zipCode: '779 00',
+    shortDescription: 'Coworking Olomouc – sdílené kanceláře v centru Olomouce s komunitní atmosférou.',
+    website: 'https://www.coworkingolomouc.cz',
   }),
   createCoworking('cw_telegraph_hub', 'Telegraph Hub', 'Olomouc', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
@@ -517,6 +816,12 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 550,
   
     photos: [{ id: 'cw_telegraph_hub_p1', url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80', caption: 'Telegraph Hub', isPrimary: true }],
+  
+    address: 'Jungmannova 800/3',
+    zipCode: '779 00',
+    priceDayPass: 450,
+    shortDescription: 'Elegantní Telegraph Hub v centru Olomouce s coworkingem a zasedacími místnostmi.',
+    website: 'https://telegraph.cz/coworking',
   }),
   createCoworking('cw_ohub', 'Ohub', 'Olomouc', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -524,6 +829,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_ohub_p1', url: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80', caption: 'Ohub', isPrimary: true }],
+  
+    address: 'Wellnerova 1215/1',
+    zipCode: '779 00',
+    shortDescription: 'OHUB – kanceláře, zasedačky a coworking v moderním BEA Centru Olomouc.',
+    website: 'https://ohub.cz',
   }),
   createCoworking('cw_element_coworking', 'Element Coworking', 'Olomouc', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -531,6 +841,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_element_coworking_p1', url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80', caption: 'Element Coworking', isPrimary: true }],
+  
+    address: '17. listopadu 1230/8a',
+    zipCode: '779 00',
+    shortDescription: 'Element Coworking v Envelopa Hubu – sdílený prostor Univerzity Palackého v Olomouci.',
+    website: 'https://www.elementcoworking.cz',
   }),
   createCoworking('cw_freework_envelopa', 'Freework Envelopa', 'Olomouc', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
@@ -538,6 +853,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 550,
   
     photos: [{ id: 'cw_freework_envelopa_p1', url: 'https://images.unsplash.com/photo-1416339134316-0e91dc9ded92?auto=format&fit=crop&w=800&q=80', caption: 'Freework Envelopa', isPrimary: true }],
+  
+    address: 'tř. Kosmonautů 1221/2a',
+    zipCode: '779 00',
+    shortDescription: 'Kancelářský coworking FreeWork v moderním administrativním centru Envelopa v Olomouci.',
+    website: 'https://www.freeworkenvelopa.cz',
   }),
   createCoworking('cw_p_pink', 'P-PINK', 'Pardubice', 'Pardubický kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
@@ -545,6 +865,12 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 650,
   
     photos: [{ id: 'cw_p_pink_p1', url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&q=80', caption: 'P-PINK', isPrimary: true }],
+  
+    address: 'Jana Palacha 363',
+    zipCode: '530 02',
+    priceDayPass: 80,
+    shortDescription: 'Pardubický podnikatelský inkubátor s flexibilním coworkingem a multimediálním studiem.',
+    website: 'https://p-pink.cz',
   }),
   createCoworking('cw_druzstvo_coworking', 'Družstvo: Coworking v Domě služeb', 'Pardubice', 'Pardubický kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -552,6 +878,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 550,
   
     photos: [{ id: 'cw_druzstvo_coworking_p1', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', caption: 'Družstvo: Coworking v Domě služeb', isPrimary: true }],
+  
+    address: 'Palackého 68',
+    zipCode: '530 01',
+    shortDescription: 'Družstvo – komunitní coworking v Domě služeb v centru Pardubic.',
   }),
   createCoworking('cw_sit_port', 'SIT Port', 'Plzeň', 'Plzeňský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
@@ -559,6 +889,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 800,
   
     photos: [{ id: 'cw_sit_port_p1', url: 'https://images.unsplash.com/photo-1547496502-affa22d38842?auto=format&fit=crop&w=800&q=80', caption: 'SIT Port', isPrimary: true }],
+  
+    address: 'Technologická 2',
+    zipCode: '301 00',
+    shortDescription: 'SIT Port Cowork v TechTower – inovační hub pro tech komunitu v Plzni.',
+    website: 'https://sitport.cz',
   }),
   createCoworking('cw_techheaven_hub', 'TechHeaven HUB', 'Plzeň', 'Plzeňský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
@@ -566,6 +901,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 700,
   
     photos: [{ id: 'cw_techheaven_hub_p1', url: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80', caption: 'TechHeaven HUB', isPrimary: true }],
+  
+    address: 'Rooseveltova 16',
+    zipCode: '301 00',
+    shortDescription: 'TechHeaven HUB – technologický hub a coworking pro inovátory v Plzni.',
   }),
   createCoworking('cw_kolektiv_hub', 'Kolektiv Hub', 'Plzeň', 'Plzeňský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -573,6 +912,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 650,
   
     photos: [{ id: 'cw_kolektiv_hub_p1', url: 'https://images.unsplash.com/photo-1536240478613-bf1c37736de1?auto=format&fit=crop&w=800&q=80', caption: 'Kolektiv Hub', isPrimary: true }],
+  
+    address: 'Kopeckého sady 329',
+    zipCode: '301 00',
+    shortDescription: 'Kolektiv Hub – coworking v zelených Kopeckého sadech v centru Plzně.',
+    website: 'https://www.kolektivhub.cz',
   }),
   createCoworking('cw_strom_offices', 'Strom Offices', 'Plzeň', 'Plzeňský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'parking'],
@@ -580,6 +924,13 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 700,
   
     photos: [{ id: 'cw_strom_offices_p1', url: 'https://images.unsplash.com/photo-1573167243872-43c6433b9d40?auto=format&fit=crop&w=800&q=80', caption: 'Strom Offices', isPrimary: true }],
+  
+    address: 'Koželužská 3034/1',
+    zipCode: '301 00',
+    priceDayPass: 200,
+    priceMonthly: 1690,
+    shortDescription: 'STROM offices – chytrá budova s coworkingem, parkováním a 24/7 přístupem v Plzni.',
+    website: 'https://www.strom-offices.cz',
   }),
   createCoworking('cw_bic_plzen', 'BIC', 'Plzeň', 'Plzeňský kraj', {
     isVerified: true,
@@ -588,6 +939,12 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 900,
   
     photos: [{ id: 'cw_bic_plzen_p1', url: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80', caption: 'BIC', isPrimary: true }],
+  
+    address: 'Riegrova 1',
+    zipCode: '301 00',
+    priceMonthly: 3000,
+    shortDescription: 'Podnikatelské a inovační centrum BIC Plzeň s coworkingem a kancelářemi.',
+    website: 'https://www.bic.cz',
   }),
   createCoworking('cw_hub_hax', 'hub HAX', 'Zlín', 'Zlínský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
@@ -595,6 +952,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 650,
   
     photos: [{ id: 'cw_hub_hax_p1', url: 'https://images.unsplash.com/photo-1565514024059-aa13af9a1bf7?auto=format&fit=crop&w=800&q=80', caption: 'hub HAX', isPrimary: true }],
+  
+    address: 'Dlouhá 497',
+    zipCode: '760 01',
+    shortDescription: 'HAX – kreativní hub pro designery, marketéry a digitální profesionály ve Zlíně.',
   }),
   createCoworking('cw_zlin_hygge', 'Zlin.Hygge', 'Zlín', 'Zlínský kraj', {
     amenities: ['wifi', 'kitchen', 'cafe', 'printer'],
@@ -602,6 +963,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_zlin_hygge_p1', url: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80', caption: 'Zlin.Hygge', isPrimary: true }],
+  
+    address: 'Štefánikova 5497',
+    zipCode: '760 01',
+    shortDescription: 'Zlín.Hygge – flexibilní kanceláře a coworking v centru Zlína.',
+    website: 'https://zlin.hygge.cz',
   }),
   createCoworking('cw_retreat_beskydy', 'Retreat.cz', 'Beskydy', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -609,6 +975,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_retreat_beskydy_p1', url: 'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=800&q=80', caption: 'Retreat.cz', isPrimary: true }],
+  
+    address: 'Hlavní 162',
+    zipCode: '739 14',
+    shortDescription: 'Retreat.cz – klidný coworking a ubytování v inspirativním prostředí Beskyd.',
+    website: 'https://retreat.cz',
   }),
   createCoworking('cw_coworking_bobr', 'CoWorking BoBr', 'Brandýs nad Labem', 'Středočeský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -616,6 +987,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_coworking_bobr_p1', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', caption: 'CoWorking BoBr', isPrimary: true }],
+  
+    address: 'Masarykovo náměstí 1',
+    zipCode: '250 01',
+    shortDescription: 'CoWorking BoBr – sdílená kancelář v Brandýse nad Labem-Staré Boleslavi.',
   }),
   createCoworking('cw_coworking_cesky_tesin', 'Co-working Český Těšín', 'Český Těšín', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -623,6 +998,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 380,
   
     photos: [{ id: 'cw_coworking_cesky_tesin_p1', url: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80', caption: 'Co-working Český Těšín', isPrimary: true }],
+  
+    address: 'Hlavní třída 130',
+    zipCode: '737 01',
+    shortDescription: 'Co-working Český Těšín – sdílená kancelář v pohraničním městě na hranici s Polskem.',
   }),
   createCoworking('cw_cowo_libre', 'Cowo Libre', 'Frýdek-Místek', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -630,6 +1009,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_cowo_libre_p1', url: 'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=800&q=80', caption: 'Cowo Libre', isPrimary: true }],
+  
+    address: 'Palackého 1279',
+    zipCode: '738 01',
+    shortDescription: 'Cowo Libre – přátelský coworking ve Frýdku-Místku pro místní freelancery a podnikatele.',
   }),
   createCoworking('cw_centrum_podpory_podnikani', 'Centrum pro podporu podnikání', 'Havířov', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -637,6 +1020,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 550,
   
     photos: [{ id: 'cw_centrum_podpory_podnikani_p1', url: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&w=800&q=80', caption: 'Centrum pro podporu podnikání', isPrimary: true }],
+  
+    address: 'Svornosti 2',
+    zipCode: '736 01',
+    shortDescription: 'Centrum pro podporu podnikání v Havířově s coworkingem a mentorskými programy.',
   }),
   createCoworking('cw_hubbr', 'Hubbr', 'Havlíčkův Brod', 'Kraj Vysočina', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -644,6 +1031,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_hubbr_p1', url: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=800&q=80', caption: 'Hubbr', isPrimary: true }],
+  
+    address: 'Havlíčkovo náměstí 189',
+    zipCode: '580 01',
+    shortDescription: 'Hubbr – coworkingový prostor v Havlíčkově Brodě pro lokální komunitu podnikatelů.',
   }),
   createCoworking('cw_kanov_cheb', 'Kanov', 'Cheb', 'Karlovarský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -651,6 +1042,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_kanov_cheb_p1', url: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=800&q=80', caption: 'Kanov', isPrimary: true }],
+  
+    address: 'Dragounská 2268/4',
+    zipCode: '350 02',
+    shortDescription: 'Kanov Cheb – podnikatelský inkubátor a coworking v Chebu.',
   }),
   createCoworking('cw_cowork_jes', 'Cowork Jes', 'Jeseník', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -658,6 +1053,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_cowork_jes_p1', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80', caption: 'Cowork Jes', isPrimary: true }],
+  
+    address: 'Dukelská 1240/21',
+    zipCode: '790 01',
+    shortDescription: 'Cowork Jes – sdílená kancelář v Jeseníku pro místní podnikatele a vzdálené pracovníky.',
   }),
   createCoworking('cw_businessgate', 'BusinessGate', 'Karviná', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -665,6 +1064,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_businessgate_p1', url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80', caption: 'BusinessGate', isPrimary: true }],
+  
+    address: 'Poštovní 615/9',
+    zipCode: '733 01',
+    shortDescription: 'BusinessGate – podpora podnikání a coworking ve Fryštátě v Karviné.',
+    website: 'https://www.businessgate.cz',
   }),
   createCoworking('cw_coworking_kolin', 'Coworking Kolín', 'Kolín', 'Středočeský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -672,6 +1076,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 550,
   
     photos: [{ id: 'cw_coworking_kolin_p1', url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80', caption: 'Coworking Kolín', isPrimary: true }],
+  
+    address: 'Kutnohorská 40',
+    zipCode: '280 02',
+    shortDescription: 'Přátelský coworking v Kolíně se zaměřením na komunitu a podnikatelské snídaně.',
+    website: 'https://coworkingkolin.cz',
   }),
   createCoworking('cw_volny_stul', 'Volný stůl', 'Kolín', 'Středočeský kraj', {
     amenities: ['wifi', 'kitchen', 'printer'],
@@ -679,6 +1088,12 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_volny_stul_p1', url: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80', caption: 'Volný stůl', isPrimary: true }],
+  
+    address: 'Politických vězňů 10',
+    zipCode: '280 02',
+    priceDayPass: 300,
+    shortDescription: 'Volný stůl Kolín – flexibilní coworking nedaleko nádraží v Kolíně.',
+    website: 'https://volnystul.cz',
   }),
   createCoworking('cw_litohub', 'Litohub', 'Litoměřice', 'Ústecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -686,6 +1101,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_litohub_p1', url: 'https://images.unsplash.com/photo-1572025442646-866d16c84a54?auto=format&fit=crop&w=800&q=80', caption: 'Litohub', isPrimary: true }],
+  
+    address: 'Mírové náměstí 167/36',
+    zipCode: '412 01',
+    shortDescription: 'LitoHUB – coworking, studio a eventy v historickém centru Litoměřic.',
+    website: 'https://litohub.cz',
   }),
   createCoworking('cw_kocarovna', 'Kočárovna', 'Litomyšl', 'Pardubický kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -693,6 +1113,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_kocarovna_p1', url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80', caption: 'Kočárovna', isPrimary: true }],
+  
+    address: 'Jiráskova 133',
+    zipCode: '570 01',
+    shortDescription: 'Kočárovna Litomyšl – unikátní coworking na zámeckém areálu zapsaném na seznamu UNESCO.',
+    website: 'https://www.zamecke-navrsi.cz/cs/m-77-coworking-kocarovna',
   }),
   createCoworking('cw_bridge_714', 'Bridge 714', 'Most', 'Ústecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -700,6 +1125,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_bridge_714_p1', url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80', caption: 'Bridge 714', isPrimary: true }],
+  
+    address: 'U Stadionu 714/30',
+    zipCode: '434 01',
+    shortDescription: 'Bridge 714 – inovační a vzdělávací centrum v Mostě s coworkingem a moderními technologiemi.',
+    website: 'https://www.bridge714.cz',
   }),
   createCoworking('cw_coworking_most_como', 'Coworking Most – COMO', 'Most', 'Ústecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -707,6 +1137,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 550,
   
     photos: [{ id: 'cw_coworking_most_como_p1', url: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=800&q=80', caption: 'Coworking Most – COMO', isPrimary: true }],
+  
+    address: 'tř. Budovatelů 2830/44',
+    zipCode: '434 01',
+    shortDescription: 'Coworking Most COMO – flexibilní pracovní prostory a komunita v centru Mostu.',
+    website: 'https://www.coworking-most.cz',
   }),
   createCoworking('cw_lovecowork', 'LoveCoWork', 'Opava', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -714,6 +1149,12 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_lovecowork_p1', url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80', caption: 'LoveCoWork', isPrimary: true }],
+  
+    address: 'Na Rybníčku 521/56',
+    zipCode: '746 01',
+    priceDayPass: 200,
+    shortDescription: 'LoveCoWork – jediný coworking v Opavě s otevřeným prostorem a zasedačkou pro 30 lidí.',
+    website: 'https://lovecowork.cz',
   }),
   createCoworking('cw_nase_hnizdo', 'Naše hnízdo', 'Orlová', 'Moravskoslezský kraj', {
     amenities: ['wifi', 'kitchen', 'printer'],
@@ -721,6 +1162,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_nase_hnizdo_p1', url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80', caption: 'Naše hnízdo', isPrimary: true }],
+  
+    address: 'Masarykova třída 1227/4',
+    zipCode: '735 11',
+    shortDescription: 'Naše hnízdo – komunitní centrum a coworking pro rodiče v Orlové.',
   }),
   createCoworking('cw_blaho_work', 'Blaho&work', 'Ostrov', 'Karlovarský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -728,6 +1173,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_blaho_work_p1', url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80', caption: 'Blaho&work', isPrimary: true }],
+  
+    address: 'Klínovecká 1432',
+    zipCode: '363 01',
+    shortDescription: 'Blaho&work – kombinace wellness a coworkingového prostoru v Ostrově.',
   }),
   createCoworking('cw_prstework', 'ProstěWork', 'Prostějov', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -735,6 +1184,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_prstework_p1', url: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=800&q=80', caption: 'ProstěWork', isPrimary: true }],
+  
+    address: 'Dukelská brána 213/4',
+    zipCode: '796 01',
+    shortDescription: 'ProstěWork – sdílená kancelář pro klidnou práci na projektech v Prostějově.',
+    website: 'https://prostework.cz',
   }),
   createCoworking('cw_in_hub', 'IN-HUB', 'Přerov', 'Olomoucký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -742,6 +1196,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_in_hub_p1', url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80', caption: 'IN-HUB', isPrimary: true }],
+  
+    address: 'Bratrská 2',
+    zipCode: '750 02',
+    shortDescription: 'IN-HUB Přerov – inovační hub s coworkingem, konferenčními sály a kreativní dílnou.',
+    website: 'https://inhubprerov.eu',
   }),
   createCoworking('cw_cwrk_jzd', 'Cwrk JzD', 'Roudnice nad Labem', 'Středočeský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -749,6 +1208,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_cwrk_jzd_p1', url: 'https://images.unsplash.com/photo-1416339134316-0e91dc9ded92?auto=format&fit=crop&w=800&q=80', caption: 'Cwrk JzD', isPrimary: true }],
+  
+    address: 'náměstí Jana z Dražic 103',
+    zipCode: '413 01',
+    shortDescription: 'Cwrk JzD – první coworking v Roudnici nad Labem provozovaný neziskovou organizací.',
+    website: 'https://www.cwrkjzd.cz',
   }),
   createCoworking('cw_cowork_svitavy', 'Cowork', 'Svitavy', 'Pardubický kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -756,6 +1220,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_cowork_svitavy_p1', url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&q=80', caption: 'Cowork', isPrimary: true }],
+  
+    address: 'náměstí Míru 96/1',
+    zipCode: '568 02',
+    shortDescription: 'Cowork Svitavy – sdílená kancelář a studovna v centru Svitav.',
   }),
   createCoworking('cw_cowosedlice', 'Cowosedlice', 'Teplice', 'Ústecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -763,6 +1231,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_cowosedlice_p1', url: 'https://images.unsplash.com/photo-1453928582365-b6ad33cbcf64?auto=format&fit=crop&w=800&q=80', caption: 'Cowosedlice', isPrimary: true }],
+  
+    address: 'náměstí Svobody 1',
+    zipCode: '415 01',
+    shortDescription: 'Cowosedlice – komunitní coworkingový prostor v Teplicích.',
   }),
   createCoworking('cw_sdilene_kancelar_teplice', 'Sdílené kanceláře Teplice', 'Teplice', 'Ústecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -770,6 +1242,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 550,
   
     photos: [{ id: 'cw_sdilene_kancelar_teplice_p1', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80', caption: 'Sdílené kanceláře Teplice', isPrimary: true }],
+  
+    address: 'Masarykova 357',
+    zipCode: '415 01',
+    shortDescription: 'Sdílené kanceláře Teplice – flexibilní coworking v centru Teplic.',
   }),
   createCoworking('cw_hnizdo_uherske_hradiste', 'Hnízdo', 'Uherské Hradiště', 'Zlínský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -777,6 +1253,11 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 400,
   
     photos: [{ id: 'cw_hnizdo_uherske_hradiste_p1', url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80', caption: 'Hnízdo', isPrimary: true }],
+  
+    address: 'Studentské náměstí 1531',
+    zipCode: '686 01',
+    shortDescription: 'Hnízdo UH – coworkingové a komunitní centrum na Studentském náměstí.',
+    website: 'https://www.hnizdouh.cz',
   }),
   createCoworking('cw_hub_123', 'HUB 123', 'Uherské Hradiště', 'Zlínský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -784,6 +1265,12 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_hub_123_p1', url: 'https://images.unsplash.com/photo-1536240478613-bf1c37736de1?auto=format&fit=crop&w=800&q=80', caption: 'HUB 123', isPrimary: true }],
+  
+    address: 'Mariánské náměstí 123',
+    zipCode: '686 01',
+    priceMonthly: 1500,
+    shortDescription: 'HUB 123 – kreativní hub a sdílená kancelář v centru Uherského Hradiště.',
+    website: 'https://hub123.cz',
   }),
   createCoworking('cw_hopspot_cowork', 'Hopspot Cowork', 'Žatec', 'Ústecký kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
@@ -791,6 +1278,10 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 450,
   
     photos: [{ id: 'cw_hopspot_cowork_p1', url: 'https://images.unsplash.com/photo-1573167243872-43c6433b9d40?auto=format&fit=crop&w=800&q=80', caption: 'Hopspot Cowork', isPrimary: true }],
+  
+    address: 'Chelčického nám. 6',
+    zipCode: '438 01',
+    shortDescription: 'Hopspot Cowork – coworking na historickém náměstí v Žatci s dílnou a 3D tiskárnami.',
   }),
 ];
 
