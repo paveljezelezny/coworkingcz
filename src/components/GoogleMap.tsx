@@ -11,8 +11,10 @@ interface MarkerData {
   lat: number;
   lng: number;
   slug: string;
-  priceDayPass?: number | null;
-  priceMonthly?: number | null;
+  prices?: {
+    dayPass?:   { enabled: boolean; from: number | null };
+    openSpace?: { enabled: boolean; from: number | null };
+  };
   capacity?: number | null;
   isVerified?: boolean;
   photoUrl?: string;
@@ -170,8 +172,8 @@ export default function GoogleMap({ markers, selectedId, onSelect }: GoogleMapPr
       ? `<span style="background:#2563eb;color:#fff;font-size:10px;padding:2px 6px;border-radius:999px;margin-left:4px;">✓ Ověřeno</span>`
       : '';
     const priceRow = [
-      m.priceDayPass ? `${m.priceDayPass} Kč/den` : null,
-      m.priceMonthly ? `${m.priceMonthly} Kč/měs` : null,
+      m.prices?.dayPass?.enabled && m.prices.dayPass.from ? `od ${m.prices.dayPass.from} Kč/den` : null,
+      m.prices?.openSpace?.enabled && m.prices.openSpace.from ? `od ${m.prices.openSpace.from} Kč/měs` : null,
     ].filter(Boolean).join(' &nbsp;·&nbsp; ');
 
     infoWindowRef.current.setContent(`

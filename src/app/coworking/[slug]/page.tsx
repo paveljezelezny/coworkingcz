@@ -267,35 +267,63 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
             {/* Pricing */}
             <section id="sekce-ceny" className="mb-12 scroll-mt-24">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Ceny</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {coworking.priceHourly && (
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
-                    <h3 className="text-sm font-semibold text-blue-900 mb-2">Hodinová sazba</h3>
-                    <div className="text-3xl font-bold text-blue-600 mb-1">
-                      {coworking.priceHourly.toLocaleString('cs-CZ')} Kč
-                    </div>
-                    <p className="text-xs text-blue-700">za hodinu</p>
+              {(() => {
+                const p = coworking.prices;
+                const cards = [
+                  p?.hourly?.enabled && p.hourly.from
+                    ? { label: 'Hodina', from: p.hourly.from, unit: 'hod', color: 'blue' }
+                    : null,
+                  p?.dayPass?.enabled && p.dayPass.from
+                    ? { label: 'Den', from: p.dayPass.from, unit: 'den', color: 'orange' }
+                    : null,
+                  p?.openSpace?.enabled && p.openSpace.from
+                    ? { label: 'Open Space', from: p.openSpace.from, unit: 'měs', color: 'green' }
+                    : null,
+                  p?.fixDesk?.enabled && p.fixDesk.from
+                    ? { label: 'Fix Desk', from: p.fixDesk.from, unit: 'měs', color: 'purple' }
+                    : null,
+                  p?.office?.enabled && p.office.from
+                    ? { label: 'Kancelář', from: p.office.from, unit: 'měs', color: 'teal' }
+                    : null,
+                ].filter(Boolean) as { label: string; from: number; unit: string; color: string }[];
+
+                const colorMap: Record<string, string> = {
+                  blue:   'from-blue-50 to-blue-100 border-blue-200 text-blue-900 text-blue-600 text-blue-700',
+                  orange: 'from-orange-50 to-orange-100 border-orange-200 text-orange-900 text-orange-600 text-orange-700',
+                  green:  'from-green-50 to-green-100 border-green-200 text-green-900 text-green-600 text-green-700',
+                  purple: 'from-purple-50 to-purple-100 border-purple-200 text-purple-900 text-purple-600 text-purple-700',
+                  teal:   'from-teal-50 to-teal-100 border-teal-200 text-teal-900 text-teal-600 text-teal-700',
+                };
+                const bgMap: Record<string, { bg: string; heading: string; price: string; unit: string }> = {
+                  blue:   { bg: 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200',   heading: 'text-blue-900',   price: 'text-blue-600',   unit: 'text-blue-700' },
+                  orange: { bg: 'bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200', heading: 'text-orange-900', price: 'text-orange-600', unit: 'text-orange-700' },
+                  green:  { bg: 'bg-gradient-to-br from-green-50 to-green-100 border-green-200',  heading: 'text-green-900',  price: 'text-green-600',  unit: 'text-green-700' },
+                  purple: { bg: 'bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200', heading: 'text-purple-900', price: 'text-purple-600', unit: 'text-purple-700' },
+                  teal:   { bg: 'bg-gradient-to-br from-teal-50 to-teal-100 border-teal-200',    heading: 'text-teal-900',   price: 'text-teal-600',   unit: 'text-teal-700' },
+                };
+
+                if (cards.length === 0) {
+                  return <p className="text-gray-500">Ceny jsou dostupné na vyžádání. Kontaktujte coworking přímo.</p>;
+                }
+
+                return (
+                  <div className={`grid grid-cols-1 sm:grid-cols-${Math.min(cards.length, 3)} gap-4`}>
+                    {cards.map((card) => {
+                      const c = bgMap[card.color] || bgMap.blue;
+                      return (
+                        <div key={card.label} className={`${c.bg} rounded-lg p-6 border`}>
+                          <h3 className={`text-sm font-semibold ${c.heading} mb-2`}>{card.label}</h3>
+                          <div className={`text-3xl font-bold ${c.price} mb-1`}>
+                            <span className="text-lg font-normal opacity-60">od </span>
+                            {card.from.toLocaleString('cs-CZ')} Kč
+                          </div>
+                          <p className={`text-xs ${c.unit}`}>za {card.unit}</p>
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
-                {coworking.priceDayPass && (
-                  <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-6 border border-orange-200">
-                    <h3 className="text-sm font-semibold text-orange-900 mb-2">Celodenní průkaz</h3>
-                    <div className="text-3xl font-bold text-orange-600 mb-1">
-                      {coworking.priceDayPass.toLocaleString('cs-CZ')} Kč
-                    </div>
-                    <p className="text-xs text-orange-700">za den</p>
-                  </div>
-                )}
-                {coworking.priceMonthly && (
-                  <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
-                    <h3 className="text-sm font-semibold text-green-900 mb-2">Měsíční předplatné</h3>
-                    <div className="text-3xl font-bold text-green-600 mb-1">
-                      {coworking.priceMonthly.toLocaleString('cs-CZ')} Kč
-                    </div>
-                    <p className="text-xs text-green-700">za měsíc</p>
-                  </div>
-                )}
-              </div>
+                );
+              })()}
             </section>
 
             {/* Events */}
@@ -431,19 +459,43 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
                     <span className="text-sm font-bold text-gray-900">{coworking.areaM2} m²</span>
                   </div>
                 )}
-                {coworking.priceDayPass && (
+                {coworking.prices?.hourly?.enabled && coworking.prices.hourly.from && (
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600">Cena/den</span>
-                    <span className="text-sm font-bold text-orange-600">
-                      {coworking.priceDayPass.toLocaleString('cs-CZ')} Kč
+                    <span className="text-xs text-gray-600">od (hodina)</span>
+                    <span className="text-sm font-bold text-blue-600">
+                      {coworking.prices.hourly.from.toLocaleString('cs-CZ')} Kč
                     </span>
                   </div>
                 )}
-                {coworking.priceMonthly && (
+                {coworking.prices?.dayPass?.enabled && coworking.prices.dayPass.from && (
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600">Cena/měsíc</span>
+                    <span className="text-xs text-gray-600">od (den)</span>
+                    <span className="text-sm font-bold text-orange-600">
+                      {coworking.prices.dayPass.from.toLocaleString('cs-CZ')} Kč
+                    </span>
+                  </div>
+                )}
+                {coworking.prices?.openSpace?.enabled && coworking.prices.openSpace.from && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">od (open space/měs)</span>
                     <span className="text-sm font-bold text-green-600">
-                      {coworking.priceMonthly.toLocaleString('cs-CZ')} Kč
+                      {coworking.prices.openSpace.from.toLocaleString('cs-CZ')} Kč
+                    </span>
+                  </div>
+                )}
+                {coworking.prices?.fixDesk?.enabled && coworking.prices.fixDesk.from && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">od (fix desk/měs)</span>
+                    <span className="text-sm font-bold text-purple-600">
+                      {coworking.prices.fixDesk.from.toLocaleString('cs-CZ')} Kč
+                    </span>
+                  </div>
+                )}
+                {coworking.prices?.office?.enabled && coworking.prices.office.from && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">od (kancelář/měs)</span>
+                    <span className="text-sm font-bold text-teal-600">
+                      {coworking.prices.office.from.toLocaleString('cs-CZ')} Kč
                     </span>
                   </div>
                 )}

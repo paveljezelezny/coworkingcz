@@ -1,3 +1,16 @@
+export interface CoworkingPrice {
+  enabled: boolean;
+  from: number | null;
+}
+
+export interface CoworkingPrices {
+  hourly: CoworkingPrice;    // hodina
+  dayPass: CoworkingPrice;   // den
+  openSpace: CoworkingPrice; // open space (měsíc v listech)
+  fixDesk: CoworkingPrice;   // fix desk
+  office: CoworkingPrice;    // kancelář
+}
+
 export interface CoworkingSpace {
   id: string;
   slug: string;
@@ -16,9 +29,7 @@ export interface CoworkingSpace {
   email: string;
   website: string;
   openingHours: OpeningHours;
-  priceDayPass: number | null;
-  priceMonthly: number | null;
-  priceHourly: number | null;
+  prices: CoworkingPrices;
   platformTier: 'small' | 'medium' | 'large' | null;
   platformActive: boolean;
   isActive: boolean;

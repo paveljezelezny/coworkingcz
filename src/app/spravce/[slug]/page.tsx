@@ -38,9 +38,13 @@ interface EditData {
   zipCode?: string;
   openingHours?: Record<string, string>;
   amenities?: string[];
-  priceDayPass?: number | null;
-  priceMonthly?: number | null;
-  priceHourly?: number | null;
+  prices?: {
+    hourly?:    { enabled: boolean; from: number | null };
+    dayPass?:   { enabled: boolean; from: number | null };
+    openSpace?: { enabled: boolean; from: number | null };
+    fixDesk?:   { enabled: boolean; from: number | null };
+    office?:    { enabled: boolean; from: number | null };
+  };
   capacity?: number | null;
   areaM2?: number | null;
   photos?: { url: string; caption?: string }[];
@@ -77,9 +81,13 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
     zipCode: formData.zipCode ?? (baseCoworking as any)?.zipCode ?? '',
     openingHours: formData.openingHours ?? (baseCoworking?.openingHours as unknown as Record<string, string>) ?? {},
     amenities: formData.amenities ?? baseCoworking?.amenities ?? [],
-    priceDayPass: formData.priceDayPass ?? baseCoworking?.priceDayPass ?? null,
-    priceMonthly: formData.priceMonthly ?? baseCoworking?.priceMonthly ?? null,
-    priceHourly: formData.priceHourly ?? baseCoworking?.priceHourly ?? null,
+    prices: formData.prices ?? (baseCoworking?.prices as any) ?? {
+      hourly:    { enabled: false, from: null },
+      dayPass:   { enabled: false, from: null },
+      openSpace: { enabled: false, from: null },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     capacity: formData.capacity ?? baseCoworking?.capacity ?? null,
     areaM2: formData.areaM2 ?? baseCoworking?.areaM2 ?? null,
     photos: formData.photos ?? (baseCoworking?.photos?.map((p) => ({ url: p.url, caption: p.caption })) ?? []),
@@ -559,53 +567,59 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
               {activeTab === 'pricing' && (
                 <div className="space-y-5">
                   <h2 className="text-lg font-bold text-gray-900 pb-3 border-b border-gray-100">Ceník</h2>
-                  <p className="text-sm text-gray-500">Zadej ceny bez DPH. Nech prázdné pokud danou variantu nenabízíš.</p>
+                  <p className="text-sm text-gray-500">Zaškrtni typy cen, které nabízíš, a zadej cenu "od" (bez DPH).</p>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                    <div className="bg-blue-50 rounded-xl p-5 border border-blue-100">
-                      <div className="text-blue-600 font-bold mb-1 text-sm">Hodinový přístup</div>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={merged.priceHourly ?? ''}
-                          onChange={(e) => update('priceHourly', e.target.value ? Number(e.target.value) : null)}
-                          className="input-field w-full pr-12"
-                          placeholder="80"
-                          min={0}
-                        />
-                        <span className="absolute right-4 top-3.5 text-gray-500 text-sm">Kč/h</span>
-                      </div>
-                    </div>
-
-                    <div className="bg-orange-50 rounded-xl p-5 border border-orange-100">
-                      <div className="text-orange-600 font-bold mb-1 text-sm">Celodenní průkaz</div>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={merged.priceDayPass ?? ''}
-                          onChange={(e) => update('priceDayPass', e.target.value ? Number(e.target.value) : null)}
-                          className="input-field w-full pr-16"
-                          placeholder="299"
-                          min={0}
-                        />
-                        <span className="absolute right-4 top-3.5 text-gray-500 text-sm">Kč/den</span>
-                      </div>
-                    </div>
-
-                    <div className="bg-green-50 rounded-xl p-5 border border-green-100">
-                      <div className="text-green-600 font-bold mb-1 text-sm">Měsíční předplatné</div>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={merged.priceMonthly ?? ''}
-                          onChange={(e) => update('priceMonthly', e.target.value ? Number(e.target.value) : null)}
-                          className="input-field w-full pr-16"
-                          placeholder="2500"
-                          min={0}
-                        />
-                        <span className="absolute right-4 top-3.5 text-gray-500 text-sm">Kč/měs</span>
-                      </div>
-                    </div>
+                  <div className="space-y-3">
+                    {([
+                      { key: 'hourly',    label: 'Hodina',      unit: 'Kč/hod', color: 'blue' },
+                      { key: 'dayPass',   label: 'Den',         unit: 'Kč/den', color: 'orange' },
+                      { key: 'openSpace', label: 'Open Space',  unit: 'Kč/měs', color: 'green' },
+                      { key: 'fixDesk',   label: 'Fix Desk',    unit: 'Kč/měs', color: 'purple' },
+                      { key: 'office',    label: 'Kancelář',    unit: 'Kč/měs', color: 'teal' },
+                    ] as const).map(({ key, label, unit, color }) => {
+                      const entry = merged.prices?.[key] || { enabled: false, from: null };
+                      const bgMap: Record<string, string> = {
+                        blue: 'bg-blue-50 border-blue-100', orange: 'bg-orange-50 border-orange-100',
+                        green: 'bg-green-50 border-green-100', purple: 'bg-purple-50 border-purple-100',
+                        teal: 'bg-teal-50 border-teal-100',
+                      };
+                      const textMap: Record<string, string> = {
+                        blue: 'text-blue-700', orange: 'text-orange-700', green: 'text-green-700',
+                        purple: 'text-purple-700', teal: 'text-teal-700',
+                      };
+                      return (
+                        <div key={key} className={`flex items-center gap-4 p-4 rounded-xl border ${bgMap[color]}`}>
+                          <label className="flex items-center gap-2 w-36 flex-shrink-0 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={!!entry.enabled}
+                              onChange={(e) => update('prices', {
+                                ...merged.prices,
+                                [key]: { ...entry, enabled: e.target.checked },
+                              })}
+                              className="w-4 h-4 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
+                            />
+                            <span className={`text-sm font-bold ${textMap[color]}`}>{label}</span>
+                          </label>
+                          <div className="flex items-center gap-2 flex-1">
+                            <span className="text-xs text-gray-500 whitespace-nowrap">od</span>
+                            <input
+                              type="number"
+                              min={0}
+                              placeholder="—"
+                              disabled={!entry.enabled}
+                              value={entry.from ?? ''}
+                              onChange={(e) => update('prices', {
+                                ...merged.prices,
+                                [key]: { ...entry, from: e.target.value ? Number(e.target.value) : null },
+                              })}
+                              className="w-28 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-white/60 disabled:text-gray-400 bg-white"
+                            />
+                            <span className="text-xs text-gray-500">{unit}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}

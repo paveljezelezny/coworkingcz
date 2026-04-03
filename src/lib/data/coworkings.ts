@@ -35,9 +35,13 @@ const createCoworking = (
     email: '',
     website: '',
     openingHours: defaultOpeningHours,
-    priceDayPass: 299,
-    priceMonthly: 3990,
-    priceHourly: 99,
+    prices: {
+      hourly:    { enabled: true,  from: 99   },
+      dayPass:   { enabled: true,  from: 299  },
+      openSpace: { enabled: true,  from: 3990 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     platformTier: null,
     platformActive: false,
     isActive: true,
@@ -63,8 +67,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Slezská 857/45',
     zipCode: '130 00',
-    priceDayPass: 200,
-    priceMonthly: 1300,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: true,  from: 200  },
+      openSpace: { enabled: true,  from: 1300 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Komunitní coworkingový prostor na Žižkově s flexibilními tarify a přátelskou atmosférou.',
     website: 'https://www.locusworkspace.cz',
   }),
@@ -80,7 +89,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Salvátorská 931/8',
     zipCode: '110 00',
-    priceMonthly: 6000,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: false,  from: null  },
+      openSpace: { enabled: true,  from: 6000 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Prémiový coworking v centru Prahy s terasou, event prostorem a inspirativní komunitou.',
   }),
   createCoworking('cw_mo_cha_vista', 'Mo-cha Vista', 'Praha', 'Praha', {
@@ -106,8 +121,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Radlická 180/50',
     zipCode: '150 00',
-    priceMonthly: 1300,
-    priceDayPass: 200,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: true,  from: 200  },
+      openSpace: { enabled: true,  from: 1300 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Velký technologický hub v Praze 5 s flexibilními kancelářemi a startupovou atmosférou.',
   }),
   createCoworking('cw_worklounge', 'WorkLounge', 'Praha', 'Praha', {
@@ -121,8 +141,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Na Příkopě 14',
     zipCode: '110 00',
-    priceDayPass: 490,
-    priceMonthly: 3900,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: true,  from: 490  },
+      openSpace: { enabled: true,  from: 3900 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Prémiový coworking na Příkopě s recepcí, zasedacími místnostmi a flexibilními tarify.',
   }),
   createCoworking('cw_pracovna_vlkova', 'Pracovna Vlkova 36 a Zlatnická 12', 'Praha', 'Praha', {
@@ -134,7 +159,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Vlkova 628/36',
     zipCode: '130 00',
-    priceMonthly: 950,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: false,  from: null  },
+      openSpace: { enabled: true,  from: 950 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Dostupný a přátelský coworking na Žižkově pro freelancery a malé týmy.',
     website: 'https://www.pracovna.co',
   }),
@@ -162,7 +193,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Pernerova 697/35',
     zipCode: '186 00',
-    priceMonthly: 5000,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: false,  from: null  },
+      openSpace: { enabled: true,  from: 5000 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Prémiové coworkingové prostory na 6 lokacích po Praze s full servisem.',
   }),
   createCoworking('cw_mumraj', 'Mumraj', 'Praha', 'Praha', {
@@ -174,7 +211,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Mezilesí 2058/6',
     zipCode: '193 00',
-    priceHourly: 170,
+    prices: {
+      hourly:    { enabled: true,  from: 170   },
+      dayPass:   { enabled: false,  from: null  },
+      openSpace: { enabled: false,  from: null },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Rodinné centrum s coworkingem a hlídáním dětí v Horních Počernicích.',
     website: 'https://www.domumraje.cz',
   }),
@@ -313,7 +356,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Perlová 371/5',
     zipCode: '110 00',
-    priceMonthly: 5850,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: false,  from: null  },
+      openSpace: { enabled: true,  from: 5850 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Luxusní coworking v historickém Paláci ARA v centru Prahy.',
     website: 'https://www.zenwork.cz',
   }),
@@ -337,8 +386,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Vinohradská 2396/184',
     zipCode: '130 00',
-    priceDayPass: 200,
-    priceHourly: 100,
+    prices: {
+      hourly:    { enabled: true,  from: 100   },
+      dayPass:   { enabled: true,  from: 200  },
+      openSpace: { enabled: false,  from: null },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Yottabe Praha – sdílený prostor pro produktivní práci s kancelářským vybavením.',
     website: 'https://www.yottabe.com',
   }),
@@ -366,7 +420,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Náměstí Republiky 1a',
     zipCode: '110 00',
-    priceMonthly: 5000,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: false,  from: null  },
+      openSpace: { enabled: true,  from: 5000 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Globální síť flexibilních kancelářských prostorů Spaces v centru Prahy.',
   }),
   createCoworking('cw_moovin_space', 'Moovin Space', 'Praha', 'Praha', {
@@ -378,7 +438,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Újezd 412/17',
     zipCode: '118 00',
-    priceMonthly: 5500,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: false,  from: null  },
+      openSpace: { enabled: true,  from: 5500 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Síť sdílených kanceláří v prémiových lokacích po celé Praze s okamžitým nastěhováním.',
     website: 'https://moovin.space',
   }),
@@ -441,7 +507,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Cyrilská 7',
     zipCode: '602 00',
-    priceMonthly: 2990,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: false,  from: null  },
+      openSpace: { enabled: true,  from: 2990 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Největší a nejzavedenější coworking v Brně s bohatou komunitou a pravidelnými akcemi.',
   }),
   createCoworking('cw_brain_farm', 'Brain Farm', 'Brno', 'Jihomoravský kraj', {
@@ -514,7 +586,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Vlněná 5',
     zipCode: '602 00',
-    priceMonthly: 3900,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: false,  from: null  },
+      openSpace: { enabled: true,  from: 3900 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Moderní a živý coworking ve Vlněna business parku s event prostorem a barevným designem.',
     website: 'https://clubco.cz/brno',
   }),
@@ -589,7 +667,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: '28. října 3346/91',
     zipCode: '702 00',
-    priceMonthly: 4900,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: false,  from: null  },
+      openSpace: { enabled: true,  from: 4900 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Premium coworking Clubco v centru Ostravy v moderním IQ parku.',
     website: 'https://clubco.cz/ostrava',
   }),
@@ -684,8 +768,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Rudolfovská tř. 64/34',
     zipCode: '370 01',
-    priceDayPass: 350,
-    priceMonthly: 2000,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: true,  from: 350  },
+      openSpace: { enabled: true,  from: 2000 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Moderní coworking s podcast studiem a 1Gb/s internetem v srdci Budějovic.',
     website: 'https://www.budehub.cz',
   }),
@@ -722,7 +811,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Úzká 1',
     zipCode: '586 01',
-    priceDayPass: 250,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: true,  from: 250  },
+      openSpace: { enabled: false,  from: null },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'CityHUB Jihlava – flexibilní coworking v centru krajského města Vysočiny.',
     website: 'https://www.hubjihlava.cz',
   }),
@@ -819,7 +914,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Jungmannova 800/3',
     zipCode: '779 00',
-    priceDayPass: 450,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: true,  from: 450  },
+      openSpace: { enabled: false,  from: null },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Elegantní Telegraph Hub v centru Olomouce s coworkingem a zasedacími místnostmi.',
     website: 'https://telegraph.cz/coworking',
   }),
@@ -868,7 +969,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Jana Palacha 363',
     zipCode: '530 02',
-    priceDayPass: 80,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: true,  from: 80  },
+      openSpace: { enabled: false,  from: null },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Pardubický podnikatelský inkubátor s flexibilním coworkingem a multimediálním studiem.',
     website: 'https://p-pink.cz',
   }),
@@ -927,8 +1034,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Koželužská 3034/1',
     zipCode: '301 00',
-    priceDayPass: 200,
-    priceMonthly: 1690,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: true,  from: 200  },
+      openSpace: { enabled: true,  from: 1690 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'STROM offices – chytrá budova s coworkingem, parkováním a 24/7 přístupem v Plzni.',
     website: 'https://www.strom-offices.cz',
   }),
@@ -942,7 +1054,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Riegrova 1',
     zipCode: '301 00',
-    priceMonthly: 3000,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: false,  from: null  },
+      openSpace: { enabled: true,  from: 3000 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Podnikatelské a inovační centrum BIC Plzeň s coworkingem a kancelářemi.',
     website: 'https://www.bic.cz',
   }),
@@ -1091,7 +1209,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Politických vězňů 10',
     zipCode: '280 02',
-    priceDayPass: 300,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: true,  from: 300  },
+      openSpace: { enabled: false,  from: null },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'Volný stůl Kolín – flexibilní coworking nedaleko nádraží v Kolíně.',
     website: 'https://volnystul.cz',
   }),
@@ -1152,7 +1276,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Na Rybníčku 521/56',
     zipCode: '746 01',
-    priceDayPass: 200,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: true,  from: 200  },
+      openSpace: { enabled: false,  from: null },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'LoveCoWork – jediný coworking v Opavě s otevřeným prostorem a zasedačkou pro 30 lidí.',
     website: 'https://lovecowork.cz',
   }),
@@ -1268,7 +1398,13 @@ export const coworkingsData: CoworkingSpace[] = [
   
     address: 'Mariánské náměstí 123',
     zipCode: '686 01',
-    priceMonthly: 1500,
+    prices: {
+      hourly:    { enabled: false,  from: null   },
+      dayPass:   { enabled: false,  from: null  },
+      openSpace: { enabled: true,  from: 1500 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
     shortDescription: 'HUB 123 – kreativní hub a sdílená kancelář v centru Uherského Hradiště.',
     website: 'https://hub123.cz',
   }),

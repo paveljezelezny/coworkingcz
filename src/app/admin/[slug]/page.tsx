@@ -649,44 +649,57 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
 
         {/* ── CENY ────────────────────────────────────────────────────── */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Ceny</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Cena za hodinu (Kč)
-              </label>
-              <input
-                type="number"
-                name="priceHourly"
-                value={formData.priceHourly ?? ''}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Cena za den (Kč)
-              </label>
-              <input
-                type="number"
-                name="priceDayPass"
-                value={formData.priceDayPass ?? ''}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Cena za měsíc (Kč)
-              </label>
-              <input
-                type="number"
-                name="priceMonthly"
-                value={formData.priceMonthly ?? ''}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+          <h2 className="text-lg font-bold text-gray-900 mb-1">Ceny</h2>
+          <p className="text-sm text-gray-500 mb-4">Zaškrtni typy cen, které coworking nabízí, a zadej cenu "od".</p>
+          <div className="space-y-3">
+            {([
+              { key: 'hourly',    label: 'Hodina',      unit: 'Kč/hod' },
+              { key: 'dayPass',   label: 'Den',         unit: 'Kč/den' },
+              { key: 'openSpace', label: 'Open Space',  unit: 'Kč/měs' },
+              { key: 'fixDesk',   label: 'Fix Desk',    unit: 'Kč/měs' },
+              { key: 'office',    label: 'Kancelář',    unit: 'Kč/měs' },
+            ] as const).map(({ key, label, unit }) => {
+              const prices = (formData as any).prices || {};
+              const entry = prices[key] || { enabled: false, from: null };
+              return (
+                <div key={key} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <label className="flex items-center gap-2 w-36 flex-shrink-0 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!!entry.enabled}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        prices: {
+                          ...((prev as any).prices || {}),
+                          [key]: { ...entry, enabled: e.target.checked },
+                        } as any,
+                      }))}
+                      className="w-4 h-4 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-medium text-gray-800">{label}</span>
+                  </label>
+                  <div className="flex items-center gap-2 flex-1">
+                    <span className="text-xs text-gray-500 whitespace-nowrap">od</span>
+                    <input
+                      type="number"
+                      min={0}
+                      placeholder="—"
+                      disabled={!entry.enabled}
+                      value={entry.from ?? ''}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        prices: {
+                          ...((prev as any).prices || {}),
+                          [key]: { ...entry, from: e.target.value ? parseInt(e.target.value) : null },
+                        } as any,
+                      }))}
+                      className="w-28 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400"
+                    />
+                    <span className="text-xs text-gray-500">{unit}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 

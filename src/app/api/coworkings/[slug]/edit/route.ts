@@ -59,7 +59,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       'phone', 'email', 'website',
       'address', 'city', 'zipCode',
       'openingHours', 'amenities',
-      'priceDayPass', 'priceMonthly', 'priceHourly',
+      'prices',
       'capacity', 'areaM2',
       'photos',
     ];

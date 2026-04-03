@@ -46,8 +46,7 @@ export default function MapaPage() {
         lat: coords.lat,
         lng: coords.lng,
         slug: cw.slug,
-        priceDayPass: cw.priceDayPass,
-        priceMonthly: cw.priceMonthly,
+        prices: cw.prices,
         capacity: cw.capacity,
         isVerified: cw.isVerified,
         photoUrl: cw.photos?.[0]?.url,
@@ -142,11 +141,11 @@ export default function MapaPage() {
                   {cw.capacity && (
                     <span className="flex items-center gap-1"><Users className="w-3 h-3 text-blue-500" />{cw.capacity} míst</span>
                   )}
-                  {cw.priceDayPass && (
-                    <span className="flex items-center gap-1"><DollarSign className="w-3 h-3 text-orange-500" />{cw.priceDayPass} Kč/den</span>
+                  {(cw as any).prices?.dayPass?.enabled && (cw as any).prices.dayPass.from && (
+                    <span className="flex items-center gap-1"><DollarSign className="w-3 h-3 text-orange-500" />od {(cw as any).prices.dayPass.from} Kč/den</span>
                   )}
-                  {cw.priceMonthly && (
-                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-green-500" />{cw.priceMonthly} Kč/měs</span>
+                  {(cw as any).prices?.openSpace?.enabled && (cw as any).prices.openSpace.from && (
+                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-green-500" />od {(cw as any).prices.openSpace.from} Kč/měs</span>
                   )}
                 </div>
 

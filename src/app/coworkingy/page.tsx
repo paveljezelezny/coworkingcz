@@ -84,15 +84,15 @@ function CoworkingyPageInner() {
       );
     }
 
-    if (maxPrice < 10000) results = results.filter((cw) => !cw.priceDayPass || cw.priceDayPass <= maxPrice);
-    if (maxMonthlyPrice < 30000) results = results.filter((cw) => !cw.priceMonthly || cw.priceMonthly <= maxMonthlyPrice);
+    if (maxPrice < 10000) results = results.filter((cw) => !cw.prices?.dayPass?.from || cw.prices.dayPass.from <= maxPrice);
+    if (maxMonthlyPrice < 30000) results = results.filter((cw) => !cw.prices?.openSpace?.from || cw.prices.openSpace.from <= maxMonthlyPrice);
     if (minCapacity > 0) results = results.filter((cw) => !cw.capacity || cw.capacity >= minCapacity);
     if (minArea > 0) results = results.filter((cw) => !cw.areaM2 || cw.areaM2 >= minArea);
     if (onlyEventSpace) results = results.filter((cw) => (cw as any).hasEventSpace === true);
 
     if (sortBy === 'name') results.sort((a, b) => a.name.localeCompare(b.name));
-    else if (sortBy === 'price') results.sort((a, b) => (a.priceDayPass || 0) - (b.priceDayPass || 0));
-    else if (sortBy === 'price_monthly') results.sort((a, b) => (a.priceMonthly || 0) - (b.priceMonthly || 0));
+    else if (sortBy === 'price') results.sort((a, b) => (a.prices?.dayPass?.from || 0) - (b.prices?.dayPass?.from || 0));
+    else if (sortBy === 'price_monthly') results.sort((a, b) => (a.prices?.openSpace?.from || 0) - (b.prices?.openSpace?.from || 0));
     else if (sortBy === 'capacity') results.sort((a, b) => (b.capacity || 0) - (a.capacity || 0));
     else if (sortBy === 'featured') results.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
 

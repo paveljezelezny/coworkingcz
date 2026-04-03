@@ -145,26 +145,29 @@ export default function CoworkingCard({ coworking }: CoworkingCardProps) {
                 <span>{coworking.capacity} míst</span>
               </div>
             )}
-            <div className="flex flex-wrap gap-x-4 gap-y-1">
-              {coworking.priceDayPass ? (
-                <div className="flex items-center gap-1.5 text-sm">
-                  <DollarSign className="w-4 h-4 text-orange-500 flex-shrink-0" />
-                  <span className="font-semibold text-gray-900">
-                    {coworking.priceDayPass.toLocaleString('cs-CZ')} Kč
-                    <span className="text-gray-500 font-normal">/den</span>
-                  </span>
-                </div>
+            <div className="flex flex-wrap gap-x-3 gap-y-1">
+              {coworking.prices?.hourly?.enabled && coworking.prices.hourly.from ? (
+                <span className="text-sm text-gray-700">
+                  <span className="text-gray-400 text-xs">od </span>
+                  <span className="font-semibold text-gray-900">{coworking.prices.hourly.from.toLocaleString('cs-CZ')} Kč</span>
+                  <span className="text-gray-500 font-normal">/hod</span>
+                </span>
               ) : null}
-              {coworking.priceMonthly ? (
-                <div className="flex items-center gap-1.5 text-sm">
-                  <Calendar className="w-4 h-4 text-green-500 flex-shrink-0" />
-                  <span className="font-semibold text-gray-900">
-                    {coworking.priceMonthly.toLocaleString('cs-CZ')} Kč
-                    <span className="text-gray-500 font-normal">/měs</span>
-                  </span>
-                </div>
+              {coworking.prices?.dayPass?.enabled && coworking.prices.dayPass.from ? (
+                <span className="text-sm text-gray-700">
+                  <span className="text-gray-400 text-xs">od </span>
+                  <span className="font-semibold text-gray-900">{coworking.prices.dayPass.from.toLocaleString('cs-CZ')} Kč</span>
+                  <span className="text-gray-500 font-normal">/den</span>
+                </span>
               ) : null}
-              {!coworking.priceDayPass && !coworking.priceMonthly && (
+              {coworking.prices?.openSpace?.enabled && coworking.prices.openSpace.from ? (
+                <span className="text-sm text-gray-700">
+                  <span className="text-gray-400 text-xs">od </span>
+                  <span className="font-semibold text-gray-900">{coworking.prices.openSpace.from.toLocaleString('cs-CZ')} Kč</span>
+                  <span className="text-gray-500 font-normal">/měs</span>
+                </span>
+              ) : null}
+              {!coworking.prices?.hourly?.enabled && !coworking.prices?.dayPass?.enabled && !coworking.prices?.openSpace?.enabled && (
                 <div className="flex items-center gap-1.5 text-sm text-gray-500">
                   <DollarSign className="w-4 h-4 text-gray-400 flex-shrink-0" />
                   Cena na vyžádání
