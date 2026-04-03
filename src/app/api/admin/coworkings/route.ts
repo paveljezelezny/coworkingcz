@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { coworkingsData } from '@/lib/data/coworkings';
 import { prisma } from '@/lib/prisma';
 
+// Always fetch live data — never serve a cached build-time snapshot
+export const dynamic = 'force-dynamic';
+
 interface CoworkingWithOverride {
   [key: string]: any;
   isDeleted?: boolean;
@@ -40,7 +43,9 @@ export async function GET(request: NextRequest) {
     // Filter out deleted coworkings for the list view
     const visible = merged.filter((cw: CoworkingWithOverride) => !cw.isDeleted);
 
-    return NextResponse.json(visible);
+    return NextResponse.json(visible, {
+      headers: { 'Cache-Control': 'no-store' },
+    });
   } catch (error) {
     console.error('Error fetching coworkings:', error);
     return NextResponse.json(

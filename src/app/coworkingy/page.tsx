@@ -22,20 +22,22 @@ function CoworkingyPageInner() {
   const [onlyEventSpace, setOnlyEventSpace] = useState(false);
   const [sortBy, setSortBy] = useState('featured');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-  const [coworkings, setCoworkings] = useState<CoworkingSpace[]>(coworkingsData);
+  // Start empty — never flash stale static photos. Fill from live API only.
+  const [coworkings, setCoworkings] = useState<CoworkingSpace[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch coworkings with DB overrides (to filter deleted ones)
+  // Fetch coworkings with DB overrides (photos, edits, deletions)
   useEffect(() => {
     const fetchCoworkings = async () => {
       try {
-        const response = await fetch('/api/admin/coworkings');
+        // cache: 'no-store' prevents the browser from serving a stale cached response
+        const response = await fetch('/api/admin/coworkings', { cache: 'no-store' });
+        if (!response.ok) throw new Error('API error');
         const data = await response.json();
-        setCoworkings(data);
+        setCoworkings(Array.isArray(data) ? data : coworkingsData);
       } catch (error) {
         console.error('Failed to fetch coworkings:', error);
-        // Fallback to static data
-        setCoworkings(coworkingsData);
+        setCoworkings(coworkingsData); // graceful fallback
       } finally {
         setLoading(false);
       }
@@ -351,32 +353,52 @@ function CoworkingyPageInner() {
 
             {/* Results */}
             <div>
-              <p className="text-sm text-gray-600 mb-6">
-                Nalezeno <span className="font-bold text-gray-900">{filteredCoworkings.length}</span> coworkingů
-              </p>
-
-              {filteredCoworkings.length > 0 ? (
+              {loading ? (
+                /* Skeleton cards while live data loads — no stale photos flash */
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {filteredCoworkings.map((coworking) => (
-                    <CoworkingCard key={coworking.id} coworking={coworking} />
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="rounded-lg bg-white border border-gray-100 shadow-sm overflow-hidden animate-pulse">
+                      <div className="h-48 bg-gray-200" />
+                      <div className="p-4 space-y-3">
+                        <div className="h-5 bg-gray-200 rounded w-3/4" />
+                        <div className="h-4 bg-gray-100 rounded w-1/2" />
+                        <div className="h-4 bg-gray-100 rounded w-full" />
+                        <div className="h-4 bg-gray-100 rounded w-5/6" />
+                        <div className="h-10 bg-gray-200 rounded mt-4" />
+                      </div>
+                    </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
-                  <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">
-                    Žádné výsledky
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Zkus změnit filtry nebo hledaný text
+                <>
+                  <p className="text-sm text-gray-600 mb-6">
+                    Nalezeno <span className="font-bold text-gray-900">{filteredCoworkings.length}</span> coworkingů
                   </p>
-                  <button
-                    onClick={() => { setSearchQuery(''); clearAllFilters(); }}
-                    className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Vymazat filtry
-                  </button>
-                </div>
+
+                  {filteredCoworkings.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      {filteredCoworkings.map((coworking) => (
+                        <CoworkingCard key={coworking.id} coworking={coworking} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
+                      <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">
+                        Žádné výsledky
+                      </h3>
+                      <p className="text-gray-600 mb-6">
+                        Zkus změnit filtry nebo hledaný text
+                      </p>
+                      <button
+                        onClick={() => { setSearchQuery(''); clearAllFilters(); }}
+                        className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Vymazat filtry
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

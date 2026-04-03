@@ -19,11 +19,13 @@ export default function CoworkingCard({ coworking }: CoworkingCardProps) {
 
   useEffect(() => {
     if (isHovered && hasMultiplePhotos) {
+      // Cycle every 1 second while hovered
       intervalRef.current = setInterval(() => {
         setCurrentPhotoIdx((prev) => (prev + 1) % photos.length);
-      }, 1200);
+      }, 1000);
     } else {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      // Reset to first photo when mouse leaves
       if (!isHovered) setCurrentPhotoIdx(0);
     }
     return () => {
