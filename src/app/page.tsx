@@ -10,6 +10,9 @@ import {
 } from '@/lib/data/coworkings';
 import { PLATFORM_PRICING, COWORKER_MEMBERSHIP, MarketplaceListing } from '@/lib/types';
 
+// force-dynamic so the random 8 coworkings reshuffle on each request
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   const featuredCoworkings = getFeaturedCoworkings();
   const cities = getCitiesWithCount();
@@ -57,95 +60,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-16 sm:py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="section-title">Jak to funguje</h2>
-            <p className="section-subtitle">3 snadné kroky k tvému ideálnímu pracovišti</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Search,
-                title: 'Najdi',
-                description: 'Procházej naši databázi coworkingů, filtruj podle města, vybavení a ceny',
-              },
-              {
-                icon: Calendar,
-                title: 'Rezervuj',
-                description: 'Vyber si den, hodinu nebo měsíc a jednoduše si zarezervuj místo',
-              },
-              {
-                icon: Zap,
-                title: 'Pracuj',
-                description: 'Připoj se do komunity a pracuj produktivně s ostatními coworkery',
-              },
-            ].map((step, idx) => {
-              const Icon = step.icon;
-              return (
-                <div
-                  key={idx}
-                  className="relative animate-slide-up"
-                  style={{ animationDelay: `${idx * 100}ms` }}
-                >
-                  <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 h-full">
-                    <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center mb-4">
-                      <Icon className="w-6 h-6 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-3">{step.title}</h3>
-                    <p className="text-gray-600">{step.description}</p>
-
-                    {idx < 2 && (
-                      <div className="absolute -right-4 top-1/2 transform -translate-y-1/2 hidden sm:block">
-                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                          →
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Cities Section */}
-      <section className="py-16 sm:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="section-title">Coworkingy v tvém městě</h2>
-            <p className="section-subtitle">Najdi coworkingový prostor v 15+ městech po celé České republice</p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {cities.slice(0, 12).map((city) => (
-              <Link
-                key={city.city}
-                href={`/coworkingy?mesto=${city.city}`}
-                className="group p-6 bg-white border-2 border-gray-100 rounded-xl hover:border-blue-600 hover:shadow-md transition-all text-center"
-              >
-                <div className="text-2xl font-bold text-blue-600 group-hover:text-orange-500 transition-colors">
-                  {city.count}
-                </div>
-                <p className="text-gray-900 font-semibold group-hover:text-blue-600 transition-colors">
-                  {city.city}
-                </p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Upcoming Events */}
+      {/* === Upcoming Events (moved up from below) === */}
       <section className="py-16 sm:py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-end mb-12">
             <div>
               <h2 className="section-title">Nadcházející eventy</h2>
-              <p className="section-subtitle">Setkat se s komunitu na zajímavých akcích</p>
+              <p className="section-subtitle">Setkat se s komunitou na zajímavých akcích</p>
             </div>
             <Link
               href="/udalosti"
@@ -198,6 +119,48 @@ export default function Home() {
             >
               Zobrazit všechny eventy
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/*
+        === JAK TO FUNGUJE — skryto, ponecháno v kódu pro budoucí použití ===
+        <section className="py-16 sm:py-24 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="section-title">Jak to funguje</h2>
+              <p className="section-subtitle">3 snadné kroky k tvému ideálnímu pracovišti</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+              Najdi → Rezervuj → Pracuj steps...
+            </div>
+          </div>
+        </section>
+      */}
+
+      {/* Cities Section */}
+      <section className="py-16 sm:py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="section-title">Coworkingy v tvém městě</h2>
+            <p className="section-subtitle">Najdi coworkingový prostor v 15+ městech po celé České republice</p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {cities.slice(0, 12).map((city) => (
+              <Link
+                key={city.city}
+                href={`/coworkingy?mesto=${city.city}`}
+                className="group p-6 bg-white border-2 border-gray-100 rounded-xl hover:border-blue-600 hover:shadow-md transition-all text-center"
+              >
+                <div className="text-2xl font-bold text-blue-600 group-hover:text-orange-500 transition-colors">
+                  {city.count}
+                </div>
+                <p className="text-gray-900 font-semibold group-hover:text-blue-600 transition-colors">
+                  {city.city}
+                </p>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

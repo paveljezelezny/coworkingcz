@@ -1708,8 +1708,44 @@ export const getCitiesWithCount = () => {
     .sort((a, b) => b.count - a.count);
 };
 
+/** Score how complete a coworking profile is (higher = more complete) */
+function profileCompleteness(cw: CoworkingSpace): number {
+  let score = 0;
+  if (cw.address)                          score += 2;
+  if (cw.website)                          score += 2;
+  if (cw.photos && cw.photos.length > 0)   score += 3;
+  if (cw.photos && cw.photos.length >= 3)  score += 1;
+  if (cw.shortDescription && cw.shortDescription.length > 40) score += 1;
+  if (cw.description && cw.description.length > 100)          score += 1;
+  if (cw.phone)                            score += 1;
+  if (cw.email)                            score += 1;
+  if (cw.capacity)                         score += 1;
+  if (cw.areaM2)                           score += 1;
+  if (cw.amenities && cw.amenities.length >= 4) score += 2;
+  const p = cw.prices;
+  const hasAnyPrice = p && (
+    p.hourly?.enabled || p.dayPass?.enabled || p.openSpace?.enabled ||
+    p.fixDesk?.enabled || p.office?.enabled
+  );
+  if (hasAnyPrice)                         score += 2;
+  return score;
+}
+
 export const getFeaturedCoworkings = () => {
-  return coworkingsData.filter((cw) => cw.isFeatured);
+  // Top tier: verified + featured (isFeatured = "highlighted/boosted"), sorted by completeness
+  const topTier = coworkingsData
+    .filter((cw) => cw.isVerified && cw.isFeatured)
+    .sort((a, b) => profileCompleteness(b) - profileCompleteness(a))
+    .slice(0, 8);
+
+  const topIds = new Set(topTier.map((cw) => cw.id));
+
+  // Random 8 from the rest — shuffle with Math.random() for per-request variation
+  const rest = coworkingsData.filter((cw) => !topIds.has(cw.id));
+  const shuffled = rest.slice().sort(() => Math.random() - 0.5);
+  const randomEight = shuffled.slice(0, 8);
+
+  return [...topTier, ...randomEight];
 };
 
 export const getUpcomingEvents = () => {
