@@ -263,7 +263,7 @@ export default function Home() {
 
           <div className="text-center">
             <Link
-              href="/pro-coworkingy"
+              href="/ceniky"
               className="text-blue-600 hover:text-blue-700 font-semibold flex items-center justify-center gap-2"
             >
               Zobrazit všechny plány
@@ -282,20 +282,24 @@ export default function Home() {
               Přidej se do komunity a získej přístup k nejlepším coworkingům v České republice
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
-              <div className="bg-white/10 backdrop-blur rounded-lg p-6">
-                <div className="text-4xl font-bold mb-2">{COWORKER_MEMBERSHIP.monthlyPrice}</div>
-                <div className="text-blue-100 mb-4">Kč/měsíc</div>
-                <div className="text-sm text-blue-100">
-                  {COWORKER_MEMBERSHIP.freeVisitsPerMonth} bezplatná návštěva za měsíc
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white/10 backdrop-blur rounded-xl p-6">
+                <div className="text-3xl font-bold mb-1">{COWORKER_MEMBERSHIP.monthlyPrice} Kč</div>
+                <div className="text-blue-100 text-sm mb-3">měsíčně</div>
+                <div className="text-xs text-blue-200">Flexibilní, bez závazků</div>
+              </div>
+              <div className="bg-white/20 backdrop-blur rounded-xl p-6 ring-2 ring-white/40">
+                <div className="text-xs font-bold text-orange-300 mb-1 tracking-widest">NEJLEPŠÍ VOLBA</div>
+                <div className="text-3xl font-bold mb-1">{COWORKER_MEMBERSHIP.yearlyPrice} Kč</div>
+                <div className="text-blue-100 text-sm mb-2">ročně</div>
+                <div className="text-xs text-green-300 font-medium">
+                  Ušetříš {COWORKER_MEMBERSHIP.yearlyMonthlySaving} Kč ročně
                 </div>
               </div>
-              <div className="bg-white/10 backdrop-blur rounded-lg p-6">
-                <div className="text-4xl font-bold mb-2">{COWORKER_MEMBERSHIP.yearlyPrice}</div>
-                <div className="text-blue-100 mb-4">Kč/rok</div>
-                <div className="text-sm text-blue-100">
-                  Ušetři až 1000 Kč ročně
-                </div>
+              <div className="bg-white/10 backdrop-blur rounded-xl p-6">
+                <div className="text-3xl font-bold mb-1">{COWORKER_MEMBERSHIP.teamYearlyPrice} Kč</div>
+                <div className="text-blue-100 text-sm mb-3">ročně / tým</div>
+                <div className="text-xs text-blue-200">Až {COWORKER_MEMBERSHIP.teamMaxMembers} lidí z jedné firmy</div>
               </div>
             </div>
 

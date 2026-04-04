@@ -179,7 +179,7 @@ export default function Navbar() {
     { href: '/mapa', label: 'Mapa', key: 'mapa' },
     { href: '/udalosti', label: 'Události', key: 'udalosti' },
     { href: '/marketplace', label: 'Marketplace', key: 'marketplace' },
-    { href: '/pro-coworkingy', label: 'Pro coworkingy', key: 'pro-coworkingy' },
+    { href: '/ceniky', label: 'Ceníky', key: 'ceniky' },
   ];
 
   const isActive = (key: string) => pathname.includes(key);

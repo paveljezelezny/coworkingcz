@@ -192,10 +192,21 @@ export const PLATFORM_PRICING: PlatformPricing[] = [
 ];
 
 export const COWORKER_MEMBERSHIP = {
-  monthlyPrice: 250,
-  yearlyPrice: 1900,
+  monthlyPrice: 79,
+  yearlyPrice: 790,
+  teamYearlyPrice: 1590,        // tým až 5 lidí
+  teamMaxMembers: 5,
   freeVisitsPerMonth: 1,
+  yearlyMonthlySaving: Math.round(79 * 12 - 790), // 158 Kč
 };
+
+export const COWORKER_MEMBERSHIP_BENEFITS = [
+  '1 bezplatná návštěva měsíčně v libovolném coworku',
+  'Sleva na služby, eventy a produkty',
+  'Pozvánka na naše akce a eventy',
+  'Neomezené zveřejňování na marketplace',
+  'Speciální akce a nabídky od coworkingů',
+];
 
 export const AMENITY_LABELS: Record<string, string> = {
   wifi: 'Wi-Fi',

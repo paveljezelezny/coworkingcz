@@ -97,10 +97,10 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
-                  href="/pro-coworkingy"
+                  href="/ceniky"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Cenové plány
+                  Ceníky
                 </Link>
               </li>
               <li>
