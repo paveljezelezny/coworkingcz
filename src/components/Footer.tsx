@@ -69,7 +69,7 @@ export default function Footer() {
                   href="/udalosti"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  NadcházejícíEvents
+                  Kalendář akcí
                 </Link>
               </li>
               <li>

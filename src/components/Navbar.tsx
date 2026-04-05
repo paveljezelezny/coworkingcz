@@ -177,7 +177,7 @@ export default function Navbar() {
   const navLinks = [
     { href: '/coworkingy', label: 'Coworkingy', key: 'coworkingy' },
     { href: '/mapa', label: 'Mapa', key: 'mapa' },
-    { href: '/udalosti', label: 'Události', key: 'udalosti' },
+    { href: '/udalosti', label: 'Kalendář akcí', key: 'udalosti' },
     { href: '/marketplace', label: 'Marketplace', key: 'marketplace' },
     { href: '/ceniky', label: 'Ceníky', key: 'ceniky' },
   ];

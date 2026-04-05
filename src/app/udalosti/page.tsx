@@ -1,13 +1,18 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Calendar, Users, DollarSign, X, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import { Calendar, Users, DollarSign, X, ChevronLeft, ChevronRight, ExternalLink, Plus, Lock } from 'lucide-react';
 import { eventsData, getCitiesWithCount } from '@/lib/data/coworkings';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 type ViewMode = 'calendar' | 'list';
 
 export default function UdalostiPage() {
+  const { data: session } = useSession();
+  const userRole: string = (session?.user as any)?.role ?? '';
+  const canAddEvent = userRole === 'super_admin' || userRole === 'coworking_admin' || userRole === 'coworker';
+
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedEventType, setSelectedEventType] = useState('');
@@ -64,13 +69,64 @@ export default function UdalostiPage() {
     <div className="min-h-screen bg-gray-50 pt-8 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-            Akce a eventy
-          </h1>
-          <p className="text-gray-600">
-            Najdi si zajímavou akci a setkat se s komunity
-          </p>
+        <div className="flex items-center justify-between mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+              Akce a eventy
+            </h1>
+            <p className="text-gray-600">
+              Najdi si zajímavou akci a setkej se s komunitou
+            </p>
+          </div>
+          {session ? (
+            canAddEvent ? (
+              <Link
+                href="/udalosti/nova-udalost"
+                className="hidden sm:flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex-shrink-0"
+              >
+                <Plus className="w-5 h-5" />
+                Přidat event
+              </Link>
+            ) : (
+              <Link
+                href="/ceniky"
+                className="hidden sm:flex items-center gap-2 px-5 py-3 bg-gray-100 text-gray-500 font-semibold rounded-lg hover:bg-gray-200 transition-colors flex-shrink-0 text-sm"
+                title="Pouze pro platící členy"
+              >
+                <Lock className="w-4 h-4" />
+                Přidat event
+              </Link>
+            )
+          ) : (
+            <Link
+              href="/prihlaseni?callbackUrl=/udalosti/nova-udalost"
+              className="hidden sm:flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex-shrink-0"
+            >
+              <Plus className="w-5 h-5" />
+              Přidat event
+            </Link>
+          )}
+        </div>
+
+        {/* Mobile add button */}
+        <div className="sm:hidden mb-6">
+          {session && canAddEvent ? (
+            <Link
+              href="/udalosti/nova-udalost"
+              className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              Přidat event
+            </Link>
+          ) : (
+            <Link
+              href={session ? '/ceniky' : '/prihlaseni?callbackUrl=/udalosti/nova-udalost'}
+              className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              Přidat event
+            </Link>
+          )}
         </div>
 
         {/* Filters */}
