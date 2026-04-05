@@ -1,68 +1,123 @@
 'use client';
 
-import { Check, X, Globe, Users, Award, HelpCircle, Plus, Building2, User, ChevronDown } from 'lucide-react';
+import { useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import {
+  Check, X, Globe, Users, Award, HelpCircle, Plus,
+  Building2, User, ChevronDown, Gift, ArrowRight, Zap,
+} from 'lucide-react';
 import { PLATFORM_PRICING, COWORKER_MEMBERSHIP, COWORKER_MEMBERSHIP_BENEFITS } from '@/lib/types';
 
 export default function CenikyPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const [activating, setActivating] = useState<string | null>(null);
+
+  // ── Button handlers ──────────────────────────────────────────────────────
+
+  const goToRegistrace = (role: 'coworking' | 'coworker', plan: string) => {
+    router.push(`/registrace?role=${role}&plan=${plan}`);
+  };
+
+  // For already-logged-in users: activate trial directly
+  const activateTrial = async (plan: string, redirectTo: string) => {
+    setActivating(plan);
+    try {
+      await fetch('/api/trial/activate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: plan.includes('year') ? 'yearly' : 'monthly' }),
+      });
+      router.push(redirectTo);
+    } catch {
+      router.push(redirectTo);
+    } finally {
+      setActivating(null);
+    }
+  };
+
+  const handleCoworkingPlan = (tier: string) => {
+    if (session) {
+      // Already logged in — activate and go to manager
+      const plan = tier === 'large' ? 'yearly' : 'monthly';
+      activateTrial(plan, '/spravce');
+    } else {
+      goToRegistrace('coworking', tier);
+    }
+  };
+
+  const handleCoworkerPlan = (plan: string) => {
+    if (session) {
+      activateTrial(plan, '/profil');
+    } else {
+      goToRegistrace('coworker', plan);
+    }
+  };
+
+  // ── Data ─────────────────────────────────────────────────────────────────
+
   const features = [
-    { name: 'Profil coworkingu', small: true, medium: true, large: true },
-    { name: 'Fotogalerie', small: true, medium: true, large: true },
-    { name: 'Vybavení', small: true, medium: true, large: true },
-    { name: 'Ceny', small: true, medium: true, large: true },
-    { name: 'Rezervační systém', small: false, medium: true, large: true },
-    { name: 'Event management', small: false, medium: true, large: true },
-    { name: 'Analytics', small: false, medium: false, large: true },
-    { name: 'Email podpora', small: true, medium: true, large: true },
-    { name: 'Special Deal — zvýhodněná nabídka na kartě', small: false, medium: true, large: true },
-    { name: 'Prioritní podpora', small: false, medium: true, large: true },
-    { name: 'Dedikovaný account manager', small: false, medium: false, large: true },
+    { name: 'Profil coworkingu',                              small: true,  medium: true,  large: true  },
+    { name: 'Fotogalerie',                                    small: true,  medium: true,  large: true  },
+    { name: 'Vybavení & ceny',                                small: true,  medium: true,  large: true  },
+    { name: 'Rezervační systém',                              small: false, medium: true,  large: true  },
+    { name: 'Event management',                               small: false, medium: true,  large: true  },
+    { name: 'Special Deal — zvýhodněná nabídka na kartě',     small: false, medium: true,  large: true  },
+    { name: 'Analytics',                                      small: false, medium: false, large: true  },
+    { name: 'Email podpora',                                  small: true,  medium: true,  large: true  },
+    { name: 'Prioritní podpora',                              small: false, medium: true,  large: true  },
+    { name: 'Dedikovaný account manager',                     small: false, medium: false, large: true  },
   ];
 
   const faqs = [
-    {
-      question: 'Jak dlouho trvá aktivace profilu?',
-      answer: 'Profil je aktivován ihned po registraci a zaplacení. Ověření údajů trvá 1–2 pracovní dny.',
-    },
-    {
-      question: 'Mohu během smlouvy změnit plán?',
-      answer: 'Ano, plán můžete změnit kdykoli. Nový plán se projeví v příští fakturaci.',
-    },
-    {
-      question: 'Jaký je minimální závazek?',
-      answer: 'Minimální závazek je 1 měsíc. Po uplynutí měsíce si můžete plán změnit nebo zrušit.',
-    },
-    {
-      question: 'Je možné platit za více měsíců najednou?',
-      answer: 'Ano, při roční smlouvě získáte slevu 20 % na cenu měsíčního plánu.',
-    },
-    {
-      question: 'Jak fungují dodatečné adresy?',
-      answer: 'Každá extra adresa Vašeho coworkingu se fakturuje zvlášť. Cena je uvedena v plánu.',
-    },
-    {
-      question: 'Poskytujete bezplatnou migraci z jiné platformy?',
-      answer: 'Ano, naši specialisté Vám s migrací dat pomohou zdarma. Kontaktujte náš support.',
-    },
+    { question: 'Jak dlouho trvá aktivace profilu?',           answer: 'Profil je aktivován ihned po registraci. Ověření údajů trvá 1–2 pracovní dny.' },
+    { question: 'Mohu během smlouvy změnit plán?',             answer: 'Ano, plán můžete změnit kdykoli. Nový plán se projeví v příští fakturaci.' },
+    { question: 'Jaký je minimální závazek?',                  answer: 'Minimální závazek je 1 měsíc. Kdykoli můžete plán změnit nebo zrušit.' },
+    { question: 'Je možné platit ročně se slevou?',            answer: 'Ano, při roční smlouvě získáte slevu 20 % na cenu měsíčního plánu.' },
+    { question: 'Jak fungují dodatečné adresy?',               answer: 'Každá extra adresa se fakturuje zvlášť. Cena je uvedena v plánu.' },
+    { question: 'Poskytujete bezplatnou migraci?',             answer: 'Ano, naši specialisté Vám s migrací dat pomohou zdarma. Kontaktujte support.' },
+    { question: 'Mohu to nejdřív vyzkoušet zdarma?',          answer: 'Ano! Každý nový účet získá 30 dní zdarma bez nutnosti platební karty. Teprve poté začne placení.' },
   ];
 
   const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const monthlySaving = COWORKER_MEMBERSHIP.yearlyMonthlySaving;
-  const freeMonths = Math.round(monthlySaving / COWORKER_MEMBERSHIP.monthlyPrice);
-  const pricePerPersonMonth = Math.round(
-    COWORKER_MEMBERSHIP.teamYearlyPrice / COWORKER_MEMBERSHIP.teamMaxMembers / 12
+  const monthlySaving     = COWORKER_MEMBERSHIP.yearlyMonthlySaving;
+  const freeMonths        = Math.round(monthlySaving / COWORKER_MEMBERSHIP.monthlyPrice);
+  const pricePerPersonMonth = Math.round(COWORKER_MEMBERSHIP.teamYearlyPrice / COWORKER_MEMBERSHIP.teamMaxMembers / 12);
+
+  // ── Trial badge shown on every CTA ──────────────────────────────────────
+  const TrialBadge = () => (
+    <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full ml-2">
+      <Gift className="w-3 h-3" />30 dní zdarma
+    </span>
+  );
+
+  // ── Free link shown under each CTA ──────────────────────────────────────
+  const FreeLink = ({ role }: { role: 'coworking' | 'coworker' }) => (
+    <div className="text-center mt-3">
+      <Link
+        href={`/registrace?role=${role}&plan=free`}
+        className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2 transition-colors"
+      >
+        nebo zaregistrovat zdarma (základní profil)
+      </Link>
+    </div>
   );
 
   return (
     <div className="w-full bg-white">
 
-      {/* ── Hero s tlačítky ─────────────────────────────────────────── */}
+      {/* ── Hero ────────────────────────────────────────────────────────── */}
       <section className="py-16 sm:py-24 bg-gradient-to-br from-blue-50 to-orange-50">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm font-semibold text-blue-600 tracking-widest uppercase mb-4">Ceníky</p>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 text-sm font-bold rounded-full mb-6">
+            <Gift className="w-4 h-4" />
+            Každý nový účet: 30 dní zdarma · bez platební karty
+          </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">Vyberte si svůj plán</h1>
           <p className="text-xl text-gray-500 mb-10">
             Různé plány pro majitele coworkingů i pro freelancery a týmy.
@@ -88,13 +143,12 @@ export default function CenikyPage() {
         </div>
       </section>
 
-      {/* ── Pricing Cards — coworkingy ───────────────────────────────── */}
+      {/* ── Coworking plans ─────────────────────────────────────────────── */}
       <section id="pro-coworkingy" className="py-16 sm:py-24 bg-white scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-100 text-blue-700 text-sm font-semibold rounded-full mb-4">
-              <Building2 className="w-4 h-4" />
-              Pro majitele coworkingů
+              <Building2 className="w-4 h-4" />Pro majitele coworkingů
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Plány pro coworkingy</h2>
             <p className="text-gray-500">Zvolte plán podle velikosti a potřeb Vašeho prostoru</p>
@@ -104,6 +158,7 @@ export default function CenikyPage() {
             {PLATFORM_PRICING.map((tier, idx) => {
               const yearlyPrice = Math.round(tier.monthlyPrice * 12 * (1 - tier.yearlyDiscount));
               const isLarge = tier.tier === 'large';
+              const isLoading = activating === tier.tier;
               return (
                 <div
                   key={tier.tier}
@@ -142,9 +197,7 @@ export default function CenikyPage() {
                     <ul className="space-y-4 mb-8">
                       <li className="flex items-center gap-3">
                         <Users className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900">
-                          {isLarge ? 'Více než 100 míst' : `Až ${tier.maxSeats} míst`}
-                        </span>
+                        <span className="text-gray-900">{isLarge ? 'Více než 100 míst' : `Až ${tier.maxSeats} míst`}</span>
                       </li>
                       <li className="flex items-center gap-3">
                         <Globe className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
@@ -156,42 +209,58 @@ export default function CenikyPage() {
                       </li>
                       <li className="flex items-center gap-3">
                         <Plus className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900 text-sm">
-                          Extra adresa: {tier.extraAddressPrice} Kč/měsíc
-                        </span>
+                        <span className="text-gray-900 text-sm">Extra adresa: {tier.extraAddressPrice} Kč/měsíc</span>
                       </li>
                     </ul>
 
+                    {/* Primary CTA */}
                     <button
-                      className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors ${
+                      onClick={() => handleCoworkingPlan(tier.tier)}
+                      disabled={isLoading}
+                      className={`w-full py-3.5 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
                         idx === 1
-                          ? 'bg-blue-600 text-white hover:bg-blue-700'
-                          : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                      }`}
+                          ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-100'
+                          : 'bg-gray-900 text-white hover:bg-gray-800'
+                      } disabled:opacity-60`}
                     >
-                      Zaregistrovat se
+                      {isLoading ? (
+                        <span className="flex items-center gap-2">
+                          <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                          Aktivuji…
+                        </span>
+                      ) : (
+                        <>
+                          Začít zdarma
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
                     </button>
+
+                    {/* Trial note */}
+                    <p className="text-center text-xs text-green-700 font-semibold mt-2 flex items-center justify-center gap-1">
+                      <Gift className="w-3.5 h-3.5" />
+                      30 dní zdarma — pak {tier.monthlyPrice} Kč/měs
+                    </p>
+
+                    <FreeLink role="coworking" />
                   </div>
                 </div>
               );
             })}
           </div>
 
+          {/* Info bar */}
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-8 text-center">
-            <p className="text-gray-600 mb-3">
-              💳 Všechny ceny jsou bez DPH. Fakturace měsíčně nebo ročně.
-            </p>
+            <p className="text-gray-600 mb-3">💳 Všechny ceny jsou bez DPH. Fakturace měsíčně nebo ročně. Zrušení kdykoliv.</p>
             <p className="text-sm text-gray-600">
               Máte dotazy?{' '}
-              <a href="#faq" className="text-blue-600 font-semibold hover:underline">
-                Podívejte se na často kladené otázky
-              </a>
+              <a href="#faq" className="text-blue-600 font-semibold hover:underline">Podívejte se na FAQ</a>
             </p>
           </div>
         </div>
       </section>
 
-      {/* ── Features Comparison ─────────────────────────────────────── */}
+      {/* ── Features comparison ─────────────────────────────────────────── */}
       <section className="py-16 sm:py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Srovnání funkcí</h2>
@@ -223,29 +292,26 @@ export default function CenikyPage() {
               </tbody>
             </table>
           </div>
-
-          {/* Special Deal callout */}
           <div className="mt-8 p-5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-4">
             <span className="text-2xl flex-shrink-0">🏷️</span>
             <div>
               <p className="font-semibold text-amber-900 mb-1">Special Deal — exkluzivně pro roční plány</p>
               <p className="text-sm text-amber-800">
-                Při roční registraci můžete aktivovat vlastní <strong>Special Deal</strong> — zvýhodněnou nabídku
-                zobrazenou přímo na kartě vašeho coworkingu ve výpisu i v detailu profilu. Coworkeři mohou filtrovat
-                coworkingy se Special Dealem a rychle najít vaši nabídku.
+                Při roční registraci aktivujte vlastní <strong>Special Deal</strong> — zvýhodněnou nabídku
+                zobrazenou na kartě vašeho coworkingu ve výpisu i v detailu. Coworkeři mohou filtrovat
+                coworkingy se Special Dealem.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Coworker Membership ──────────────────────────────────────── */}
+      {/* ── Coworker membership ─────────────────────────────────────────── */}
       <section id="pro-coworkery" className="py-16 sm:py-24 bg-white scroll-mt-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-orange-100 text-orange-700 text-sm font-semibold rounded-full mb-4">
-              <User className="w-4 h-4" />
-              Pro coworkery
+              <User className="w-4 h-4" />Pro coworkery
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Členství pro coworkery</h2>
             <p className="text-gray-500">Přidej se do komunity a využívej výhody členství</p>
@@ -253,7 +319,7 @@ export default function CenikyPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-            {/* ── Měsíční ── */}
+            {/* Měsíční */}
             <div className="border-2 border-gray-200 rounded-2xl p-8 hover:border-blue-400 hover:shadow-lg transition-all flex flex-col">
               <div className="mb-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-1">Měsíční</h3>
@@ -269,17 +335,28 @@ export default function CenikyPage() {
               <ul className="space-y-3 mb-8 flex-grow">
                 {COWORKER_MEMBERSHIP_BENEFITS.map((benefit, i) => (
                   <li key={i} className="flex items-start gap-2.5 text-sm text-gray-700">
-                    <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                    {benefit}
+                    <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />{benefit}
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-3 px-4 bg-gray-100 text-gray-900 font-semibold rounded-xl hover:bg-gray-200 transition-colors">
-                Začít měsíčně
+              <button
+                onClick={() => handleCoworkerPlan('monthly')}
+                disabled={activating === 'monthly'}
+                className="w-full py-3.5 px-4 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {activating === 'monthly' ? (
+                  <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Aktivuji…</>
+                ) : (
+                  <>Začít zdarma <ArrowRight className="w-4 h-4" /></>
+                )}
               </button>
+              <p className="text-center text-xs text-green-700 font-semibold mt-2 flex items-center justify-center gap-1">
+                <Gift className="w-3.5 h-3.5" />30 dní zdarma — pak {COWORKER_MEMBERSHIP.monthlyPrice} Kč/měs
+              </p>
+              <FreeLink role="coworker" />
             </div>
 
-            {/* ── Roční — BEST VALUE ── */}
+            {/* Roční — BEST VALUE */}
             <div className="border-2 border-blue-600 rounded-2xl p-8 shadow-2xl relative flex flex-col md:scale-105">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-full whitespace-nowrap">
                 NEJLEPŠÍ VOLBA
@@ -304,17 +381,28 @@ export default function CenikyPage() {
               <ul className="space-y-3 mb-8 flex-grow">
                 {COWORKER_MEMBERSHIP_BENEFITS.map((benefit, i) => (
                   <li key={i} className="flex items-start gap-2.5 text-sm text-gray-700">
-                    <Check className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
-                    {benefit}
+                    <Check className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />{benefit}
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors">
-                Začít ročně
+              <button
+                onClick={() => handleCoworkerPlan('yearly')}
+                disabled={activating === 'yearly'}
+                className="w-full py-3.5 px-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-60 shadow-lg shadow-blue-200 flex items-center justify-center gap-2"
+              >
+                {activating === 'yearly' ? (
+                  <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Aktivuji…</>
+                ) : (
+                  <>Začít zdarma <ArrowRight className="w-4 h-4" /></>
+                )}
               </button>
+              <p className="text-center text-xs text-green-700 font-semibold mt-2 flex items-center justify-center gap-1">
+                <Gift className="w-3.5 h-3.5" />30 dní zdarma — pak {COWORKER_MEMBERSHIP.yearlyPrice} Kč/rok
+              </p>
+              <FreeLink role="coworker" />
             </div>
 
-            {/* ── Firemní ── */}
+            {/* Firemní */}
             <div className="border-2 border-gray-200 rounded-2xl p-8 hover:border-purple-400 hover:shadow-lg transition-all flex flex-col">
               <div className="mb-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-1">Firemní</h3>
@@ -326,15 +414,12 @@ export default function CenikyPage() {
                   <span className="text-purple-400 mb-2 text-lg">Kč</span>
                 </div>
                 <p className="text-sm text-gray-500">ročně za celý tým</p>
-                <p className="text-xs text-gray-400 mt-1">
-                  = {pricePerPersonMonth} Kč / osoba / měsíc
-                </p>
+                <p className="text-xs text-gray-400 mt-1">= {pricePerPersonMonth} Kč / osoba / měsíc</p>
               </div>
               <ul className="space-y-3 mb-8 flex-grow">
                 {COWORKER_MEMBERSHIP_BENEFITS.map((benefit, i) => (
                   <li key={i} className="flex items-start gap-2.5 text-sm text-gray-700">
-                    <Check className="w-4 h-4 text-purple-500 flex-shrink-0 mt-0.5" />
-                    {benefit}
+                    <Check className="w-4 h-4 text-purple-500 flex-shrink-0 mt-0.5" />{benefit}
                   </li>
                 ))}
                 <li className="flex items-start gap-2.5 text-sm font-semibold text-purple-700">
@@ -342,20 +427,31 @@ export default function CenikyPage() {
                   Správa celého týmu z jednoho účtu
                 </li>
               </ul>
-              <button className="w-full py-3 px-4 bg-purple-600 text-white font-semibold rounded-xl hover:bg-purple-700 transition-colors">
-                Firemní členství
+              <button
+                onClick={() => handleCoworkerPlan('team')}
+                disabled={activating === 'team'}
+                className="w-full py-3.5 px-4 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {activating === 'team' ? (
+                  <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Aktivuji…</>
+                ) : (
+                  <>Začít zdarma <ArrowRight className="w-4 h-4" /></>
+                )}
               </button>
+              <p className="text-center text-xs text-green-700 font-semibold mt-2 flex items-center justify-center gap-1">
+                <Gift className="w-3.5 h-3.5" />30 dní zdarma pro celý tým
+              </p>
+              <FreeLink role="coworker" />
             </div>
 
           </div>
         </div>
       </section>
 
-      {/* ── FAQ ─────────────────────────────────────────────────────── */}
+      {/* ── FAQ ─────────────────────────────────────────────────────────── */}
       <section className="py-16 sm:py-24 bg-gray-50" id="faq">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Často kladené otázky</h2>
-
           <div className="space-y-4">
             {faqs.map((faq, idx) => (
               <details
@@ -374,12 +470,31 @@ export default function CenikyPage() {
             ))}
           </div>
 
-          <div className="mt-12 p-8 bg-blue-50 border border-blue-200 rounded-xl text-center">
-            <h3 className="text-lg font-bold text-gray-900 mb-3">Potřebujete pomoc?</h3>
-            <p className="text-gray-600 mb-6">Náš tým Vám rád zodpoví všechny otázky o plánech a integraci.</p>
-            <button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-              Kontaktovat podporu
-            </button>
+          {/* Bottom CTA strip */}
+          <div className="mt-12 p-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl text-center text-white">
+            <Zap className="w-8 h-8 mx-auto mb-3 text-yellow-300" />
+            <h3 className="text-xl font-bold mb-2">Připraveni začít?</h3>
+            <p className="text-blue-100 mb-6 text-sm">Žádná platební karta. Prvních 30 dní zdarma.</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={() => scrollTo('pro-coworkingy')}
+                className="px-6 py-3 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-colors"
+              >
+                Mám coworking
+              </button>
+              <button
+                onClick={() => scrollTo('pro-coworkery')}
+                className="px-6 py-3 bg-blue-500 text-white font-bold rounded-xl hover:bg-blue-400 transition-colors border border-blue-400"
+              >
+                Jsem coworker
+              </button>
+            </div>
+            <p className="text-xs text-blue-300 mt-4">
+              Nebo{' '}
+              <Link href="/registrace?plan=free" className="underline hover:text-white">
+                základní registrace zdarma
+              </Link>
+            </p>
           </div>
         </div>
       </section>

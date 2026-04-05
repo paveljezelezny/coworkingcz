@@ -1,21 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Mail, Lock, User, Eye, EyeOff, Building2,
-  AlertCircle, CheckCircle, Zap, Star, ArrowRight,
-  Gift, Calendar, Users, TrendingUp,
+  AlertCircle, CheckCircle, ArrowRight,
+  Gift, Calendar, TrendingUp, Users, Star, Zap,
 } from 'lucide-react';
 
-type Tab = 'coworker' | 'coworking';
+type Tab  = 'coworker' | 'coworking';
 type Step = 'form' | 'trial' | 'done';
-type Plan = 'monthly' | 'yearly';
+type Plan = 'monthly' | 'yearly' | 'team';
 
-const COWORKER_MONTHLY = 79;
-const COWORKER_YEARLY  = 790;
+const COWORKER_MONTHLY  = 79;
+const COWORKER_YEARLY   = 790;
 const COWORKING_MONTHLY = 490;
 const COWORKING_YEARLY  = Math.round(COWORKING_MONTHLY * 12 * 0.8);
 
@@ -35,24 +35,48 @@ const COWORKING_BENEFITS = [
   'Analytika a statistiky profilu',
 ];
 
-export default function RegistracePage() {
-  const router = useRouter();
-  const [tab, setTab] = useState<Tab>('coworker');
-  const [step, setStep] = useState<Step>('form');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+// ─── Inner component (uses useSearchParams) ───────────────────────────────
+
+function RegistraceInner() {
+  const router       = useRouter();
+  const searchParams = useSearchParams();
+
+  // Read URL params — pre-fill tab and plan from ceniky page
+  const paramRole  = searchParams.get('role');   // 'coworker' | 'coworking'
+  const paramPlan  = searchParams.get('plan');   // 'monthly'|'yearly'|'team'|'small'|'medium'|'large'|'free'
+  const isFreeOnly = paramPlan === 'free';
+
+  const [tab,          setTab]          = useState<Tab>(paramRole === 'coworking' ? 'coworking' : 'coworker');
+  const [step,         setStep]         = useState<Step>('form');
+  const [name,         setName]         = useState('');
+  const [email,        setEmail]        = useState('');
+  const [password,     setPassword]     = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [activatingTrial, setActivatingTrial] = useState(false);
-  const [error, setError] = useState('');
-  const [selectedPlan, setSelectedPlan] = useState<Plan>('yearly');
+  const [loading,      setLoading]      = useState(false);
+  const [activating,   setActivating]   = useState(false);
+  const [error,        setError]        = useState('');
 
-  const monthlyPrice  = tab === 'coworker' ? COWORKER_MONTHLY  : COWORKING_MONTHLY;
-  const yearlyPrice   = tab === 'coworker' ? COWORKER_YEARLY   : COWORKING_YEARLY;
-  const yearlySaving  = Math.round(monthlyPrice * 12 - yearlyPrice);
-  const benefits      = tab === 'coworker' ? COWORKER_BENEFITS : COWORKING_BENEFITS;
+  // Map coworking tier → plan
+  const resolveInitialPlan = (): Plan => {
+    if (paramPlan === 'yearly' || paramPlan === 'large')  return 'yearly';
+    if (paramPlan === 'team')                             return 'team';
+    return 'yearly'; // default to yearly (better value)
+  };
+  const [selectedPlan, setSelectedPlan] = useState<Plan>(resolveInitialPlan());
 
+  const monthlyPrice = tab === 'coworker' ? COWORKER_MONTHLY  : COWORKING_MONTHLY;
+  const yearlyPrice  = tab === 'coworker' ? COWORKER_YEARLY   : COWORKING_YEARLY;
+  const yearlySaving = Math.round(monthlyPrice * 12 - yearlyPrice);
+  const benefits     = tab === 'coworker' ? COWORKER_BENEFITS : COWORKING_BENEFITS;
+  const pricePerPersonMonth = Math.round(COWORKER_MONTHLY * 12 * 5 / 5 / 12 * 0.8);
+
+  const displayPrice = selectedPlan === 'team'
+    ? { main: 1590, unit: 'Kč/rok za tým', sub: `= ${pricePerPersonMonth} Kč/os/měs` }
+    : selectedPlan === 'yearly'
+    ? { main: yearlyPrice, unit: 'Kč/rok', sub: `ušetříš ${yearlySaving} Kč` }
+    : { main: monthlyPrice, unit: 'Kč/měs', sub: 'flexibilní, bez závazků' };
+
+  // ── Registration ──────────────────────────────────────────────────────────
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -69,9 +93,15 @@ export default function RegistracePage() {
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Registrace se nezdařila'); return; }
 
-      // Auto sign-in, then show trial offer
       await signIn('credentials', { email, password, redirect: false });
-      setStep('trial');
+
+      if (isFreeOnly) {
+        // Free basic — skip trial, go directly
+        setStep('done');
+        setTimeout(() => router.push(tab === 'coworking' ? '/spravce' : '/'), 1500);
+      } else {
+        setStep('trial');
+      }
     } catch {
       setError('Chyba serveru. Zkus to znovu.');
     } finally {
@@ -79,23 +109,21 @@ export default function RegistracePage() {
     }
   };
 
+  // ── Trial activation ──────────────────────────────────────────────────────
   const handleActivateTrial = async () => {
-    setActivatingTrial(true);
+    setActivating(true);
     try {
       await fetch('/api/trial/activate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: selectedPlan }),
+        body: JSON.stringify({
+          plan: selectedPlan === 'team' ? 'yearly' : selectedPlan,
+        }),
       });
+    } catch { /* silent */ } finally {
+      setActivating(false);
       setStep('done');
-      setTimeout(() => {
-        router.push(tab === 'coworking' ? '/spravce' : '/');
-      }, 2200);
-    } catch {
-      setStep('done');
-      setTimeout(() => router.push('/'), 1500);
-    } finally {
-      setActivatingTrial(false);
+      setTimeout(() => router.push(tab === 'coworking' ? '/spravce' : '/'), 1800);
     }
   };
 
@@ -103,67 +131,72 @@ export default function RegistracePage() {
     router.push(tab === 'coworking' ? '/spravce' : '/');
   };
 
-  // ─── STEP: done ──────────────────────────────────────────────────────
+  // ── DONE ─────────────────────────────────────────────────────────────────
   if (step === 'done') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-md mx-4">
+        <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-sm mx-4">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Vítejte na palubě! 🚀</h2>
-          <p className="text-gray-600">Váš 30denní trial je aktivní. Přesměrovávám…</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Vítejte! 🚀</h2>
+          <p className="text-gray-500 text-sm">{isFreeOnly ? 'Účet vytvořen. Přesměrovávám…' : 'Trial aktivován. Přesměrovávám…'}</p>
         </div>
       </div>
     );
   }
 
-  // ─── STEP: trial offer ───────────────────────────────────────────────
+  // ── TRIAL OFFER ──────────────────────────────────────────────────────────
   if (step === 'trial') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 py-12 px-4">
         <div className="max-w-2xl mx-auto">
 
-          {/* Header */}
+          {/* Success badge */}
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 text-sm font-bold rounded-full mb-6">
-              <Gift className="w-4 h-4" />
-              Účet vytvořen úspěšně!
+              <CheckCircle className="w-4 h-4" />Účet vytvořen úspěšně!
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              30 dní <span className="text-blue-600">zdarma</span> — žádná karta
+              Aktivujte <span className="text-blue-600">30 dní zdarma</span>
             </h1>
             <p className="text-lg text-gray-600">
-              Vyzkoušejte všechny funkce bez závazků. Teprve po 30 dnech začne platit váš vybraný plán.
+              Vyzkoušejte všechny funkce bez závazků.<br />
+              Žádná platební karta — teprve po trialu začne platit váš plán.
             </p>
           </div>
 
-          {/* Plan toggle */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 flex mb-8 max-w-xs mx-auto">
-            <button
-              onClick={() => setSelectedPlan('monthly')}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                selectedPlan === 'monthly' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Měsíční
-            </button>
-            <button
-              onClick={() => setSelectedPlan('yearly')}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-1.5 ${
-                selectedPlan === 'yearly' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Roční
-              <span className={`text-xs px-1.5 py-0.5 rounded font-bold ${selectedPlan === 'yearly' ? 'bg-green-400 text-green-900' : 'bg-green-100 text-green-700'}`}>
-                -{Math.round(yearlySaving / (monthlyPrice * 12) * 100)}%
-              </span>
-            </button>
-          </div>
+          {/* Plan switcher */}
+          {tab === 'coworker' && (
+            <div className="flex justify-center mb-8">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-1.5 flex gap-1">
+                {([
+                  { id: 'monthly' as Plan, label: 'Měsíční', price: `${COWORKER_MONTHLY} Kč/měs` },
+                  { id: 'yearly'  as Plan, label: 'Roční',   price: `${COWORKER_YEARLY} Kč/rok`, badge: `-${Math.round(yearlySaving / (monthlyPrice * 12) * 100)}%` },
+                  { id: 'team'    as Plan, label: 'Firemní', price: '1590 Kč/rok' },
+                ] as const).map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => setSelectedPlan(p.id)}
+                    className={`px-4 py-3 rounded-xl text-sm font-semibold transition-all text-center ${
+                      selectedPlan === p.id ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <div>{p.label}</div>
+                    <div className={`text-xs mt-0.5 ${selectedPlan === p.id ? 'text-gray-300' : 'text-gray-400'}`}>{p.price}</div>
+                    {'badge' in p && (
+                      <span className={`text-xs px-1.5 py-0.5 rounded font-bold mt-1 inline-block ${
+                        selectedPlan === p.id ? 'bg-green-400 text-green-900' : 'bg-green-100 text-green-700'
+                      }`}>{p.badge}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-
+          <div className="grid sm:grid-cols-2 gap-6 mb-8">
             {/* Trial card */}
             <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-6 text-white relative overflow-hidden">
               <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/10 rounded-full" />
@@ -173,61 +206,47 @@ export default function RegistracePage() {
                   <Zap className="w-5 h-5 text-yellow-300" />
                   <span className="text-sm font-bold text-blue-100">TRIAL — prvních 30 dní</span>
                 </div>
-                <div className="text-5xl font-black mb-1">0 Kč</div>
-                <p className="text-blue-200 text-sm mb-5">bez nutnosti platební karty</p>
-                <div className="flex items-center gap-2 text-sm">
+                <div className="text-6xl font-black mb-1">0 Kč</div>
+                <p className="text-blue-200 text-sm mb-6">bez platební karty</p>
+                <div className="flex items-center gap-2 text-sm text-blue-100">
                   <Calendar className="w-4 h-4 text-blue-300" />
-                  <span>Pak {selectedPlan === 'yearly'
-                    ? `${yearlyPrice} Kč/rok`
-                    : `${monthlyPrice} Kč/měs`}</span>
+                  <span>Pak {selectedPlan === 'team' ? '1590 Kč/rok' : selectedPlan === 'yearly' ? `${COWORKER_YEARLY} Kč/rok` : `${COWORKER_MONTHLY} Kč/měs`}</span>
                 </div>
               </div>
             </div>
 
-            {/* After trial card */}
+            {/* After-trial card */}
             <div className="bg-white rounded-2xl border-2 border-gray-200 p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Star className="w-5 h-5 text-amber-500" />
-                <span className="text-sm font-bold text-gray-600">
-                  PO TRIALU — {selectedPlan === 'yearly' ? 'Roční' : 'Měsíční'} plán
-                </span>
+                <span className="text-sm font-bold text-gray-600">PO TRIALU</span>
               </div>
               <div className="mb-5">
                 <div className="flex items-end gap-1 mb-1">
-                  <span className="text-4xl font-black text-gray-900">
-                    {selectedPlan === 'yearly'
-                      ? Math.round(yearlyPrice / 12)
-                      : monthlyPrice}
-                  </span>
-                  <span className="text-gray-500 mb-1.5">Kč/měs</span>
+                  <span className="text-4xl font-black text-gray-900">{displayPrice.main}</span>
+                  <span className="text-gray-500 mb-1.5 text-sm">{displayPrice.unit}</span>
                 </div>
-                {selectedPlan === 'yearly' && (
-                  <p className="text-xs text-gray-500">
-                    Fakturováno ročně — {yearlyPrice} Kč/rok
-                    <span className="ml-2 text-green-600 font-semibold">ušetříte {yearlySaving} Kč</span>
-                  </p>
-                )}
+                <p className="text-xs text-green-600 font-medium">{displayPrice.sub}</p>
               </div>
               <ul className="space-y-2">
                 {benefits.map((b, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                    {b}
+                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />{b}
                   </li>
                 ))}
               </ul>
             </div>
           </div>
 
-          {/* Perks row */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
+          {/* Trust row */}
+          <div className="grid grid-cols-3 gap-3 mb-8">
             {[
-              { icon: <Gift className="w-5 h-5 text-blue-600" />, label: '30 dní', sub: 'zdarma' },
+              { icon: <Gift className="w-5 h-5 text-blue-600" />,     label: '30 dní', sub: 'zdarma' },
               { icon: <TrendingUp className="w-5 h-5 text-green-600" />, label: 'Zrušení', sub: 'kdykoliv' },
-              { icon: <Users className="w-5 h-5 text-purple-600" />, label: '100+', sub: 'coworkingů' },
+              { icon: <Users className="w-5 h-5 text-purple-600" />,  label: '100+',   sub: 'coworkingů' },
             ].map((p, i) => (
               <div key={i} className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-                <div className="flex justify-center mb-2">{p.icon}</div>
+                <div className="flex justify-center mb-1">{p.icon}</div>
                 <div className="font-bold text-gray-900 text-sm">{p.label}</div>
                 <div className="text-xs text-gray-500">{p.sub}</div>
               </div>
@@ -238,40 +257,32 @@ export default function RegistracePage() {
           <div className="space-y-3">
             <button
               onClick={handleActivateTrial}
-              disabled={activatingTrial}
+              disabled={activating}
               className="w-full py-4 bg-blue-600 text-white font-bold text-lg rounded-2xl hover:bg-blue-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-3 shadow-lg shadow-blue-200"
             >
-              {activatingTrial ? (
-                <span className="flex items-center gap-2">
-                  <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
-                  Aktivuji…
-                </span>
+              {activating ? (
+                <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Aktivuji…</>
               ) : (
-                <>
-                  <Gift className="w-6 h-6" />
-                  Aktivovat 30 dní zdarma
-                  <ArrowRight className="w-5 h-5" />
-                </>
+                <><Gift className="w-6 h-6" /> Aktivovat 30 dní zdarma <ArrowRight className="w-5 h-5" /></>
               )}
             </button>
-
             <button
               onClick={handleSkipTrial}
-              className="w-full py-3 text-gray-500 hover:text-gray-700 text-sm transition-colors"
+              className="w-full py-3 text-gray-400 hover:text-gray-600 text-sm transition-colors"
             >
               Přeskočit — pokračovat bez trialu
             </button>
           </div>
 
           <p className="text-center text-xs text-gray-400 mt-6">
-            Po 30 dnech vám zašleme e-mail s připomínkou. Platbu aktivujete ručně — nic se nestrhne automaticky bez vašeho souhlasu.
+            Po 30 dnech vám zašleme e-mail s připomínkou. Platba se aktivuje až po vašem souhlasu.
           </p>
         </div>
       </div>
     );
   }
 
-  // ─── STEP: registration form ─────────────────────────────────────────
+  // ── REGISTRATION FORM ─────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
@@ -283,17 +294,25 @@ export default function RegistracePage() {
               <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">C</div>
               <span className="text-2xl font-bold text-gray-900">COWORKINGS<span className="text-blue-600">.cz</span></span>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">Registrace</h1>
-            <p className="text-sm text-gray-500">30 dní zdarma · bez platební karty</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">
+              {isFreeOnly ? 'Základní registrace' : 'Registrace'}
+            </h1>
+            <p className="text-sm text-gray-500">
+              {isFreeOnly
+                ? 'Bezplatný účet · 1 inzerát zdarma'
+                : '30 dní zdarma · bez platební karty'}
+            </p>
           </div>
 
-          {/* Trial badge */}
-          <div className="mb-6 flex items-center justify-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 text-blue-800 text-sm font-semibold rounded-full">
-              <Gift className="w-4 h-4 text-green-600" />
-              Vyzkoušejte zdarma po dobu 30 dní
+          {/* Trial badge — only for paid plans */}
+          {!isFreeOnly && (
+            <div className="mb-6 flex items-center justify-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 text-blue-800 text-sm font-semibold rounded-full">
+                <Gift className="w-4 h-4 text-green-600" />
+                Vyzkoušejte zdarma po dobu 30 dní
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Tabs */}
           <div className="grid grid-cols-2 gap-2 mb-6 bg-gray-100 p-1 rounded-xl">
@@ -303,8 +322,7 @@ export default function RegistracePage() {
                 tab === 'coworker' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <User className="w-4 h-4" />
-              Jsem coworker
+              <User className="w-4 h-4" />Jsem coworker
             </button>
             <button
               onClick={() => setTab('coworking')}
@@ -312,30 +330,31 @@ export default function RegistracePage() {
                 tab === 'coworking' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <Building2 className="w-4 h-4" />
-              Mám coworking
+              <Building2 className="w-4 h-4" />Mám coworking
             </button>
           </div>
 
           {/* Info box */}
-          <div className={`mb-6 p-4 rounded-xl text-sm ${tab === 'coworking' ? 'bg-blue-50 border border-blue-200 text-blue-800' : 'bg-green-50 border border-green-200 text-green-800'}`}>
-            {tab === 'coworking' ? (
-              <><strong>Správce coworkingu:</strong> Po registraci si přivlastníte svůj coworking a budete moct editovat celý profil.</>
-            ) : (
-              <><strong>Coworker:</strong> Získáte přístup do sítě coworkingů, marketplace a kalendáře akcí.</>
-            )}
+          <div className={`mb-6 p-4 rounded-xl text-sm ${
+            tab === 'coworking'
+              ? 'bg-blue-50 border border-blue-200 text-blue-800'
+              : 'bg-green-50 border border-green-200 text-green-800'
+          }`}>
+            {tab === 'coworking'
+              ? <><strong>Správce coworkingu:</strong> Po registraci si přivlastníte svůj coworking a budete moct editovat celý profil.</>
+              : <><strong>Coworker:</strong> Získáte přístup do sítě coworkingů, marketplace a kalendáře akcí.</>
+            }
           </div>
 
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700 text-sm">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              {error}
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />{error}
             </div>
           )}
 
-          {/* Google */}
+          {/* Google OAuth */}
           <button
-            onClick={() => signIn('google', { callbackUrl: '/api/trial/activate?redirect=true' })}
+            onClick={() => signIn('google', { callbackUrl: tab === 'coworking' ? '/spravce' : '/' })}
             className="w-full py-3 px-4 border-2 border-gray-200 text-gray-900 font-semibold rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 mb-4"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -389,18 +408,47 @@ export default function RegistracePage() {
             >
               {loading ? (
                 <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Registruji…</>
+              ) : isFreeOnly ? (
+                <>Vytvořit bezplatný účet <ArrowRight className="w-4 h-4" /></>
               ) : (
                 <><Gift className="w-5 h-5" /> Vytvořit účet a získat 30 dní zdarma</>
               )}
             </button>
           </form>
 
-          <p className="text-center text-gray-600 mt-6 text-sm">
+          {/* Switch between paid & free */}
+          <div className="mt-4 text-center text-xs text-gray-400">
+            {isFreeOnly ? (
+              <Link href="/registrace" className="text-blue-600 hover:underline font-medium">
+                Chci 30 dní zdarma (všechny funkce)
+              </Link>
+            ) : (
+              <Link href="/registrace?plan=free" className="hover:text-gray-600 underline">
+                Chci jen základní bezplatný účet
+              </Link>
+            )}
+          </div>
+
+          <p className="text-center text-gray-600 mt-4 text-sm">
             Máš účet?{' '}
             <Link href="/prihlaseni" className="text-blue-600 hover:text-blue-700 font-semibold">Přihlaš se</Link>
           </p>
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Suspense wrapper (required for useSearchParams in Next.js 14) ─────────
+
+export default function RegistracePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 flex items-center justify-center">
+        <div className="text-gray-400 text-sm">Načítám…</div>
+      </div>
+    }>
+      <RegistraceInner />
+    </Suspense>
   );
 }
