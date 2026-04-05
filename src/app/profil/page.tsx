@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import {
   Mail, Globe, Linkedin, Award, Pencil, LogOut,
   Loader2, Check, X, Plus, Trash2, ShieldCheck,
-  Calendar, ExternalLink, Lock, Zap,
+  Calendar, ExternalLink, Lock, Zap, Tag, MapPin,
+  ToggleLeft, ToggleRight, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -29,6 +30,31 @@ interface ProfileData {
   membershipTier: string | null;
   membershipStart: string | null;
   membershipEnd: string | null;
+}
+
+interface MyListing {
+  id: string;
+  title: string;
+  category: string;
+  description: string | null;
+  price: number | null;
+  priceType: string | null;
+  location: string | null;
+  isActive: boolean;
+  createdAt: string;
+  tags: Record<string, unknown>;
+}
+
+interface MyEvent {
+  id: string;
+  title: string;
+  coworkingSlug: string;
+  eventType: string | null;
+  startDate: string;
+  isFree: boolean;
+  price: number | null;
+  externalUrl: string | null;
+  createdAt: string;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -194,6 +220,296 @@ function Avatar({ name, image, size = 'lg' }: { name: string; image?: string | n
   return (
     <div className={`${sz} rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold flex-shrink-0`}>
       {initials}
+    </div>
+  );
+}
+
+// ─── Category config (listings) ──────────────────────────────────────────────
+
+const CATEGORY_CONFIG: Record<string, { label: string; bgColor: string; textColor: string }> = {
+  job_offer:       { label: 'Nabídka práce',    bgColor: 'bg-green-50',  textColor: 'text-green-700' },
+  job_seeking:     { label: 'Hledám práci',     bgColor: 'bg-blue-50',   textColor: 'text-blue-700' },
+  service_offer:   { label: 'Nabízím služby',   bgColor: 'bg-purple-50', textColor: 'text-purple-700' },
+  service_seeking: { label: 'Hledám služby',    bgColor: 'bg-orange-50', textColor: 'text-orange-700' },
+  item_for_sale:   { label: 'Prodám',           bgColor: 'bg-pink-50',   textColor: 'text-pink-700' },
+  item_wanted:     { label: 'Koupím',           bgColor: 'bg-indigo-50', textColor: 'text-indigo-700' },
+};
+
+// ─── My Listings Section ─────────────────────────────────────────────────────
+
+function MyListingsSection() {
+  const [listings, setListings] = useState<MyListing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
+  const [actionId, setActionId] = useState<string | null>(null);
+
+  const fetchListings = useCallback(async () => {
+    try {
+      const res = await fetch('/api/marketplace/listings?mine=true');
+      const data = await res.json();
+      setListings(data.listings ?? []);
+    } catch {
+      setListings([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchListings(); }, [fetchListings]);
+
+  const toggleActive = async (id: string, current: boolean) => {
+    setActionId(id);
+    try {
+      await fetch(`/api/marketplace/listings/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !current }),
+      });
+      setListings(prev => prev.map(l => l.id === id ? { ...l, isActive: !current } : l));
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const deleteListing = async (id: string) => {
+    if (!confirm('Opravdu smazat tento inzerát?')) return;
+    setActionId(id);
+    try {
+      await fetch(`/api/marketplace/listings/${id}`, { method: 'DELETE' });
+      setListings(prev => prev.filter(l => l.id !== id));
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <Tag className="w-4 h-4 text-blue-500" />
+          <h2 className="text-base font-bold text-gray-900">Moje inzeráty</h2>
+          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">
+            {listings.length}
+          </span>
+        </div>
+        {collapsed ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronUp className="w-4 h-4 text-gray-400" />}
+      </button>
+
+      {!collapsed && (
+        <div className="border-t border-gray-100">
+          {loading ? (
+            <div className="px-6 py-8 text-center text-gray-400 text-sm">Načítám…</div>
+          ) : listings.length === 0 ? (
+            <div className="px-6 py-8 text-center">
+              <p className="text-gray-400 text-sm mb-3">Zatím žádné inzeráty</p>
+              <Link
+                href="/marketplace/nova-nabidka"
+                className="inline-flex items-center gap-1.5 text-sm text-blue-600 font-semibold hover:underline"
+              >
+                <Plus className="w-4 h-4" /> Přidat první inzerát
+              </Link>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-50">
+              {listings.map((listing) => {
+                const cfg = CATEGORY_CONFIG[listing.category] || CATEGORY_CONFIG.job_offer;
+                return (
+                  <div key={listing.id} className={`px-6 py-4 flex items-start justify-between gap-4 ${!listing.isActive ? 'opacity-60' : ''}`}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.bgColor} ${cfg.textColor}`}>
+                          {cfg.label}
+                        </span>
+                        {!listing.isActive && (
+                          <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Neaktivní</span>
+                        )}
+                      </div>
+                      <p className="font-semibold text-gray-900 text-sm line-clamp-1">{listing.title}</p>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
+                        {listing.location && (
+                          <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{listing.location}</span>
+                        )}
+                        <span>{new Date(listing.createdAt).toLocaleDateString('cs-CZ')}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button
+                        onClick={() => toggleActive(listing.id, listing.isActive)}
+                        disabled={actionId === listing.id}
+                        title={listing.isActive ? 'Deaktivovat' : 'Aktivovat'}
+                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-40"
+                      >
+                        {listing.isActive
+                          ? <ToggleRight className="w-4 h-4 text-green-600" />
+                          : <ToggleLeft className="w-4 h-4" />
+                        }
+                      </button>
+                      <button
+                        onClick={() => deleteListing(listing.id)}
+                        disabled={actionId === listing.id}
+                        title="Smazat"
+                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="px-6 py-3 bg-gray-50">
+                <Link
+                  href="/marketplace/nova-nabidka"
+                  className="text-sm text-blue-600 font-semibold hover:underline flex items-center gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Přidat inzerát
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── My Events Section ────────────────────────────────────────────────────────
+
+function MyEventsSection() {
+  const [events, setEvents] = useState<MyEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
+  const [actionId, setActionId] = useState<string | null>(null);
+
+  const fetchEvents = useCallback(async () => {
+    try {
+      const res = await fetch('/api/events');
+      const data = await res.json();
+      setEvents(data.events ?? []);
+    } catch {
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchEvents(); }, [fetchEvents]);
+
+  const deleteEvent = async (id: string) => {
+    if (!confirm('Opravdu smazat tento event?')) return;
+    setActionId(id);
+    try {
+      await fetch(`/api/events/${id}`, { method: 'DELETE' });
+      setEvents(prev => prev.filter(e => e.id !== id));
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const EVENT_TYPE_LABELS: Record<string, string> = {
+    workshop: 'Workshop', networking: 'Networking', talk: 'Přednáška',
+    conference: 'Konference', social: 'Sociální', other: 'Jiné',
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-blue-500" />
+          <h2 className="text-base font-bold text-gray-900">Moje eventy</h2>
+          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">
+            {events.length}
+          </span>
+        </div>
+        {collapsed ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronUp className="w-4 h-4 text-gray-400" />}
+      </button>
+
+      {!collapsed && (
+        <div className="border-t border-gray-100">
+          {loading ? (
+            <div className="px-6 py-8 text-center text-gray-400 text-sm">Načítám…</div>
+          ) : events.length === 0 ? (
+            <div className="px-6 py-8 text-center">
+              <p className="text-gray-400 text-sm mb-3">Zatím žádné eventy</p>
+              <Link
+                href="/udalosti/nova-udalost"
+                className="inline-flex items-center gap-1.5 text-sm text-blue-600 font-semibold hover:underline"
+              >
+                <Plus className="w-4 h-4" /> Přidat první event
+              </Link>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-50">
+              {events.map((event) => {
+                const isPast = new Date(event.startDate) < new Date();
+                return (
+                  <div key={event.id} className={`px-6 py-4 flex items-start justify-between gap-4 ${isPast ? 'opacity-60' : ''}`}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        {event.eventType && (
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
+                            {EVENT_TYPE_LABELS[event.eventType] ?? event.eventType}
+                          </span>
+                        )}
+                        {isPast && (
+                          <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">Proběhlý</span>
+                        )}
+                      </div>
+                      <p className="font-semibold text-gray-900 text-sm line-clamp-1">{event.title}</p>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(event.startDate).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        </span>
+                        <span>{event.coworkingSlug}</span>
+                        {event.isFree ? (
+                          <span className="text-green-600 font-medium">Zdarma</span>
+                        ) : event.price ? (
+                          <span>{event.price.toLocaleString('cs-CZ')} Kč</span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {event.externalUrl && (
+                        <a
+                          href={event.externalUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Otevřít odkaz"
+                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
+                      <button
+                        onClick={() => deleteEvent(event.id)}
+                        disabled={actionId === event.id}
+                        title="Smazat"
+                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="px-6 py-3 bg-gray-50">
+                <Link
+                  href="/udalosti/nova-udalost"
+                  className="text-sm text-blue-600 font-semibold hover:underline flex items-center gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Přidat event
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -607,6 +923,12 @@ export default function ProfilPage() {
                     </div>
                   </div>
                 )}
+
+                {/* My Listings */}
+                <MyListingsSection />
+
+                {/* My Events */}
+                <MyEventsSection />
               </>
             )}
           </div>

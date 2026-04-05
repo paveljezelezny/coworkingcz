@@ -23,6 +23,28 @@ async function hasPaidAccess(userId: string, role: string): Promise<boolean> {
   return false;
 }
 
+// ---------------------------------------------------------------------------
+// GET — current user's events
+// ---------------------------------------------------------------------------
+
+export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Nepřihlášen' }, { status: 401 });
+  }
+
+  const events = await prisma.event.findMany({
+    where: { userId: session.user.id },
+    orderBy: { startDate: 'desc' },
+  });
+
+  return NextResponse.json({ events });
+}
+
+// ---------------------------------------------------------------------------
+// POST — create new event
+// ---------------------------------------------------------------------------
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -56,6 +78,7 @@ export async function POST(req: NextRequest) {
 
     const event = await prisma.event.create({
       data: {
+        userId,
         coworkingSlug,
         title: title.trim(),
         description: description?.trim() ?? null,

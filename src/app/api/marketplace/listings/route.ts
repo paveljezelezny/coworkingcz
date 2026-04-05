@@ -10,13 +10,11 @@ import { prisma } from '@/lib/prisma';
 async function hasPaidAccess(userId: string, role: string): Promise<boolean> {
   if (role === 'super_admin') return true;
 
-  // Coworking admin with claimed coworking = paid
   if (role === 'coworking_admin') {
     const edit = await prisma.coworkingEdit.findFirst({ where: { userId } });
     if (edit) return true;
   }
 
-  // Coworker with active membership
   const profile = await prisma.coworkerProfile.findUnique({
     where: { userId },
     select: { membershipTier: true, membershipEnd: true },
@@ -30,6 +28,77 @@ async function hasPaidAccess(userId: string, role: string): Promise<boolean> {
   }
 
   return false;
+}
+
+// ---------------------------------------------------------------------------
+// GET — public listings OR current user's listings
+// ---------------------------------------------------------------------------
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const mine = searchParams.get('mine') === 'true';
+
+  if (mine) {
+    // Auth required — return current user's listings
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Nepřihlášen' }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+    const role: string = (session.user as any).role ?? 'coworker';
+    const paid = await hasPaidAccess(userId, role);
+
+    const listings = await prisma.marketplaceListing.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const count = listings.filter((l: { isActive: boolean }) => l.isActive).length;
+
+    return NextResponse.json({
+      listings: listings.map((l: { tags: string | null; [key: string]: unknown }) => ({
+        ...l,
+        tags: (() => {
+          try { return JSON.parse((l.tags as string) ?? '{}'); } catch { return {}; }
+        })(),
+      })),
+      count,
+      paid,
+      limit: paid ? null : 1,
+    });
+  }
+
+  // Public — return all active listings with creator info
+  const listings = await prisma.marketplaceListing.findMany({
+    where: { isActive: true },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      user: {
+        select: { name: true, image: true },
+      },
+    },
+  });
+
+  return NextResponse.json({
+    listings: listings.map((l: typeof listings[0]) => ({
+      id: l.id,
+      title: l.title,
+      description: l.description,
+      category: l.category,
+      tags: (() => {
+        try { return JSON.parse(l.tags ?? '{}'); } catch { return {}; }
+      })(),
+      price: l.price,
+      priceType: l.priceType,
+      location: l.location,
+      contactEmail: l.contactEmail,
+      contactPhone: l.contactPhone,
+      createdAt: l.createdAt,
+      userName: l.user?.name ?? 'Anonymní',
+      userImage: l.user?.image ?? null,
+    })),
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -86,7 +155,6 @@ export async function POST(req: NextRequest) {
       condition,
     } = body;
 
-    // Basic validation
     if (!title?.trim()) {
       return NextResponse.json({ error: 'Nadpis je povinný.' }, { status: 400 });
     }
@@ -100,18 +168,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Kontaktní e-mail je povinný.' }, { status: 400 });
     }
 
-    // Encode extra fields into tags so we stay schema-compatible
     const tagArray: string[] = Array.isArray(tags)
       ? tags.filter(Boolean)
       : typeof tags === 'string'
-      ? tags
-          .split(',')
-          .map((t: string) => t.trim())
-          .filter(Boolean)
+      ? tags.split(',').map((t: string) => t.trim()).filter(Boolean)
       : [];
 
-    // Store rich meta as JSON-encoded string in the tags field
-    // (schema has tags as String?, so we store JSON)
     const meta = {
       tags: tagArray,
       workType: workType ?? null,
@@ -142,25 +204,4 @@ export async function POST(req: NextRequest) {
     console.error('Marketplace create error:', err);
     return NextResponse.json({ error: 'Chyba při ukládání inzerátu.' }, { status: 500 });
   }
-}
-
-// ---------------------------------------------------------------------------
-// GET — current user's listings (for quota info)
-// ---------------------------------------------------------------------------
-
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Nepřihlášen' }, { status: 401 });
-  }
-
-  const userId = session.user.id;
-  const role: string = (session.user as any).role ?? 'coworker';
-  const paid = await hasPaidAccess(userId, role);
-
-  const count = await prisma.marketplaceListing.count({
-    where: { userId, isActive: true },
-  });
-
-  return NextResponse.json({ count, paid, limit: paid ? null : 1 });
 }
