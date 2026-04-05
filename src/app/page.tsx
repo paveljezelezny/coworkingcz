@@ -30,7 +30,7 @@ export default function Home() {
           <div className="flex justify-between items-end mb-12">
             <div>
               <h2 className="section-title">Doporučené coworkingy</h2>
-              <p className="section-subtitle">Nejpopulárnější a ověřené coworkingové prostory</p>
+              <p className="section-subtitle">Nejpopulárnější coworkingové prostory v České republice</p>
             </div>
             <Link
               href="/coworkingy"

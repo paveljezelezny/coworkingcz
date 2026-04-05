@@ -274,7 +274,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 15,
     areaM2: 350,
   
-    photos: [{ id: 'cw_meandr_revnice_p1', url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80', caption: 'Meandr Řevnice', isPrimary: true }],
+    photos: [{ id: 'cw_meandr_revnice_p1', url: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80', caption: 'Meandr Řevnice', isPrimary: true }],
   
     address: 'Okružní 1233',
     zipCode: '252 30',
@@ -606,7 +606,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 20,
     areaM2: 400,
   
-    photos: [{ id: 'cw_simpl_kancl_p1', url: 'https://images.unsplash.com/photo-1588702547954-4800fd33382a?auto=format&fit=crop&w=800&q=80', caption: 'Simpl Kancl', isPrimary: true }],
+    photos: [{ id: 'cw_simpl_kancl_p1', url: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=800&q=80', caption: 'Simpl Kancl', isPrimary: true }],
   
     address: 'V Újezdech 569/7',
     zipCode: '621 00',
@@ -617,7 +617,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 15,
     areaM2: 300,
   
-    photos: [{ id: 'cw_minicowork_lemur_p1', url: 'https://images.unsplash.com/photo-1565514024059-aa13af9a1bf7?auto=format&fit=crop&w=800&q=80', caption: 'Minicowork Lemur', isPrimary: true }],
+    photos: [{ id: 'cw_minicowork_lemur_p1', url: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80', caption: 'Minicowork Lemur', isPrimary: true }],
   
     address: 'nám. 28. dubna 36',
     zipCode: '635 00',
@@ -641,7 +641,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 45,
     areaM2: 800,
   
-    photos: [{ id: 'cw_clubco_ostrava_p1', url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80', caption: 'Clubco', isPrimary: true }],
+    photos: [{ id: 'cw_clubco_ostrava_p1', url: 'https://images.unsplash.com/photo-1564069114553-7215e1ff1890?auto=format&fit=crop&w=800&q=80', caption: 'Clubco', isPrimary: true }],
   
     address: '28. října 3346/91',
     zipCode: '702 00',
@@ -671,7 +671,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 25,
     areaM2: 450,
   
-    photos: [{ id: 'cw_mamahub_koutek_sveta_p1', url: 'https://images.unsplash.com/photo-1550305080-4e021e297698?auto=format&fit=crop&w=800&q=80', caption: 'Mamahub Koutek světa', isPrimary: true }],
+    photos: [{ id: 'cw_mamahub_koutek_sveta_p1', url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80', caption: 'Mamahub Koutek světa', isPrimary: true }],
   
     address: 'Zámecká 480/9',
     zipCode: '702 00',
@@ -815,7 +815,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 25,
     areaM2: 450,
   
-    photos: [{ id: 'cw_kanov_p1', url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80', caption: 'Kanov', isPrimary: true }],
+    photos: [{ id: 'cw_kanov_p1', url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80', caption: 'Kanov', isPrimary: true }],
   
     address: 'Závodní 278',
     zipCode: '360 18',
@@ -827,7 +827,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 35,
     areaM2: 650,
   
-    photos: [{ id: 'cw_lipo_ink_p1', url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80', caption: 'Lipo.ink', isPrimary: true }],
+    photos: [{ id: 'cw_lipo_ink_p1', url: 'https://images.unsplash.com/photo-1416339134316-0e91dc9ded92?auto=format&fit=crop&w=800&q=80', caption: 'Lipo.ink', isPrimary: true }],
   
     address: 'U Jezu 525/4',
     zipCode: '460 01',
@@ -994,7 +994,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 35,
     areaM2: 650,
   
-    photos: [{ id: 'cw_kolektiv_hub_p1', url: 'https://images.unsplash.com/photo-1536240478613-bf1c37736de1?auto=format&fit=crop&w=800&q=80', caption: 'Kolektiv Hub', isPrimary: true }],
+    photos: [{ id: 'cw_kolektiv_hub_p1', url: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80', caption: 'Kolektiv Hub', isPrimary: true }],
   
     address: 'Kopeckého sady 329',
     zipCode: '301 00',
@@ -1044,7 +1044,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 35,
     areaM2: 650,
   
-    photos: [{ id: 'cw_hub_hax_p1', url: 'https://images.unsplash.com/photo-1565514024059-aa13af9a1bf7?auto=format&fit=crop&w=800&q=80', caption: 'hub HAX', isPrimary: true }],
+    photos: [{ id: 'cw_hub_hax_p1', url: 'https://images.unsplash.com/photo-1572025442646-866d16c84a54?auto=format&fit=crop&w=800&q=80', caption: 'hub HAX', isPrimary: true }],
   
     address: 'Dlouhá 497',
     zipCode: '760 01',
@@ -1211,7 +1211,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 20,
     areaM2: 400,
   
-    photos: [{ id: 'cw_kocarovna_p1', url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=80', caption: 'Kočárovna', isPrimary: true }],
+    photos: [{ id: 'cw_kocarovna_p1', url: 'https://images.unsplash.com/photo-1453928582365-b6ad33cbcf64?auto=format&fit=crop&w=800&q=80', caption: 'Kočárovna', isPrimary: true }],
   
     address: 'Jiráskova 133',
     zipCode: '570 01',
@@ -1369,7 +1369,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 25,
     areaM2: 450,
   
-    photos: [{ id: 'cw_hub_123_p1', url: 'https://images.unsplash.com/photo-1536240478613-bf1c37736de1?auto=format&fit=crop&w=800&q=80', caption: 'HUB 123', isPrimary: true }],
+    photos: [{ id: 'cw_hub_123_p1', url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&q=80', caption: 'HUB 123', isPrimary: true }],
   
     address: 'Mariánské náměstí 123',
     zipCode: '686 01',
@@ -1411,6 +1411,7 @@ export const eventsData: Event[] = [
     price: 150,
     isFree: false,
     imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400',
+    url: 'https://www.node5.cz/events/networking-startupery-2026',
   },
   {
     id: 'evt_2',
@@ -1426,6 +1427,7 @@ export const eventsData: Event[] = [
     price: 890,
     isFree: false,
     imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400',
+    url: 'https://opero.cz/workshop-digital-marketing-2026',
   },
   {
     id: 'evt_3',
@@ -1456,6 +1458,7 @@ export const eventsData: Event[] = [
     price: null,
     isFree: true,
     imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400',
+    url: 'https://www.impacthub.cz/events/brno-tech-meetup-april-2026',
   },
   {
     id: 'evt_5',
@@ -1471,6 +1474,7 @@ export const eventsData: Event[] = [
     price: 1290,
     isFree: false,
     imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400',
+    url: 'https://azure.microsoft.com/cs-cz/developer/events/azure-cloud-conference/',
   },
   {
     id: 'evt_6',
@@ -1516,6 +1520,7 @@ export const eventsData: Event[] = [
     price: 200,
     isFree: false,
     imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400',
+    url: 'https://www.impacthub.cz/events/startup-pitch-ostrava-2026',
   },
   {
     id: 'evt_9',
