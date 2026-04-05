@@ -7,6 +7,7 @@ import Link from 'next/link';
 import {
   Check, X, Globe, Users, Award, HelpCircle, Plus,
   Building2, User, ChevronDown, Gift, ArrowRight, Zap,
+  BadgeCheck, CalendarPlus, Megaphone, Star, ShoppingBag,
 } from 'lucide-react';
 import { PLATFORM_PRICING, COWORKER_MEMBERSHIP, COWORKER_MEMBERSHIP_BENEFITS } from '@/lib/types';
 
@@ -194,14 +195,22 @@ export default function CenikyPage() {
                       </p>
                     </div>
 
-                    <ul className="space-y-4 mb-8">
-                      <li className="flex items-center gap-3">
-                        <Users className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900">{isLarge ? 'Více než 100 míst' : `Až ${tier.maxSeats} míst`}</span>
-                      </li>
+                    <ul className="space-y-4 mb-6">
                       <li className="flex items-center gap-3">
                         <Globe className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
                         <span className="text-gray-900">{tier.includedAddresses} adresa/y</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <BadgeCheck className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
+                        <span className="text-gray-900">Štítek „ověřeno" u profilu</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <CalendarPlus className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
+                        <span className="text-gray-900">5 eventů měsíčně</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <ShoppingBag className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
+                        <span className="text-gray-900">5 inzerátů na marketplace měsíčně</span>
                       </li>
                       <li className="flex items-center gap-3">
                         <Award className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
@@ -212,6 +221,27 @@ export default function CenikyPage() {
                         <span className="text-gray-900 text-sm">Extra adresa: {tier.extraAddressPrice} Kč/měsíc</span>
                       </li>
                     </ul>
+
+                    {/* Add-on upsell block */}
+                    <div className={`rounded-xl p-4 mb-6 border ${idx === 1 ? 'bg-blue-700/20 border-blue-400/30' : 'bg-gray-50 border-gray-200'}`}>
+                      <p className={`text-xs font-bold uppercase tracking-wide mb-2.5 ${idx === 1 ? 'text-blue-100' : 'text-gray-500'}`}>
+                        Rozšíření +190 Kč/měs
+                      </p>
+                      <ul className="space-y-2">
+                        <li className={`flex items-start gap-2 text-xs ${idx === 1 ? 'text-blue-100' : 'text-gray-600'}`}>
+                          <Zap className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-yellow-400" />
+                          Neomezené přidávání eventů ve vašem prostoru
+                        </li>
+                        <li className={`flex items-start gap-2 text-xs ${idx === 1 ? 'text-blue-100' : 'text-gray-600'}`}>
+                          <Megaphone className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-yellow-400" />
+                          Neomezená inzerce na marketplace
+                        </li>
+                        <li className={`flex items-start gap-2 text-xs ${idx === 1 ? 'text-blue-100' : 'text-gray-600'}`}>
+                          <Star className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-yellow-400" />
+                          Každý týden topovaný v „doporučených"
+                        </li>
+                      </ul>
+                    </div>
 
                     {/* Primary CTA */}
                     <button
@@ -317,7 +347,45 @@ export default function CenikyPage() {
             <p className="text-gray-500">Přidej se do komunity a využívej výhody členství</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+
+            {/* Zdarma */}
+            <div className="border-2 border-gray-200 rounded-2xl p-8 hover:border-gray-400 hover:shadow-lg transition-all flex flex-col bg-gray-50">
+              <div className="mb-6">
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 bg-gray-200 text-gray-600 rounded-full mb-2">
+                  Základní
+                </span>
+                <h3 className="text-xl font-bold text-gray-900 mb-1">Zdarma</h3>
+                <p className="text-sm text-gray-500">Základní přístup bez závazků</p>
+              </div>
+              <div className="mb-8">
+                <div className="flex items-end gap-1">
+                  <span className="text-5xl font-bold text-gray-700">0</span>
+                  <span className="text-gray-400 mb-2 text-lg">Kč</span>
+                </div>
+                <p className="text-sm text-gray-400">navždy zdarma</p>
+              </div>
+              <ul className="space-y-3 mb-8 flex-grow">
+                <li className="flex items-start gap-2.5 text-sm text-gray-700">
+                  <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                  1 aktivní inzerát na marketplace
+                </li>
+                <li className="flex items-start gap-2.5 text-sm text-gray-700">
+                  <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                  1 event, který pořádáte/spolupořádáte
+                </li>
+                <li className="flex items-start gap-2.5 text-sm text-gray-700">
+                  <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                  Možnost účastnit se našich eventů a akcí
+                </li>
+              </ul>
+              <Link
+                href="/registrace?role=coworker&plan=free"
+                className="w-full py-3.5 px-4 bg-gray-200 text-gray-800 font-bold rounded-xl hover:bg-gray-300 transition-colors text-center block"
+              >
+                Registrovat zdarma
+              </Link>
+            </div>
 
             {/* Měsíční */}
             <div className="border-2 border-gray-200 rounded-2xl p-8 hover:border-blue-400 hover:shadow-lg transition-all flex flex-col">
@@ -357,7 +425,7 @@ export default function CenikyPage() {
             </div>
 
             {/* Roční — BEST VALUE */}
-            <div className="border-2 border-blue-600 rounded-2xl p-8 shadow-2xl relative flex flex-col md:scale-105">
+            <div className="border-2 border-blue-600 rounded-2xl p-8 shadow-2xl relative flex flex-col xl:scale-105">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-full whitespace-nowrap">
                 NEJLEPŠÍ VOLBA
               </div>
