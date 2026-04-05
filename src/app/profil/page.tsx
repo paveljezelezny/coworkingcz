@@ -51,9 +51,14 @@ interface MyEvent {
   coworkingSlug: string;
   eventType: string | null;
   startDate: string;
+  endDate?: string | null;
+  isAllDay?: boolean;
   isFree: boolean;
   price: number | null;
+  maxAttendees?: number | null;
   externalUrl: string | null;
+  imageUrl?: string | null;
+  description?: string | null;
   createdAt: string;
 }
 
@@ -235,6 +240,655 @@ const CATEGORY_CONFIG: Record<string, { label: string; bgColor: string; textColo
   item_wanted:     { label: 'Koupím',           bgColor: 'bg-indigo-50', textColor: 'text-indigo-700' },
 };
 
+// ─── Listing Edit Modal ───────────────────────────────────────────────────────
+
+const LISTING_CATEGORIES = [
+  { id: 'job_offer',       label: 'Nabídka práce' },
+  { id: 'job_seeking',     label: 'Hledám práci' },
+  { id: 'service_offer',   label: 'Nabízím služby' },
+  { id: 'service_seeking', label: 'Hledám služby' },
+  { id: 'item_for_sale',   label: 'Prodám / pronajmu' },
+  { id: 'item_wanted',     label: 'Koupím / přijmu' },
+];
+
+const PRICE_TYPES = [
+  { id: 'free',       label: 'Zdarma' },
+  { id: 'negotiable', label: 'Dohodou' },
+  { id: 'fixed',      label: 'Pevná cena (Kč)' },
+  { id: 'hourly',     label: 'Hodinová sazba' },
+  { id: 'monthly',    label: 'Měsíční sazba' },
+];
+
+interface ListingEditForm {
+  title: string;
+  description: string;
+  category: string;
+  priceType: string;
+  price: string;
+  location: string;
+  contactEmail: string;
+  contactPhone: string;
+  tagsInput: string;
+  externalUrl: string;
+  workType: string;
+  experienceLevel: string;
+  condition: string;
+}
+
+function ListingEditModal({
+  listing,
+  onClose,
+  onSaved,
+}: {
+  listing: MyListing;
+  onClose: () => void;
+  onSaved: (updated: MyListing) => void;
+}) {
+  const meta = listing.tags as Record<string, unknown>;
+  const tagsArr: string[] = Array.isArray(meta?.tags) ? (meta.tags as string[]) : [];
+
+  const [form, setForm] = useState<ListingEditForm>({
+    title: listing.title,
+    description: listing.description ?? '',
+    category: listing.category,
+    priceType: listing.priceType ?? '',
+    price: listing.price ? String(listing.price) : '',
+    location: listing.location ?? '',
+    contactEmail: '',
+    contactPhone: '',
+    tagsInput: tagsArr.join(', '),
+    externalUrl: (meta?.externalUrl as string) ?? '',
+    workType: (meta?.workType as string) ?? '',
+    experienceLevel: (meta?.experienceLevel as string) ?? '',
+    condition: (meta?.condition as string) ?? '',
+  });
+
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  // Pre-fill contact from API
+  useEffect(() => {
+    fetch(`/api/marketplace/listings/${listing.id}`)
+      .then(r => r.json())
+      .then(d => {
+        setForm(prev => ({
+          ...prev,
+          contactEmail: d.contactEmail ?? '',
+          contactPhone: d.contactPhone ?? '',
+        }));
+      })
+      .catch(() => {});
+  }, [listing.id]);
+
+  // Close on Escape
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, [onClose]);
+
+  const set = (field: keyof ListingEditForm, value: string) =>
+    setForm(prev => ({ ...prev, [field]: value }));
+
+  const needsPrice = form.priceType !== '' && form.priceType !== 'free' && form.priceType !== 'negotiable';
+
+  const handleSave = async () => {
+    if (!form.title.trim()) { setError('Nadpis je povinný.'); return; }
+    setSaving(true);
+    setError('');
+    try {
+      const res = await fetch(`/api/marketplace/listings/${listing.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: form.title,
+          description: form.description,
+          category: form.category,
+          priceType: form.priceType || null,
+          price: needsPrice && form.price ? form.price : null,
+          location: form.location,
+          contactEmail: form.contactEmail,
+          contactPhone: form.contactPhone || null,
+          tags: form.tagsInput.split(',').map(t => t.trim()).filter(Boolean),
+          externalUrl: form.externalUrl || null,
+          workType: form.workType || null,
+          experienceLevel: form.experienceLevel || null,
+          condition: form.condition || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || 'Chyba při ukládání.'); return; }
+      onSaved(data.listing);
+      onClose();
+    } catch {
+      setError('Nepodařilo se připojit k serveru.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const inputCls = 'w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400';
+  const labelCls = 'block text-sm font-semibold text-gray-700 mb-1.5';
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div
+        className="relative w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-gray-900">Upravit inzerát</h2>
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5 space-y-5">
+
+          {/* Kategorie */}
+          <div>
+            <label className={labelCls}>Kategorie</label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {LISTING_CATEGORIES.map(cat => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => set('category', cat.id)}
+                  className={`text-sm px-3 py-2 rounded-xl border-2 font-medium transition-all text-left ${
+                    form.category === cat.id
+                      ? 'border-blue-600 bg-blue-50 text-blue-800'
+                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Nadpis */}
+          <div>
+            <label className={labelCls}>Nadpis <span className="text-red-500">*</span></label>
+            <input
+              type="text"
+              maxLength={100}
+              value={form.title}
+              onChange={e => set('title', e.target.value)}
+              className={inputCls}
+            />
+          </div>
+
+          {/* Popis */}
+          <div>
+            <label className={labelCls}>Popis</label>
+            <textarea
+              rows={4}
+              value={form.description}
+              onChange={e => set('description', e.target.value)}
+              className={`${inputCls} resize-none`}
+            />
+          </div>
+
+          {/* Cena */}
+          <div>
+            <label className={labelCls}>Cena</label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {PRICE_TYPES.map(pt => (
+                <button
+                  key={pt.id}
+                  type="button"
+                  onClick={() => set('priceType', form.priceType === pt.id ? '' : pt.id)}
+                  className={`text-sm px-3 py-1.5 rounded-xl border font-medium transition-all ${
+                    form.priceType === pt.id
+                      ? 'border-blue-600 bg-blue-50 text-blue-800'
+                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {pt.label}
+                </button>
+              ))}
+            </div>
+            {needsPrice && (
+              <input
+                type="number"
+                min={0}
+                value={form.price}
+                onChange={e => set('price', e.target.value)}
+                placeholder="Částka v Kč"
+                className={inputCls}
+              />
+            )}
+          </div>
+
+          {/* Lokalita */}
+          <div>
+            <label className={labelCls}>Lokalita</label>
+            <input
+              type="text"
+              value={form.location}
+              onChange={e => set('location', e.target.value)}
+              placeholder="Praha, remote, celá ČR…"
+              className={inputCls}
+            />
+          </div>
+
+          {/* Tagy */}
+          <div>
+            <label className={labelCls}>Klíčová slova <span className="text-gray-400 font-normal">(oddělené čárkou)</span></label>
+            <input
+              type="text"
+              value={form.tagsInput}
+              onChange={e => set('tagsInput', e.target.value)}
+              placeholder="React, TypeScript, remote…"
+              className={inputCls}
+            />
+            {form.tagsInput && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {form.tagsInput.split(',').map(t => t.trim()).filter(Boolean).map((tag, i) => (
+                  <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">{tag}</span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Kontakt */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelCls}>Kontaktní e-mail</label>
+              <input
+                type="email"
+                value={form.contactEmail}
+                onChange={e => set('contactEmail', e.target.value)}
+                placeholder="váš@email.cz"
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Telefon <span className="text-gray-400 font-normal">(volitelné)</span></label>
+              <input
+                type="tel"
+                value={form.contactPhone}
+                onChange={e => set('contactPhone', e.target.value)}
+                placeholder="+420 …"
+                className={inputCls}
+              />
+            </div>
+          </div>
+
+          {/* Web */}
+          <div>
+            <label className={labelCls}>Web / portfolio <span className="text-gray-400 font-normal">(volitelné)</span></label>
+            <input
+              type="url"
+              value={form.externalUrl}
+              onChange={e => set('externalUrl', e.target.value)}
+              placeholder="https://"
+              className={inputCls}
+            />
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-800">
+              <X className="w-4 h-4 flex-shrink-0" /> {error}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="sticky bottom-0 bg-white border-t border-gray-100 px-6 py-4 flex gap-3">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+            Uložit změny
+          </button>
+          <button
+            onClick={onClose}
+            disabled={saving}
+            className="px-5 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 disabled:opacity-60 transition-colors"
+          >
+            Zrušit
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Event Edit Modal ─────────────────────────────────────────────────────────
+
+const EVENT_TYPES = [
+  { id: 'workshop',    label: 'Workshop' },
+  { id: 'networking', label: 'Networking' },
+  { id: 'talk',       label: 'Přednáška' },
+  { id: 'conference', label: 'Konference' },
+  { id: 'social',     label: 'Sociální' },
+  { id: 'other',      label: 'Jiné' },
+];
+
+const EVENT_TYPE_LABELS: Record<string, string> = {
+  workshop: 'Workshop', networking: 'Networking', talk: 'Přednáška',
+  conference: 'Konference', social: 'Sociální', other: 'Jiné',
+};
+
+interface EventEditForm {
+  title: string;
+  description: string;
+  eventType: string;
+  startDate: string;
+  endDate: string;
+  isAllDay: boolean;
+  isFree: boolean;
+  price: string;
+  maxAttendees: string;
+  externalUrl: string;
+  imageUrl: string;
+  coworkingSlug: string;
+}
+
+function toDateInput(iso: string | null | undefined): string {
+  if (!iso) return '';
+  return new Date(iso).toISOString().slice(0, 16);
+}
+
+function EventEditModal({
+  event,
+  onClose,
+  onSaved,
+}: {
+  event: MyEvent;
+  onClose: () => void;
+  onSaved: (updated: MyEvent) => void;
+}) {
+  const [form, setForm] = useState<EventEditForm>({
+    title: event.title,
+    description: '',
+    eventType: event.eventType ?? '',
+    startDate: toDateInput(event.startDate),
+    endDate: '',
+    isAllDay: false,
+    isFree: event.isFree,
+    price: event.price ? String(event.price) : '',
+    maxAttendees: '',
+    externalUrl: event.externalUrl ?? '',
+    imageUrl: '',
+    coworkingSlug: event.coworkingSlug,
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  // Load full event data
+  useEffect(() => {
+    fetch(`/api/events`)
+      .then(r => r.json())
+      .then((data: { events: Array<MyEvent & { description?: string | null; endDate?: string | null; isAllDay?: boolean; maxAttendees?: number | null; imageUrl?: string | null }> }) => {
+        const full = data.events?.find((e) => e.id === event.id);
+        if (full) {
+          setForm(prev => ({
+            ...prev,
+            description: full.description ?? '',
+            endDate: toDateInput(full.endDate),
+            isAllDay: full.isAllDay ?? false,
+            maxAttendees: full.maxAttendees ? String(full.maxAttendees) : '',
+            imageUrl: full.imageUrl ?? '',
+          }));
+        }
+      })
+      .catch(() => {});
+  }, [event.id]);
+
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, [onClose]);
+
+  const set = <K extends keyof EventEditForm>(field: K, value: EventEditForm[K]) =>
+    setForm(prev => ({ ...prev, [field]: value }));
+
+  const handleSave = async () => {
+    if (!form.title.trim()) { setError('Název je povinný.'); return; }
+    if (!form.startDate) { setError('Datum začátku je povinné.'); return; }
+    setSaving(true);
+    setError('');
+    try {
+      const res = await fetch(`/api/events/${event.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: form.title,
+          description: form.description || null,
+          eventType: form.eventType || 'other',
+          startDate: form.startDate,
+          endDate: form.endDate || null,
+          isAllDay: form.isAllDay,
+          isFree: form.isFree,
+          price: !form.isFree && form.price ? form.price : null,
+          maxAttendees: form.maxAttendees || null,
+          externalUrl: form.externalUrl || null,
+          imageUrl: form.imageUrl || null,
+          coworkingSlug: form.coworkingSlug,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || 'Chyba při ukládání.'); return; }
+      onSaved({
+        ...event,
+        title: form.title,
+        eventType: form.eventType || null,
+        startDate: form.startDate,
+        isFree: form.isFree,
+        price: !form.isFree && form.price ? parseFloat(form.price) : null,
+        externalUrl: form.externalUrl || null,
+        coworkingSlug: form.coworkingSlug,
+      });
+      onClose();
+    } catch {
+      setError('Nepodařilo se připojit k serveru.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const inputCls = 'w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400';
+  const labelCls = 'block text-sm font-semibold text-gray-700 mb-1.5';
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div
+        className="relative w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-gray-900">Upravit event</h2>
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5 space-y-5">
+
+          {/* Název */}
+          <div>
+            <label className={labelCls}>Název eventu <span className="text-red-500">*</span></label>
+            <input
+              type="text"
+              value={form.title}
+              onChange={e => set('title', e.target.value)}
+              className={inputCls}
+            />
+          </div>
+
+          {/* Typ */}
+          <div>
+            <label className={labelCls}>Typ eventu</label>
+            <div className="flex flex-wrap gap-2">
+              {EVENT_TYPES.map(t => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => set('eventType', form.eventType === t.id ? '' : t.id)}
+                  className={`text-sm px-3 py-1.5 rounded-xl border font-medium transition-all ${
+                    form.eventType === t.id
+                      ? 'border-blue-600 bg-blue-50 text-blue-800'
+                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Popis */}
+          <div>
+            <label className={labelCls}>Popis</label>
+            <textarea
+              rows={4}
+              value={form.description}
+              onChange={e => set('description', e.target.value)}
+              className={`${inputCls} resize-none`}
+            />
+          </div>
+
+          {/* Datum */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelCls}>Začátek <span className="text-red-500">*</span></label>
+              <input
+                type="datetime-local"
+                value={form.startDate}
+                onChange={e => set('startDate', e.target.value)}
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Konec <span className="text-gray-400 font-normal">(volitelné)</span></label>
+              <input
+                type="datetime-local"
+                value={form.endDate}
+                onChange={e => set('endDate', e.target.value)}
+                className={inputCls}
+              />
+            </div>
+          </div>
+
+          {/* Coworking slug */}
+          <div>
+            <label className={labelCls}>Coworking slug</label>
+            <input
+              type="text"
+              value={form.coworkingSlug}
+              onChange={e => set('coworkingSlug', e.target.value)}
+              placeholder="např. coworking-brno"
+              className={inputCls}
+            />
+          </div>
+
+          {/* Vstupné */}
+          <div>
+            <label className={labelCls}>Vstupné</label>
+            <div className="flex gap-3 mb-3">
+              <button
+                type="button"
+                onClick={() => set('isFree', true)}
+                className={`flex-1 py-2 text-sm font-medium rounded-xl border transition-all ${
+                  form.isFree
+                    ? 'border-green-500 bg-green-50 text-green-800'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Zdarma
+              </button>
+              <button
+                type="button"
+                onClick={() => set('isFree', false)}
+                className={`flex-1 py-2 text-sm font-medium rounded-xl border transition-all ${
+                  !form.isFree
+                    ? 'border-blue-600 bg-blue-50 text-blue-800'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Placené
+              </button>
+            </div>
+            {!form.isFree && (
+              <input
+                type="number"
+                min={0}
+                value={form.price}
+                onChange={e => set('price', e.target.value)}
+                placeholder="Cena v Kč"
+                className={inputCls}
+              />
+            )}
+          </div>
+
+          {/* Max účastníků + odkaz */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelCls}>Max. účastníků <span className="text-gray-400 font-normal">(volitelné)</span></label>
+              <input
+                type="number"
+                min={1}
+                value={form.maxAttendees}
+                onChange={e => set('maxAttendees', e.target.value)}
+                placeholder="Neomezeno"
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Odkaz na registraci <span className="text-gray-400 font-normal">(volitelné)</span></label>
+              <input
+                type="url"
+                value={form.externalUrl}
+                onChange={e => set('externalUrl', e.target.value)}
+                placeholder="https://"
+                className={inputCls}
+              />
+            </div>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-800">
+              <X className="w-4 h-4 flex-shrink-0" /> {error}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="sticky bottom-0 bg-white border-t border-gray-100 px-6 py-4 flex gap-3">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+            Uložit změny
+          </button>
+          <button
+            onClick={onClose}
+            disabled={saving}
+            className="px-5 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 disabled:opacity-60 transition-colors"
+          >
+            Zrušit
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── My Listings Section ─────────────────────────────────────────────────────
 
 function MyListingsSection() {
@@ -242,6 +896,7 @@ function MyListingsSection() {
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [editingListing, setEditingListing] = useState<MyListing | null>(null);
 
   const fetchListings = useCallback(async () => {
     try {
@@ -282,96 +937,118 @@ function MyListingsSection() {
     }
   };
 
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <Tag className="w-4 h-4 text-blue-500" />
-          <h2 className="text-base font-bold text-gray-900">Moje inzeráty</h2>
-          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">
-            {listings.length}
-          </span>
-        </div>
-        {collapsed ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronUp className="w-4 h-4 text-gray-400" />}
-      </button>
+  const handleSaved = (updated: MyListing) => {
+    setListings(prev => prev.map(l => l.id === updated.id ? { ...l, ...updated } : l));
+  };
 
-      {!collapsed && (
-        <div className="border-t border-gray-100">
-          {loading ? (
-            <div className="px-6 py-8 text-center text-gray-400 text-sm">Načítám…</div>
-          ) : listings.length === 0 ? (
-            <div className="px-6 py-8 text-center">
-              <p className="text-gray-400 text-sm mb-3">Zatím žádné inzeráty</p>
-              <Link
-                href="/marketplace/nova-nabidka"
-                className="inline-flex items-center gap-1.5 text-sm text-blue-600 font-semibold hover:underline"
-              >
-                <Plus className="w-4 h-4" /> Přidat první inzerát
-              </Link>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-50">
-              {listings.map((listing) => {
-                const cfg = CATEGORY_CONFIG[listing.category] || CATEGORY_CONFIG.job_offer;
-                return (
-                  <div key={listing.id} className={`px-6 py-4 flex items-start justify-between gap-4 ${!listing.isActive ? 'opacity-60' : ''}`}>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.bgColor} ${cfg.textColor}`}>
-                          {cfg.label}
-                        </span>
-                        {!listing.isActive && (
-                          <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Neaktivní</span>
-                        )}
-                      </div>
-                      <p className="font-semibold text-gray-900 text-sm line-clamp-1">{listing.title}</p>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
-                        {listing.location && (
-                          <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{listing.location}</span>
-                        )}
-                        <span>{new Date(listing.createdAt).toLocaleDateString('cs-CZ')}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      <button
-                        onClick={() => toggleActive(listing.id, listing.isActive)}
-                        disabled={actionId === listing.id}
-                        title={listing.isActive ? 'Deaktivovat' : 'Aktivovat'}
-                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-40"
-                      >
-                        {listing.isActive
-                          ? <ToggleRight className="w-4 h-4 text-green-600" />
-                          : <ToggleLeft className="w-4 h-4" />
-                        }
-                      </button>
-                      <button
-                        onClick={() => deleteListing(listing.id)}
-                        disabled={actionId === listing.id}
-                        title="Smazat"
-                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-              <div className="px-6 py-3 bg-gray-50">
+  return (
+    <>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Tag className="w-4 h-4 text-blue-500" />
+            <h2 className="text-base font-bold text-gray-900">Moje inzeráty</h2>
+            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">
+              {listings.length}
+            </span>
+          </div>
+          {collapsed ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronUp className="w-4 h-4 text-gray-400" />}
+        </button>
+
+        {!collapsed && (
+          <div className="border-t border-gray-100">
+            {loading ? (
+              <div className="px-6 py-8 text-center text-gray-400 text-sm">Načítám…</div>
+            ) : listings.length === 0 ? (
+              <div className="px-6 py-8 text-center">
+                <p className="text-gray-400 text-sm mb-3">Zatím žádné inzeráty</p>
                 <Link
                   href="/marketplace/nova-nabidka"
-                  className="text-sm text-blue-600 font-semibold hover:underline flex items-center gap-1"
+                  className="inline-flex items-center gap-1.5 text-sm text-blue-600 font-semibold hover:underline"
                 >
-                  <Plus className="w-3.5 h-3.5" /> Přidat inzerát
+                  <Plus className="w-4 h-4" /> Přidat první inzerát
                 </Link>
               </div>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="divide-y divide-gray-50">
+                {listings.map((listing) => {
+                  const cfg = CATEGORY_CONFIG[listing.category] || CATEGORY_CONFIG.job_offer;
+                  return (
+                    <div key={listing.id} className={`px-6 py-4 flex items-start justify-between gap-4 ${!listing.isActive ? 'opacity-60' : ''}`}>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.bgColor} ${cfg.textColor}`}>
+                            {cfg.label}
+                          </span>
+                          {!listing.isActive && (
+                            <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Neaktivní</span>
+                          )}
+                        </div>
+                        <p className="font-semibold text-gray-900 text-sm line-clamp-1">{listing.title}</p>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
+                          {listing.location && (
+                            <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{listing.location}</span>
+                          )}
+                          <span>{new Date(listing.createdAt).toLocaleDateString('cs-CZ')}</span>
+                        </div>
+                      </div>
+                      {/* Action buttons */}
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button
+                          onClick={() => setEditingListing(listing)}
+                          title="Upravit"
+                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => toggleActive(listing.id, listing.isActive)}
+                          disabled={actionId === listing.id}
+                          title={listing.isActive ? 'Deaktivovat' : 'Aktivovat'}
+                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-40"
+                        >
+                          {listing.isActive
+                            ? <ToggleRight className="w-4 h-4 text-green-600" />
+                            : <ToggleLeft className="w-4 h-4" />
+                          }
+                        </button>
+                        <button
+                          onClick={() => deleteListing(listing.id)}
+                          disabled={actionId === listing.id}
+                          title="Smazat"
+                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div className="px-6 py-3 bg-gray-50">
+                  <Link
+                    href="/marketplace/nova-nabidka"
+                    className="text-sm text-blue-600 font-semibold hover:underline flex items-center gap-1"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Přidat inzerát
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {editingListing && (
+        <ListingEditModal
+          listing={editingListing}
+          onClose={() => setEditingListing(null)}
+          onSaved={handleSaved}
+        />
       )}
-    </div>
+    </>
   );
 }
 
@@ -382,6 +1059,7 @@ function MyEventsSection() {
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [editingEvent, setEditingEvent] = useState<MyEvent | null>(null);
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -408,109 +1086,126 @@ function MyEventsSection() {
     }
   };
 
-  const EVENT_TYPE_LABELS: Record<string, string> = {
-    workshop: 'Workshop', networking: 'Networking', talk: 'Přednáška',
-    conference: 'Konference', social: 'Sociální', other: 'Jiné',
+  const handleEventSaved = (updated: MyEvent) => {
+    setEvents(prev => prev.map(e => e.id === updated.id ? updated : e));
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-blue-500" />
-          <h2 className="text-base font-bold text-gray-900">Moje eventy</h2>
-          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">
-            {events.length}
-          </span>
-        </div>
-        {collapsed ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronUp className="w-4 h-4 text-gray-400" />}
-      </button>
+    <>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-blue-500" />
+            <h2 className="text-base font-bold text-gray-900">Moje eventy</h2>
+            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">
+              {events.length}
+            </span>
+          </div>
+          {collapsed ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronUp className="w-4 h-4 text-gray-400" />}
+        </button>
 
-      {!collapsed && (
-        <div className="border-t border-gray-100">
-          {loading ? (
-            <div className="px-6 py-8 text-center text-gray-400 text-sm">Načítám…</div>
-          ) : events.length === 0 ? (
-            <div className="px-6 py-8 text-center">
-              <p className="text-gray-400 text-sm mb-3">Zatím žádné eventy</p>
-              <Link
-                href="/udalosti/nova-udalost"
-                className="inline-flex items-center gap-1.5 text-sm text-blue-600 font-semibold hover:underline"
-              >
-                <Plus className="w-4 h-4" /> Přidat první event
-              </Link>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-50">
-              {events.map((event) => {
-                const isPast = new Date(event.startDate) < new Date();
-                return (
-                  <div key={event.id} className={`px-6 py-4 flex items-start justify-between gap-4 ${isPast ? 'opacity-60' : ''}`}>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        {event.eventType && (
-                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
-                            {EVENT_TYPE_LABELS[event.eventType] ?? event.eventType}
-                          </span>
-                        )}
-                        {isPast && (
-                          <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">Proběhlý</span>
-                        )}
-                      </div>
-                      <p className="font-semibold text-gray-900 text-sm line-clamp-1">{event.title}</p>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {new Date(event.startDate).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' })}
-                        </span>
-                        <span>{event.coworkingSlug}</span>
-                        {event.isFree ? (
-                          <span className="text-green-600 font-medium">Zdarma</span>
-                        ) : event.price ? (
-                          <span>{event.price.toLocaleString('cs-CZ')} Kč</span>
-                        ) : null}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      {event.externalUrl && (
-                        <a
-                          href={event.externalUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="Otevřít odkaz"
-                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      )}
-                      <button
-                        onClick={() => deleteEvent(event.id)}
-                        disabled={actionId === event.id}
-                        title="Smazat"
-                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-              <div className="px-6 py-3 bg-gray-50">
+        {!collapsed && (
+          <div className="border-t border-gray-100">
+            {loading ? (
+              <div className="px-6 py-8 text-center text-gray-400 text-sm">Načítám…</div>
+            ) : events.length === 0 ? (
+              <div className="px-6 py-8 text-center">
+                <p className="text-gray-400 text-sm mb-3">Zatím žádné eventy</p>
                 <Link
                   href="/udalosti/nova-udalost"
-                  className="text-sm text-blue-600 font-semibold hover:underline flex items-center gap-1"
+                  className="inline-flex items-center gap-1.5 text-sm text-blue-600 font-semibold hover:underline"
                 >
-                  <Plus className="w-3.5 h-3.5" /> Přidat event
+                  <Plus className="w-4 h-4" /> Přidat první event
                 </Link>
               </div>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="divide-y divide-gray-50">
+                {events.map((event) => {
+                  const isPast = new Date(event.startDate) < new Date();
+                  return (
+                    <div key={event.id} className={`px-6 py-4 flex items-start justify-between gap-4 ${isPast ? 'opacity-60' : ''}`}>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          {event.eventType && (
+                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
+                              {EVENT_TYPE_LABELS[event.eventType] ?? event.eventType}
+                            </span>
+                          )}
+                          {isPast && (
+                            <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">Proběhlý</span>
+                          )}
+                        </div>
+                        <p className="font-semibold text-gray-900 text-sm line-clamp-1">{event.title}</p>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(event.startDate).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          </span>
+                          <span>{event.coworkingSlug}</span>
+                          {event.isFree ? (
+                            <span className="text-green-600 font-medium">Zdarma</span>
+                          ) : event.price ? (
+                            <span>{event.price.toLocaleString('cs-CZ')} Kč</span>
+                          ) : null}
+                        </div>
+                      </div>
+                      {/* Action buttons */}
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button
+                          onClick={() => setEditingEvent(event)}
+                          title="Upravit"
+                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        {event.externalUrl && (
+                          <a
+                            href={event.externalUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Otevřít odkaz"
+                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
+                        <button
+                          onClick={() => deleteEvent(event.id)}
+                          disabled={actionId === event.id}
+                          title="Smazat"
+                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div className="px-6 py-3 bg-gray-50">
+                  <Link
+                    href="/udalosti/nova-udalost"
+                    className="text-sm text-blue-600 font-semibold hover:underline flex items-center gap-1"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Přidat event
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {editingEvent && (
+        <EventEditModal
+          event={editingEvent}
+          onClose={() => setEditingEvent(null)}
+          onSaved={handleEventSaved}
+        />
       )}
-    </div>
+    </>
   );
 }
 

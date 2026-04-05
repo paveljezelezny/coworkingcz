@@ -3,32 +3,75 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-export async function DELETE(
+type SessionUser = { id?: string; role?: string } & Record<string, unknown>;
+
+async function ownerCheck(id: string, session: { user?: SessionUser } | null) {
+  const userId = session?.user?.id;
+  if (!userId) return { error: 'Nepřihlášen', status: 401 };
+  const event = await prisma.event.findUnique({
+    where: { id },
+    select: { userId: true },
+  });
+  if (!event) return { error: 'Event nenalezen', status: 404 };
+  const role = session?.user?.role ?? 'coworker';
+  if (event.userId !== userId && role !== 'super_admin') {
+    return { error: 'Nemáte oprávnění', status: 403 };
+  }
+  return { event };
+}
+
+// ---------------------------------------------------------------------------
+// PATCH — full event update (owner only)
+// ---------------------------------------------------------------------------
+
+export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Nepřihlášen' }, { status: 401 });
+  const check = await ownerCheck(params.id, session);
+  if ('error' in check) {
+    return NextResponse.json({ error: check.error }, { status: check.status });
   }
 
-  const event = await prisma.event.findUnique({
+  const body = await req.json();
+
+  const updated = await prisma.event.update({
     where: { id: params.id },
-    select: { userId: true },
+    data: {
+      ...(body.title !== undefined ? { title: String(body.title).trim() } : {}),
+      ...(body.description !== undefined ? { description: body.description?.trim() || null } : {}),
+      ...(body.eventType !== undefined ? { eventType: body.eventType || null } : {}),
+      ...(body.startDate !== undefined ? { startDate: new Date(body.startDate) } : {}),
+      ...(body.endDate !== undefined ? { endDate: body.endDate ? new Date(body.endDate) : null } : {}),
+      ...(body.isAllDay !== undefined ? { isAllDay: Boolean(body.isAllDay) } : {}),
+      ...(body.isFree !== undefined ? { isFree: Boolean(body.isFree) } : {}),
+      ...(body.price !== undefined ? { price: !body.isFree && body.price ? parseFloat(body.price) : null } : {}),
+      ...(body.maxAttendees !== undefined ? { maxAttendees: body.maxAttendees ? parseInt(body.maxAttendees) : null } : {}),
+      ...(body.externalUrl !== undefined ? { externalUrl: body.externalUrl?.trim() || null } : {}),
+      ...(body.imageUrl !== undefined ? { imageUrl: body.imageUrl?.trim() || null } : {}),
+      ...(body.coworkingSlug !== undefined ? { coworkingSlug: body.coworkingSlug } : {}),
+    },
   });
 
-  if (!event) {
-    return NextResponse.json({ error: 'Event nenalezen' }, { status: 404 });
+  return NextResponse.json({ success: true, event: updated });
+}
+
+// ---------------------------------------------------------------------------
+// DELETE — remove event (owner only)
+// ---------------------------------------------------------------------------
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const session = await getServerSession(authOptions);
+  const check = await ownerCheck(params.id, session);
+  if ('error' in check) {
+    return NextResponse.json({ error: check.error }, { status: check.status });
   }
 
-  const role: string = (session.user as any).role ?? 'coworker';
-  if (event.userId !== session.user.id && role !== 'super_admin') {
-    return NextResponse.json({ error: 'Nemáte oprávnění' }, { status: 403 });
-  }
-
-  // Delete registrations first, then the event
   await prisma.eventRegistration.deleteMany({ where: { eventId: params.id } });
   await prisma.event.delete({ where: { id: params.id } });
-
   return NextResponse.json({ success: true });
 }
