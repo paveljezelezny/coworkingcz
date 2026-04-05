@@ -58,7 +58,6 @@ const createCoworking = (
 
 export const coworkingsData: CoworkingSpace[] = [
   createCoworking('cw_locus_workspace', 'Locus Workspace', 'Praha', 'Praha', {
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', '24h_access'],
     capacity: 45,
     areaM2: 800,
@@ -78,8 +77,6 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.locusworkspace.cz',
   }),
   createCoworking('cw_opero', 'Opero', 'Praha', 'Praha', {
-    isFeatured: true,
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'terrace', 'events'],
     capacity: 60,
     areaM2: 1000,
@@ -110,8 +107,6 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Útulný coworkingový prostor s kavárnou v moderní budově na Pankráci.',
   }),
   createCoworking('cw_node5', 'Node5', 'Praha', 'Praha', {
-    isFeatured: true,
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', '24h_access', 'events'],
     capacity: 55,
     areaM2: 850,
@@ -131,7 +126,6 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Velký technologický hub v Praze 5 s flexibilními kancelářemi a startupovou atmosférou.',
   }),
   createCoworking('cw_worklounge', 'WorkLounge', 'Praha', 'Praha', {
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'locker'],
     capacity: 70,
     areaM2: 1100,
@@ -170,7 +164,6 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.pracovna.co',
   }),
   createCoworking('cw_co_labs', 'Co-Labs', 'Praha', 'Praha', {
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 30,
     areaM2: 550,
@@ -183,7 +176,6 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.co-labs.cz',
   }),
   createCoworking('cw_scott_weber', 'Scott.Weber', 'Praha', 'Praha', {
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'locker'],
     capacity: 100,
     areaM2: 1500,
@@ -233,8 +225,6 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Ponk Space – komunitní dílna a makerspace pro tvůrce a designéry v Praze.',
   }),
   createCoworking('cw_microsoft_coworking', 'Microsoft Coworking Space', 'Praha', 'Praha', {
-    isFeatured: true,
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', '24h_access', 'reception'],
     capacity: 90,
     areaM2: 1400,
@@ -302,7 +292,6 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Coworking33 – flexibilní pracovní prostor na Bílé Hoře v Praze 6.',
   }),
   createCoworking('cw_clubco_praha', 'Clubco', 'Praha', 'Praha', {
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 50,
     areaM2: 900,
@@ -397,7 +386,6 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.yottabe.com',
   }),
   createCoworking('cw_wework_drn', 'Wework DRN', 'Praha', 'Praha', {
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 60,
     areaM2: 1000,
@@ -410,7 +398,6 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.wework.com/buildings/drn--prague',
   }),
   createCoworking('cw_spaces_praha', 'Spaces', 'Praha', 'Praha', {
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'locker'],
     capacity: 75,
     areaM2: 1200,
@@ -496,8 +483,6 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://coworking.vse.cz',
   }),
   createCoworking('cw_impact_hub_brno', 'Impact Hub Brno', 'Brno', 'Jihomoravský kraj', {
-    isFeatured: true,
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'events'],
     capacity: 70,
     areaM2: 1100,
@@ -517,7 +502,6 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Největší a nejzavedenější coworking v Brně s bohatou komunitou a pravidelnými akcemi.',
   }),
   createCoworking('cw_brain_farm', 'Brain Farm', 'Brno', 'Jihomoravský kraj', {
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 50,
     areaM2: 900,
@@ -552,7 +536,6 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Moderní workspace v Zábrdovicích s flexibilními kancelářemi a kreativní atmosférou.',
   }),
   createCoworking('cw_cowo_brno', 'Cowo Brno', 'Brno', 'Jihomoravský kraj', {
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 45,
     areaM2: 800,
@@ -577,7 +560,6 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.kumstbrno.cz',
   }),
   createCoworking('cw_clubco_brno', 'Clubco', 'Brno', 'Jihomoravský kraj', {
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 50,
     areaM2: 900,
@@ -608,7 +590,6 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Coworking na Palubě – sdílený pracovní prostor v centru Brna.',
   }),
   createCoworking('cw_jic_cowork_brno', 'JIC cowork Brno', 'Brno', 'Jihomoravský kraj', {
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 40,
     areaM2: 700,
@@ -644,8 +625,6 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'http://minicowork.cz',
   }),
   createCoworking('cw_impact_hub_ostrava', 'Impact Hub Ostrava', 'Ostrava', 'Moravskoslezský kraj', {
-    isFeatured: true,
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'events'],
     capacity: 60,
     areaM2: 1000,
@@ -658,7 +637,6 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://impacthub.cz/ostrava',
   }),
   createCoworking('cw_clubco_ostrava', 'Clubco', 'Ostrava', 'Moravskoslezský kraj', {
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 45,
     areaM2: 800,
@@ -724,7 +702,6 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://ostrava.hygge.cz',
   }),
   createCoworking('cw_cowo_cb', 'Cowo CB', 'České Budějovice', 'Jihočeský kraj', {
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 35,
     areaM2: 650,
@@ -893,7 +870,6 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Industriální coworking ve Vault 42 v Olomouci s kreativní atmosférou.',
   }),
   createCoworking('cw_coworking_olomouc', 'Coworking Olomouc', 'Olomouc', 'Olomoucký kraj', {
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 35,
     areaM2: 650,
@@ -1045,7 +1021,6 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.strom-offices.cz',
   }),
   createCoworking('cw_bic_plzen', 'BIC', 'Plzeň', 'Plzeňský kraj', {
-    isVerified: true,
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
     capacity: 50,
     areaM2: 900,
@@ -1732,9 +1707,9 @@ function profileCompleteness(cw: CoworkingSpace): number {
 }
 
 export const getFeaturedCoworkings = () => {
-  // Top tier: verified + featured (isFeatured = "highlighted/boosted"), sorted by completeness
+  // Top tier: isFeatured nastavuje pouze super_admin — vždy první pozice
   const topTier = coworkingsData
-    .filter((cw) => cw.isVerified && cw.isFeatured)
+    .filter((cw) => cw.isFeatured)
     .sort((a, b) => profileCompleteness(b) - profileCompleteness(a))
     .slice(0, 8);
 

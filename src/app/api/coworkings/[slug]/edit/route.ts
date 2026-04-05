@@ -62,6 +62,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       'prices',
       'capacity', 'areaM2',
       'photos',
+      'specialDeal',
     ];
 
     const sanitized: Record<string, any> = {};

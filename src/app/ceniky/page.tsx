@@ -13,6 +13,7 @@ export default function CenikyPage() {
     { name: 'Event management', small: false, medium: true, large: true },
     { name: 'Analytics', small: false, medium: false, large: true },
     { name: 'Email podpora', small: true, medium: true, large: true },
+    { name: 'Special Deal — zvýhodněná nabídka na kartě', small: false, medium: true, large: true },
     { name: 'Prioritní podpora', small: false, medium: true, large: true },
     { name: 'Dedikovaný account manager', small: false, medium: false, large: true },
   ];
@@ -221,6 +222,19 @@ export default function CenikyPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Special Deal callout */}
+          <div className="mt-8 p-5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-4">
+            <span className="text-2xl flex-shrink-0">🏷️</span>
+            <div>
+              <p className="font-semibold text-amber-900 mb-1">Special Deal — exkluzivně pro roční plány</p>
+              <p className="text-sm text-amber-800">
+                Při roční registraci můžete aktivovat vlastní <strong>Special Deal</strong> — zvýhodněnou nabídku
+                zobrazenou přímo na kartě vašeho coworkingu ve výpisu i v detailu profilu. Coworkeři mohou filtrovat
+                coworkingy se Special Dealem a rychle najít vaši nabídku.
+              </p>
+            </div>
           </div>
         </div>
       </section>

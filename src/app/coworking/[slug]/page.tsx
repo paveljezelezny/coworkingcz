@@ -365,9 +365,25 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
                           <div className="text-lg font-bold text-blue-600 mb-2">
                             {event.isFree ? 'Zdarma' : `${event.price} Kč`}
                           </div>
-                          <button className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-                            Podrobnosti
-                          </button>
+                          {event.url ? (
+                            <a
+                              href={event.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                              Zjistit víc…
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          ) : (
+                            <button
+                              disabled
+                              className="px-4 py-2 bg-gray-200 text-gray-400 text-sm font-semibold rounded-lg cursor-not-allowed"
+                              title="Odkaz nebyl zadán"
+                            >
+                              Zjistit víc…
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -500,6 +516,33 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
                   </div>
                 )}
               </div>
+
+              {/* Special Deal banner */}
+              {coworking.specialDeal?.enabled && (
+                <div className="mb-4 p-4 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">🏷️</span>
+                    <span className="text-sm font-bold text-amber-800">Special Deal</span>
+                    <span className="ml-auto text-xs bg-amber-500 text-white px-2 py-0.5 rounded-full font-bold">
+                      {coworking.specialDeal.badgeText}
+                    </span>
+                  </div>
+                  {coworking.specialDeal.description && (
+                    <p className="text-sm text-amber-900 mb-2">{coworking.specialDeal.description}</p>
+                  )}
+                  {(coworking.specialDeal.validFrom || coworking.specialDeal.validTo) && (
+                    <p className="text-xs text-amber-700">
+                      Platí{' '}
+                      {coworking.specialDeal.validFrom && (
+                        <span>od {new Date(coworking.specialDeal.validFrom).toLocaleDateString('cs-CZ')}</span>
+                      )}
+                      {coworking.specialDeal.validTo && (
+                        <span> do {new Date(coworking.specialDeal.validTo).toLocaleDateString('cs-CZ')}</span>
+                      )}
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* Event space banner */}
               {hasEventSpace && (

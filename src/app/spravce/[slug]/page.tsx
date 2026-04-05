@@ -7,7 +7,7 @@ import Link from 'next/link';
 import {
   ArrowLeft, Save, ExternalLink, CheckCircle, AlertCircle,
   Info, Clock, Wifi, DollarSign, Image, Phone, Globe, Mail,
-  MapPin, Users, Building2
+  MapPin, Users, Building2, Tag
 } from 'lucide-react';
 import { coworkingsData } from '@/lib/data/coworkings';
 import { AMENITY_LABELS } from '@/lib/types';
@@ -24,7 +24,7 @@ const DAYS = [
 
 const ALL_AMENITIES = Object.keys(AMENITY_LABELS);
 
-type Tab = 'info' | 'contact' | 'hours' | 'amenities' | 'pricing' | 'photos';
+type Tab = 'info' | 'contact' | 'hours' | 'amenities' | 'pricing' | 'photos' | 'deal';
 
 interface EditData {
   name?: string;
@@ -48,6 +48,13 @@ interface EditData {
   capacity?: number | null;
   areaM2?: number | null;
   photos?: { url: string; caption?: string }[];
+  specialDeal?: {
+    enabled: boolean;
+    badgeText: string;
+    description: string;
+    validFrom: string | null;
+    validTo: string | null;
+  };
 }
 
 interface EditPageProps {
@@ -91,6 +98,13 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
     capacity: formData.capacity ?? baseCoworking?.capacity ?? null,
     areaM2: formData.areaM2 ?? baseCoworking?.areaM2 ?? null,
     photos: formData.photos ?? (baseCoworking?.photos?.map((p) => ({ url: p.url, caption: p.caption })) ?? []),
+    specialDeal: formData.specialDeal ?? (baseCoworking?.specialDeal as any) ?? {
+      enabled: false,
+      badgeText: '',
+      description: '',
+      validFrom: null,
+      validTo: null,
+    },
   };
 
   useEffect(() => {
@@ -213,6 +227,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
     { id: 'amenities', label: 'Vybavení', icon: <Wifi className="w-4 h-4" /> },
     { id: 'pricing', label: 'Ceny', icon: <DollarSign className="w-4 h-4" /> },
     { id: 'photos', label: 'Fotografie', icon: <Image className="w-4 h-4" /> },
+    { id: 'deal', label: 'Special Deal', icon: <Tag className="w-4 h-4" /> },
   ];
 
   return (
@@ -685,6 +700,146 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
                   )}
                 </div>
               )}
+
+            {/* TAB: Special Deal */}
+            {activeTab === 'deal' && (
+              <div className="space-y-6">
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
+                  <strong>Special Deal</strong> je zvýhodněná nabídka, kterou můžete zobrazit návštěvníkům vašeho profilu. Dostupné při ročním předplatném.
+                </div>
+
+                {/* Enabled toggle */}
+                <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl">
+                  <div>
+                    <div className="font-semibold text-gray-900">Aktivovat Special Deal</div>
+                    <div className="text-sm text-gray-500">Zobrazí štítek na kartě a banneru v detailu</div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={(merged.specialDeal as any)?.enabled ?? false}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          specialDeal: {
+                            ...((prev.specialDeal as any) ?? {}),
+                            enabled: e.target.checked,
+                            badgeText: (prev.specialDeal as any)?.badgeText ?? '',
+                            description: (prev.specialDeal as any)?.description ?? '',
+                            validFrom: (prev.specialDeal as any)?.validFrom ?? null,
+                            validTo: (prev.specialDeal as any)?.validTo ?? null,
+                          },
+                        }))
+                      }
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                  </label>
+                </div>
+
+                {/* Badge text */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Text štítku <span className="text-gray-400 font-normal">(max 30 znaků, zobrazí se na kartě)</span>
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={30}
+                    value={(merged.specialDeal as any)?.badgeText ?? ''}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        specialDeal: {
+                          ...((prev.specialDeal as any) ?? {}),
+                          enabled: (prev.specialDeal as any)?.enabled ?? false,
+                          badgeText: e.target.value,
+                          description: (prev.specialDeal as any)?.description ?? '',
+                          validFrom: (prev.specialDeal as any)?.validFrom ?? null,
+                          validTo: (prev.specialDeal as any)?.validTo ?? null,
+                        },
+                      }))
+                    }
+                    placeholder="např. 1 den zdarma"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  />
+                  <div className="text-xs text-gray-400 mt-1 text-right">
+                    {((merged.specialDeal as any)?.badgeText ?? '').length}/30
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Podrobný popis <span className="text-gray-400 font-normal">(zobrazí se v detailu profilu)</span>
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={(merged.specialDeal as any)?.description ?? ''}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        specialDeal: {
+                          ...((prev.specialDeal as any) ?? {}),
+                          enabled: (prev.specialDeal as any)?.enabled ?? false,
+                          badgeText: (prev.specialDeal as any)?.badgeText ?? '',
+                          description: e.target.value,
+                          validFrom: (prev.specialDeal as any)?.validFrom ?? null,
+                          validTo: (prev.specialDeal as any)?.validTo ?? null,
+                        },
+                      }))
+                    }
+                    placeholder="Popište svou nabídku podrobněji..."
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+                  />
+                </div>
+
+                {/* Date range */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Platí od</label>
+                    <input
+                      type="date"
+                      value={(merged.specialDeal as any)?.validFrom ?? ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          specialDeal: {
+                            ...((prev.specialDeal as any) ?? {}),
+                            enabled: (prev.specialDeal as any)?.enabled ?? false,
+                            badgeText: (prev.specialDeal as any)?.badgeText ?? '',
+                            description: (prev.specialDeal as any)?.description ?? '',
+                            validFrom: e.target.value || null,
+                            validTo: (prev.specialDeal as any)?.validTo ?? null,
+                          },
+                        }))
+                      }
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Platí do</label>
+                    <input
+                      type="date"
+                      value={(merged.specialDeal as any)?.validTo ?? ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          specialDeal: {
+                            ...((prev.specialDeal as any) ?? {}),
+                            enabled: (prev.specialDeal as any)?.enabled ?? false,
+                            badgeText: (prev.specialDeal as any)?.badgeText ?? '',
+                            description: (prev.specialDeal as any)?.description ?? '',
+                            validFrom: (prev.specialDeal as any)?.validFrom ?? null,
+                            validTo: e.target.value || null,
+                          },
+                        }))
+                      }
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             </div>
 

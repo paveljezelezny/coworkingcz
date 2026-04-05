@@ -11,6 +11,14 @@ export interface CoworkingPrices {
   office: CoworkingPrice;    // kancelář
 }
 
+export interface SpecialDeal {
+  enabled: boolean;
+  badgeText: string;       // krátký štítek, např. "1 den zdarma"
+  description: string;     // delší popis pro detail stránku
+  validFrom: string | null; // ISO date "2025-01-01"
+  validTo: string | null;   // ISO date "2025-12-31"
+}
+
 export interface CoworkingSpace {
   id: string;
   slug: string;
@@ -33,8 +41,12 @@ export interface CoworkingSpace {
   platformTier: 'small' | 'medium' | 'large' | null;
   platformActive: boolean;
   isActive: boolean;
+  /** Pouze super_admin může nastavit */
   isVerified: boolean;
+  /** Pouze super_admin může nastavit — zobrazení v doporučených + první pozice ve filtrech */
   isFeatured: boolean;
+  /** Special Deal — coworking si zapne při roční registraci */
+  specialDeal?: SpecialDeal;
   amenities: string[];
   photos: Photo[];
   locations: Location[];
@@ -115,6 +127,8 @@ export interface Event {
   price: number | null;
   isFree: boolean;
   imageUrl: string;
+  /** Odkaz na registraci / více informací — zadává se v adminu */
+  url?: string | null;
 }
 
 export interface Booking {

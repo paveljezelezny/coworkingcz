@@ -20,6 +20,7 @@ function CoworkingyPageInner() {
   const [minCapacity, setMinCapacity] = useState(0);
   const [minArea, setMinArea] = useState(0);
   const [onlyEventSpace, setOnlyEventSpace] = useState(false);
+  const [onlySpecialDeal, setOnlySpecialDeal] = useState(false);
   const [sortBy, setSortBy] = useState('featured');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   // Start empty — never flash stale static photos. Fill from live API only.
@@ -89,15 +90,24 @@ function CoworkingyPageInner() {
     if (minCapacity > 0) results = results.filter((cw) => !cw.capacity || cw.capacity >= minCapacity);
     if (minArea > 0) results = results.filter((cw) => !cw.areaM2 || cw.areaM2 >= minArea);
     if (onlyEventSpace) results = results.filter((cw) => (cw as any).hasEventSpace === true);
+    if (onlySpecialDeal) results = results.filter((cw) => cw.specialDeal?.enabled);
 
+    // Primary sort
     if (sortBy === 'name') results.sort((a, b) => a.name.localeCompare(b.name));
     else if (sortBy === 'price') results.sort((a, b) => (a.prices?.dayPass?.from || 0) - (b.prices?.dayPass?.from || 0));
     else if (sortBy === 'price_monthly') results.sort((a, b) => (a.prices?.openSpace?.from || 0) - (b.prices?.openSpace?.from || 0));
     else if (sortBy === 'capacity') results.sort((a, b) => (b.capacity || 0) - (a.capacity || 0));
     else if (sortBy === 'featured') results.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
 
+    // isFeatured vždy první bez ohledu na řazení
+    results.sort((a, b) => {
+      if (a.isFeatured && !b.isFeatured) return -1;
+      if (!a.isFeatured && b.isFeatured) return 1;
+      return 0;
+    });
+
     return results;
-  }, [coworkings, searchQuery, selectedCity, selectedAmenities, selectedVenueTypes, maxPrice, maxMonthlyPrice, minCapacity, minArea, onlyEventSpace, sortBy]);
+  }, [coworkings, searchQuery, selectedCity, selectedAmenities, selectedVenueTypes, maxPrice, maxMonthlyPrice, minCapacity, minArea, onlyEventSpace, onlySpecialDeal, sortBy]);
 
   const toggleAmenity = (amenity: string) => {
     setSelectedAmenities((prev) =>
@@ -113,7 +123,7 @@ function CoworkingyPageInner() {
 
   const hasActiveFilters =
     selectedCity || selectedAmenities.length > 0 || selectedVenueTypes.length > 0 ||
-    maxPrice < 10000 || maxMonthlyPrice < 30000 || minCapacity > 0 || minArea > 0 || onlyEventSpace;
+    maxPrice < 10000 || maxMonthlyPrice < 30000 || minCapacity > 0 || minArea > 0 || onlyEventSpace || onlySpecialDeal;
 
   const clearAllFilters = () => {
     setSelectedCity('');
@@ -124,6 +134,7 @@ function CoworkingyPageInner() {
     setMinCapacity(0);
     setMinArea(0);
     setOnlyEventSpace(false);
+    setOnlySpecialDeal(false);
   };
 
   return (
@@ -211,6 +222,16 @@ function CoworkingyPageInner() {
                   <input type="checkbox" checked={onlyEventSpace} onChange={(e) => setOnlyEventSpace(e.target.checked)} className="w-4 h-4 rounded accent-purple-600" />
                   <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
                     <Building2 className="w-4 h-4 text-purple-500" />Eventový prostor
+                  </span>
+                </label>
+              </div>
+
+              {/* Special Deal only */}
+              <div>
+                <label className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-amber-50 transition-colors">
+                  <input type="checkbox" checked={onlySpecialDeal} onChange={(e) => setOnlySpecialDeal(e.target.checked)} className="w-4 h-4 rounded accent-amber-500" />
+                  <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                    🏷️ <span>Jen Special Deal</span>
                   </span>
                 </label>
               </div>

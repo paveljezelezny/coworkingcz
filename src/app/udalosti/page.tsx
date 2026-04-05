@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Calendar, MapPin, Users, DollarSign, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Users, DollarSign, X, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 import { eventsData, getCitiesWithCount } from '@/lib/data/coworkings';
 import Link from 'next/link';
 
@@ -66,7 +66,7 @@ export default function UdalostiPage() {
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-            Eventy v coworkingech
+            Akce a eventy
           </h1>
           <p className="text-gray-600">
             Najdi si zajímavou akci a setkat se s komunity
@@ -209,10 +209,27 @@ export default function UdalostiPage() {
                       </div>
 
                       {/* CTA */}
-                      <div className="flex sm:flex-col gap-2 items-stretch sm:items-end">
-                        <button className="flex-1 sm:flex-none px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-                          Přihlásit se
-                        </button>
+                      <div className="flex sm:flex-col gap-2 items-stretch sm:items-end justify-center">
+                        {event.url ? (
+                          <a
+                            href={event.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 sm:flex-none px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                          >
+                            Zjistit víc…
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        ) : (
+                          <button
+                            disabled
+                            className="flex-1 sm:flex-none px-6 py-3 bg-gray-200 text-gray-400 font-semibold rounded-lg cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap"
+                            title="Odkaz nebyl zadán"
+                          >
+                            Zjistit víc…
+                            <ExternalLink className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

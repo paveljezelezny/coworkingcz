@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { MapPin, Users, DollarSign, Star, Calendar } from 'lucide-react';
+import { MapPin, Users, DollarSign, Calendar } from 'lucide-react';
 import { CoworkingSpace, AMENITY_LABELS } from '@/lib/types';
 
 interface CoworkingCardProps {
@@ -87,10 +87,12 @@ export default function CoworkingCard({ coworking }: CoworkingCardProps) {
             </div>
           )}
 
-          {coworking.isVerified && (
-            <div className="absolute top-3 right-3 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 z-10">
-              <Star className="w-3 h-3" />
-              Ověřeno
+          {/* Badges — top-right stack */}
+          {coworking.specialDeal?.enabled && coworking.specialDeal.badgeText && (
+            <div className="absolute top-3 right-3 z-10">
+              <div className="bg-amber-500 text-white px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
+                🏷️ {coworking.specialDeal.badgeText}
+              </div>
             </div>
           )}
         </div>

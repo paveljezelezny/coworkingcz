@@ -129,27 +129,76 @@ body {
 }
 
 .button-primary {
-  @apply px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors;
+  @apply px-6 py-3 bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors;
+  border-radius: 18px 6px 18px 6px / 6px 18px 6px 18px;
 }
 
 .button-secondary {
-  @apply px-6 py-3 bg-white text-blue-600 border-2 border-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors;
+  @apply px-6 py-3 bg-white text-blue-600 border-2 border-blue-600 font-medium hover:bg-blue-50 transition-colors;
+  border-radius: 18px 6px 18px 6px / 6px 18px 6px 18px;
 }
 
 .button-accent {
-  @apply px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors;
+  @apply px-6 py-3 bg-orange-500 text-white font-medium hover:bg-orange-600 transition-colors;
+  border-radius: 18px 6px 18px 6px / 6px 18px 6px 18px;
 }
 
 .input-field {
-  @apply w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all;
+  @apply w-full px-4 py-3 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all;
+  border-radius: 14px 5px 14px 5px / 5px 14px 5px 14px;
 }
 
 .badge {
-  @apply inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium;
+  @apply inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium;
+  border-radius: 50% 32% 50% 32% / 32% 50% 32% 50%;
 }
 
 .badge-accent {
-  @apply inline-flex items-center gap-1 px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-sm font-medium;
+  @apply inline-flex items-center gap-1 px-3 py-1 bg-orange-50 text-orange-700 text-sm font-medium;
+  border-radius: 50% 32% 50% 32% / 32% 50% 32% 50%;
+}
+
+/* ── Organic shapes — atypical asymmetric corners sitewide ──────── */
+/* Each diagonal pair of corners gets a different radius,            */
+/* creating a subtle but distinctive organic feel.                   */
+
+.rounded-sm {
+  border-radius: 6px 2px 6px 2px / 2px 6px 2px 6px !important;
+}
+
+.rounded {
+  border-radius: 10px 3px 10px 3px / 3px 10px 3px 10px !important;
+}
+
+.rounded-md {
+  border-radius: 14px 4px 14px 4px / 4px 14px 4px 14px !important;
+}
+
+.rounded-lg {
+  border-radius: 18px 6px 18px 6px / 6px 18px 6px 18px !important;
+}
+
+.rounded-xl {
+  border-radius: 22px 8px 22px 8px / 8px 22px 8px 22px !important;
+}
+
+.rounded-2xl {
+  border-radius: 28px 10px 28px 10px / 10px 28px 10px 28px !important;
+}
+
+.rounded-3xl {
+  border-radius: 36px 14px 36px 14px / 14px 36px 14px 36px !important;
+}
+
+/* Pills & badges — keep pill feel but with organic twist */
+.rounded-full {
+  border-radius: 50% 36% 50% 36% / 36% 50% 36% 50% !important;
+}
+
+/* Avatar / profile photos — override back to perfect circle */
+img.rounded-full,
+.avatar-circle {
+  border-radius: 50% !important;
 }
 
 .section-title {

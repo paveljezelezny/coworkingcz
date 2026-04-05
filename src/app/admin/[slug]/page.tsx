@@ -781,11 +781,12 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
           </div>
         </div>
 
-        {/* ── STATUS ──────────────────────────────────────────────────── */}
+        {/* ── STATUS (pouze super_admin) ───────────────────────────── */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Status</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-1">Status</h2>
+          <p className="text-xs text-gray-500 mb-4">Pouze super_admin může tyto hodnoty měnit.</p>
           <div className="space-y-3">
-            <label className="flex items-center gap-3 cursor-pointer">
+            <label className="flex items-center gap-3 cursor-pointer p-3 bg-blue-50 rounded-lg border border-blue-100">
               <input
                 type="checkbox"
                 name="isVerified"
@@ -793,9 +794,12 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
                 onChange={handleCheckboxChange}
                 className="w-4 h-4 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700">Ověřený coworking</span>
+              <div>
+                <span className="text-sm font-medium text-gray-900">✓ Ověřený coworking</span>
+                <p className="text-xs text-gray-500">Zobrazuje se jako badge "Ověřeno" na kartě</p>
+              </div>
             </label>
-            <label className="flex items-center gap-3 cursor-pointer">
+            <label className="flex items-center gap-3 cursor-pointer p-3 bg-amber-50 rounded-lg border border-amber-100">
               <input
                 type="checkbox"
                 name="isFeatured"
@@ -803,8 +807,84 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
                 onChange={handleCheckboxChange}
                 className="w-4 h-4 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700">Zvýrazněný coworking</span>
+              <div>
+                <span className="text-sm font-medium text-gray-900">⭐ Zvýrazněný coworking</span>
+                <p className="text-xs text-gray-500">Zobrazuje se v Doporučených + vždy první ve filtrech</p>
+              </div>
             </label>
+          </div>
+        </div>
+
+        {/* ── SPECIAL DEAL ────────────────────────────────────────────── */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-1">Special Deal</h2>
+          <p className="text-xs text-gray-500 mb-4">Zobrazí se jako štítek na kartě a v detailu coworkingu.</p>
+          <div className="space-y-4">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!!(formData as any).specialDeal?.enabled}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  specialDeal: { ...((prev as any).specialDeal || { badgeText: '', description: '', validFrom: null, validTo: null }), enabled: e.target.checked },
+                } as any))}
+                className="w-4 h-4 rounded border-gray-300 focus:ring-2 focus:ring-amber-500"
+              />
+              <span className="text-sm font-medium text-gray-900">Aktivní Special Deal</span>
+            </label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Krátký štítek <span className="text-gray-400">(max 30 znaků, zobrazí se na kartě)</span></label>
+              <input
+                type="text"
+                maxLength={30}
+                placeholder="např. 1 den zdarma"
+                value={(formData as any).specialDeal?.badgeText || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  specialDeal: { ...((prev as any).specialDeal || { enabled: false, description: '', validFrom: null, validTo: null }), badgeText: e.target.value },
+                } as any))}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Popis dealu <span className="text-gray-400">(zobrazí se v detailu)</span></label>
+              <textarea
+                rows={3}
+                placeholder="např. Při roční registraci dostanete první den v coworku zdarma..."
+                value={(formData as any).specialDeal?.description || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  specialDeal: { ...((prev as any).specialDeal || { enabled: false, badgeText: '', validFrom: null, validTo: null }), description: e.target.value },
+                } as any))}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Platí od</label>
+                <input
+                  type="date"
+                  value={(formData as any).specialDeal?.validFrom || ''}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    specialDeal: { ...((prev as any).specialDeal || { enabled: false, badgeText: '', description: '', validTo: null }), validFrom: e.target.value || null },
+                  } as any))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Platí do</label>
+                <input
+                  type="date"
+                  value={(formData as any).specialDeal?.validTo || ''}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    specialDeal: { ...((prev as any).specialDeal || { enabled: false, badgeText: '', description: '', validFrom: null }), validTo: e.target.value || null },
+                  } as any))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
