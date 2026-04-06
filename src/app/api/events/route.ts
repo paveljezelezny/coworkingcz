@@ -24,24 +24,37 @@ async function hasPaidAccess(userId: string, role: string): Promise<boolean> {
 }
 
 // ---------------------------------------------------------------------------
-// GET — current user's events
+// GET — public all events, or ?mine=true for current user's events
 // ---------------------------------------------------------------------------
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Nepřihlášen' }, { status: 401 });
+export async function GET(req: NextRequest) {
+  const mine = new URL(req.url).searchParams.get('mine') === 'true';
+
+  if (mine) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Nepřihlášen' }, { status: 401 });
+    }
+    try {
+      const events = await prisma.event.findMany({
+        where: { userId: session.user.id },
+        orderBy: { startDate: 'desc' },
+      });
+      return NextResponse.json({ events });
+    } catch (err) {
+      console.warn('GET /api/events mine fallback:', (err as Error).message);
+      return NextResponse.json({ events: [] });
+    }
   }
 
+  // Public — all events
   try {
     const events = await prisma.event.findMany({
-      where: { userId: session.user.id },
-      orderBy: { startDate: 'desc' },
+      orderBy: { startDate: 'asc' },
     });
     return NextResponse.json({ events });
   } catch (err) {
-    // userId column may not exist yet in DB — return empty list gracefully
-    console.warn('GET /api/events fallback (column missing?):', (err as Error).message);
+    console.warn('GET /api/events public fallback:', (err as Error).message);
     return NextResponse.json({ events: [] });
   }
 }

@@ -625,7 +625,7 @@ function EventEditModal({
 
   // Load full event data
   useEffect(() => {
-    fetch(`/api/events`)
+    fetch(`/api/events?mine=true`)
       .then(r => r.json())
       .then((data: { events: Array<MyEvent & { description?: string | null; endDate?: string | null; isAllDay?: boolean; maxAttendees?: number | null; imageUrl?: string | null }> }) => {
         const full = data.events?.find((e) => e.id === event.id);
@@ -1063,7 +1063,7 @@ function MyEventsSection() {
 
   const fetchEvents = useCallback(async () => {
     try {
-      const res = await fetch('/api/events');
+      const res = await fetch('/api/events?mine=true');
       const data = await res.json();
       setEvents(data.events ?? []);
     } catch {

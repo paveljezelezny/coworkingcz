@@ -1,12 +1,33 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Calendar, Users, DollarSign, X, ChevronLeft, ChevronRight, ExternalLink, Plus, Lock } from 'lucide-react';
-import { eventsData, getCitiesWithCount } from '@/lib/data/coworkings';
+import { coworkingsData, getCitiesWithCount } from '@/lib/data/coworkings';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 
 type ViewMode = 'calendar' | 'list';
+
+interface DbEvent {
+  id: string;
+  coworkingSlug: string;
+  title: string;
+  description?: string | null;
+  eventType?: string | null;
+  startDate: string;
+  endDate?: string | null;
+  isAllDay: boolean;
+  isFree: boolean;
+  price?: number | null;
+  maxAttendees?: number | null;
+  externalUrl?: string | null;
+  imageUrl?: string | null;
+}
+
+// Resolve coworking slug → display name from static data
+const slugToName: Record<string, string> = Object.fromEntries(
+  coworkingsData.map((c) => [c.slug, c.name])
+);
 
 export default function UdalostiPage() {
   const { data: session } = useSession();
@@ -16,7 +37,17 @@ export default function UdalostiPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedEventType, setSelectedEventType] = useState('');
-  const [currentMonth, setCurrentMonth] = useState(new Date(2026, 2));
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [allEvents, setAllEvents] = useState<DbEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/events')
+      .then((r) => r.json())
+      .then((d) => setAllEvents(d.events ?? []))
+      .catch(() => setAllEvents([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   const cities = getCitiesWithCount();
   const eventTypes = [
@@ -28,14 +59,15 @@ export default function UdalostiPage() {
   ];
 
   const filteredEvents = useMemo(() => {
-    return eventsData
+    return allEvents
       .filter((event) => {
-        const matchCity = !selectedCity || event.coworkingName?.includes(selectedCity);
+        const name = slugToName[event.coworkingSlug] ?? event.coworkingSlug;
+        const matchCity = !selectedCity || name.includes(selectedCity);
         const matchType = !selectedEventType || event.eventType === selectedEventType;
         return matchCity && matchType;
       })
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-  }, [selectedCity, selectedEventType]);
+  }, [allEvents, selectedCity, selectedEventType]);
 
   // Calendar functions
   const getDaysInMonth = (date: Date) => {
@@ -198,7 +230,14 @@ export default function UdalostiPage() {
         {/* List View */}
         {viewMode === 'list' && (
           <div>
-            {filteredEvents.length > 0 ? (
+            {loading && (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-white rounded-lg border border-gray-100 p-6 animate-pulse h-40" />
+                ))}
+              </div>
+            )}
+            {!loading && filteredEvents.length > 0 ? (
               <div className="space-y-4">
                 {filteredEvents.map((event) => (
                   <div
@@ -229,7 +268,7 @@ export default function UdalostiPage() {
                               {event.eventType === 'party' && 'Party'}
                             </span>
                             <span className="text-xs text-gray-600 font-medium">
-                              {event.coworkingName}
+                              {slugToName[event.coworkingSlug] ?? event.coworkingSlug}
                             </span>
                           </div>
                           <h3 className="text-lg font-bold text-gray-900 mb-3">
@@ -266,9 +305,9 @@ export default function UdalostiPage() {
 
                       {/* CTA */}
                       <div className="flex sm:flex-col gap-2 items-stretch sm:items-end justify-center">
-                        {event.url ? (
+                        {event.externalUrl ? (
                           <a
-                            href={event.url}
+                            href={event.externalUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex-1 sm:flex-none px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
@@ -292,15 +331,13 @@ export default function UdalostiPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
-                <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  Žádné eventy
-                </h3>
-                <p className="text-gray-600">
-                  Zkus změnit filtry nebo se vrať později
-                </p>
-              </div>
+              !loading && (
+                <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
+                  <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Žádné eventy</h3>
+                  <p className="text-gray-600">Zkus změnit filtry nebo se vrať později</p>
+                </div>
+              )
             )}
           </div>
         )}
