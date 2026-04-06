@@ -114,6 +114,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, id: event.id });
   } catch (err) {
     console.error('Event create error:', err);
-    return NextResponse.json({ error: 'Chyba při ukládání eventu.' }, { status: 500 });
+    const detail = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: 'Chyba při ukládání eventu.', detail }, { status: 500 });
   }
 }
