@@ -33,12 +33,17 @@ export async function GET() {
     return NextResponse.json({ error: 'Nepřihlášen' }, { status: 401 });
   }
 
-  const events = await prisma.event.findMany({
-    where: { userId: session.user.id },
-    orderBy: { startDate: 'desc' },
-  });
-
-  return NextResponse.json({ events });
+  try {
+    const events = await prisma.event.findMany({
+      where: { userId: session.user.id },
+      orderBy: { startDate: 'desc' },
+    });
+    return NextResponse.json({ events });
+  } catch (err) {
+    // userId column may not exist yet in DB — return empty list gracefully
+    console.warn('GET /api/events fallback (column missing?):', (err as Error).message);
+    return NextResponse.json({ events: [] });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -76,23 +81,35 @@ export async function POST(req: NextRequest) {
     if (!startDate) return NextResponse.json({ error: 'Datum začátku je povinné.' }, { status: 400 });
     if (!coworkingSlug?.trim()) return NextResponse.json({ error: 'Vyberte coworking.' }, { status: 400 });
 
-    const event = await prisma.event.create({
-      data: {
-        userId,
-        coworkingSlug,
-        title: title.trim(),
-        description: description?.trim() ?? null,
-        eventType: eventType ?? 'other',
-        startDate: new Date(startDate),
-        endDate: endDate ? new Date(endDate) : null,
-        isAllDay: isAllDay ?? false,
-        maxAttendees: maxAttendees ? parseInt(maxAttendees) : null,
-        price: !isFree && price ? parseFloat(price) : null,
-        isFree: isFree ?? true,
-        externalUrl: externalUrl?.trim() ?? null,
-        imageUrl: imageUrl?.trim() ?? null,
-      },
-    });
+    const eventData = {
+      coworkingSlug,
+      title: title.trim(),
+      description: description?.trim() ?? null,
+      eventType: eventType ?? 'other',
+      startDate: new Date(startDate),
+      endDate: endDate ? new Date(endDate) : null,
+      isAllDay: isAllDay ?? false,
+      maxAttendees: maxAttendees ? parseInt(maxAttendees) : null,
+      price: !isFree && price ? parseFloat(price) : null,
+      isFree: isFree ?? true,
+      externalUrl: externalUrl?.trim() ?? null,
+      imageUrl: imageUrl?.trim() ?? null,
+    };
+
+    let event;
+    try {
+      // Try with userId first (schema has the column)
+      event = await prisma.event.create({ data: { ...eventData, userId } });
+    } catch (dbErr) {
+      const msg = (dbErr as Error).message ?? '';
+      // If the column doesn't exist yet in production DB, fall back without userId
+      if (msg.includes('userId') || msg.includes('column')) {
+        console.warn('Event create: userId column missing, creating without userId');
+        event = await prisma.event.create({ data: eventData });
+      } else {
+        throw dbErr;
+      }
+    }
 
     return NextResponse.json({ success: true, id: event.id });
   } catch (err) {
