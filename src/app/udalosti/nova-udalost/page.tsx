@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft, Send, CheckCircle, AlertCircle,
   Calendar, Clock, MapPin, Users, DollarSign,
-  Globe, Image, Lock, Zap,
+  Globe, Image, Lock, Zap, Upload, X, Link2,
 } from 'lucide-react';
 import { coworkingsData } from '@/lib/data/coworkings';
 
@@ -52,6 +52,23 @@ export default function NovaUdalostPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [imageMode, setImageMode] = useState<'upload' | 'url'>('upload');
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [imageError, setImageError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageFile = (file: File) => {
+    setImageError('');
+    if (!file.type.startsWith('image/')) { setImageError('Vyberte obrázek (jpg, png, webp…)'); return; }
+    if (file.size > 1024 * 1024) { setImageError('Obrázek musí být menší než 1 MB'); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      set('imageUrl', dataUrl);
+      setImagePreview(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const userRole: string = (session?.user as any)?.role ?? '';
 
@@ -178,7 +195,7 @@ export default function NovaUdalostPage() {
               Zpět na kalendář akcí
             </Link>
             <button
-              onClick={() => { setSuccess(false); setForm({ title: '', description: '', eventType: '', coworkingSlug: '', startDate: '', startTime: '09:00', endDate: '', endTime: '11:00', isAllDay: false, isFree: true, price: '', maxAttendees: '', externalUrl: '', imageUrl: '' }); }}
+              onClick={() => { setSuccess(false); setImagePreview(''); setImageError(''); setImageMode('upload'); setForm({ title: '', description: '', eventType: '', coworkingSlug: '', startDate: '', startTime: '09:00', endDate: '', endTime: '11:00', isAllDay: false, isFree: true, price: '', maxAttendees: '', externalUrl: '', imageUrl: '' }); }}
               className="w-full py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
             >
               Přidat další event
@@ -417,15 +434,59 @@ export default function NovaUdalostPage() {
                       className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                   </div>
-                  <div className="relative">
-                    <Image className="absolute left-4 top-3.5 w-4 h-4 text-gray-400" />
-                    <input
-                      type="url"
-                      value={form.imageUrl}
-                      onChange={(e) => set('imageUrl', e.target.value)}
-                      placeholder="URL obrázku / banneru eventu (volitelné)"
-                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    />
+                  {/* Image upload / URL */}
+                  <div className="border border-gray-200 rounded-xl overflow-hidden">
+                    {/* Toggle */}
+                    <div className="flex border-b border-gray-100">
+                      <button type="button"
+                        onClick={() => { setImageMode('upload'); set('imageUrl', imagePreview); }}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${imageMode === 'upload' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-50'}`}>
+                        <Upload className="w-4 h-4" /> Nahrát soubor
+                      </button>
+                      <button type="button"
+                        onClick={() => { setImageMode('url'); set('imageUrl', form.imageUrl.startsWith('data:') ? '' : form.imageUrl); setImagePreview(''); }}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${imageMode === 'url' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-50'}`}>
+                        <Link2 className="w-4 h-4" /> URL adresa
+                      </button>
+                    </div>
+
+                    <div className="p-3">
+                      {imageMode === 'upload' ? (
+                        <div>
+                          <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+                            onChange={e => e.target.files?.[0] && handleImageFile(e.target.files[0])} />
+                          {imagePreview ? (
+                            <div className="relative">
+                              <img src={imagePreview} alt="preview" className="w-full h-36 object-cover rounded-lg" />
+                              <button type="button"
+                                onClick={() => { setImagePreview(''); set('imageUrl', ''); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                                className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70">
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <button type="button" onClick={() => fileInputRef.current?.click()}
+                              onDragOver={e => e.preventDefault()}
+                              onDrop={e => { e.preventDefault(); e.dataTransfer.files?.[0] && handleImageFile(e.dataTransfer.files[0]); }}
+                              className="w-full border-2 border-dashed border-gray-200 rounded-lg py-6 flex flex-col items-center gap-2 text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-colors">
+                              <Image className="w-6 h-6" />
+                              <span className="text-xs">Klikni nebo přetáhni obrázek</span>
+                              <span className="text-xs text-gray-300">Max 1 MB · jpg, png, webp</span>
+                            </button>
+                          )}
+                          {imageError && <p className="text-xs text-red-500 mt-1">{imageError}</p>}
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <Globe className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                          <input type="url"
+                            value={form.imageUrl.startsWith('data:') ? '' : form.imageUrl}
+                            onChange={e => set('imageUrl', e.target.value)}
+                            placeholder="https://… URL obrázku eventu"
+                            className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </section>

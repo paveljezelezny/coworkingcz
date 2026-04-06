@@ -5,20 +5,32 @@ import { prisma } from '@/lib/prisma';
 import { hasPaidAccess } from '@/lib/membership';
 
 // ---------------------------------------------------------------------------
-// GET — public all events, or ?mine=true for current user's events
+// Migration helper — adds userId column if missing (runs inline on first need)
 // ---------------------------------------------------------------------------
 
-// Raw SELECT columns that exist even before userId migration
-const EVENT_COLS = `"id","coworkingSlug","title","description","eventType","startDate","endDate","isAllDay","maxAttendees","price","isFree","externalUrl","imageUrl","createdAt","updatedAt"`;
-
-async function queryEvents(where?: string, params: unknown[] = []): Promise<unknown[]> {
-  const sql = `SELECT ${EVENT_COLS} FROM "Event"${where ? ` WHERE ${where}` : ''} ORDER BY "startDate" ASC`;
+async function ensureUserIdColumn(): Promise<boolean> {
   try {
-    return await prisma.$queryRawUnsafe(sql, ...params) as unknown[];
+    await prisma.$executeRawUnsafe(
+      `ALTER TABLE "Event" ADD COLUMN IF NOT EXISTS "userId" TEXT`
+    );
+    // Try to add FK — ignore if already exists
+    await prisma.$executeRawUnsafe(`
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Event_userId_fkey') THEN
+          ALTER TABLE "Event" ADD CONSTRAINT "Event_userId_fkey"
+            FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+        END IF;
+      END $$
+    `);
+    return true;
   } catch {
-    return [];
+    return false;
   }
 }
+
+// ---------------------------------------------------------------------------
+// GET — public all events, or ?mine=true for current user's events
+// ---------------------------------------------------------------------------
 
 export async function GET(req: NextRequest) {
   const mine = new URL(req.url).searchParams.get('mine') === 'true';
@@ -28,16 +40,35 @@ export async function GET(req: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Nepřihlášen' }, { status: 401 });
     }
-    // Try with userId column first, fall back to raw SQL without it
+    const userId = session.user.id;
+    const role: string = (session.user as any).role ?? '';
+
+    // Try normal query (works if userId column exists)
     try {
       const events = await prisma.event.findMany({
-        where: { userId: session.user.id },
+        where: { userId },
         orderBy: { startDate: 'desc' },
       });
       return NextResponse.json({ events });
     } catch {
-      // userId column missing in DB — can't filter by user, return empty
-      return NextResponse.json({ events: [] });
+      // Column missing — run migration, then retry
+      await ensureUserIdColumn();
+      try {
+        // After migration: assign orphaned (null userId) events to super_admin
+        if (role === 'super_admin') {
+          await prisma.$executeRawUnsafe(
+            `UPDATE "Event" SET "userId" = $1 WHERE "userId" IS NULL`,
+            userId
+          );
+        }
+        const events = await prisma.event.findMany({
+          where: { userId },
+          orderBy: { startDate: 'desc' },
+        });
+        return NextResponse.json({ events });
+      } catch {
+        return NextResponse.json({ events: [] });
+      }
     }
   }
 
@@ -47,8 +78,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ events });
   } catch {
     // userId column missing — raw SQL without it
-    const events = await queryEvents();
-    return NextResponse.json({ events });
+    const cols = `"id","coworkingSlug","title","description","eventType","startDate","endDate","isAllDay","maxAttendees","price","isFree","externalUrl","imageUrl","createdAt","updatedAt"`;
+    try {
+      const events = await prisma.$queryRawUnsafe(`SELECT ${cols} FROM "Event" ORDER BY "startDate" ASC`);
+      return NextResponse.json({ events });
+    } catch {
+      return NextResponse.json({ events: [] });
+    }
   }
 }
 
@@ -104,33 +140,30 @@ export async function POST(req: NextRequest) {
 
     let eventId: string;
     try {
-      // Try with userId first (schema has the column)
       const event = await prisma.event.create({ data: { ...eventData, userId } });
       eventId = event.id;
     } catch (dbErr) {
       const msg = (dbErr as Error).message ?? '';
-      // userId column missing in DB — use raw SQL INSERT that skips that column
       if (msg.includes('userId') || msg.includes('column')) {
-        console.warn('Event create: userId column missing, falling back to raw INSERT');
-        const { randomUUID } = await import('crypto');
-        eventId = randomUUID();
-        await prisma.$executeRawUnsafe(
-          `INSERT INTO "Event" ("id","coworkingSlug","title","description","eventType","startDate","endDate","isAllDay","maxAttendees","price","isFree","externalUrl","imageUrl","createdAt","updatedAt")
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NOW(),NOW())`,
-          eventId,
-          eventData.coworkingSlug,
-          eventData.title,
-          eventData.description,
-          eventData.eventType,
-          eventData.startDate,
-          eventData.endDate ?? null,
-          eventData.isAllDay,
-          eventData.maxAttendees ?? null,
-          eventData.price ?? null,
-          eventData.isFree,
-          eventData.externalUrl ?? null,
-          eventData.imageUrl ?? null,
-        );
+        // Run migration inline, then retry
+        await ensureUserIdColumn();
+        try {
+          const event = await prisma.event.create({ data: { ...eventData, userId } });
+          eventId = event.id;
+        } catch {
+          // Migration ran but Prisma client not refreshed — raw INSERT with userId
+          const { randomUUID } = await import('crypto');
+          eventId = randomUUID();
+          await prisma.$executeRawUnsafe(
+            `INSERT INTO "Event" ("id","userId","coworkingSlug","title","description","eventType","startDate","endDate","isAllDay","maxAttendees","price","isFree","externalUrl","imageUrl","createdAt","updatedAt")
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,NOW(),NOW())`,
+            eventId, userId,
+            eventData.coworkingSlug, eventData.title, eventData.description,
+            eventData.eventType, eventData.startDate, eventData.endDate ?? null,
+            eventData.isAllDay, eventData.maxAttendees ?? null, eventData.price ?? null,
+            eventData.isFree, eventData.externalUrl ?? null, eventData.imageUrl ?? null,
+          );
+        }
       } else {
         throw dbErr;
       }
