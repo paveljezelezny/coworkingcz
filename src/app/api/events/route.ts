@@ -2,26 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-
-async function hasPaidAccess(userId: string, role: string): Promise<boolean> {
-  if (role === 'super_admin') return true;
-  if (role === 'coworking_admin') {
-    const edit = await prisma.coworkingEdit.findFirst({ where: { userId } });
-    if (edit) return true;
-  }
-  const profile = await prisma.coworkerProfile.findUnique({
-    where: { userId },
-    select: { membershipTier: true, membershipEnd: true },
-  });
-  if (
-    profile?.membershipTier &&
-    profile.membershipEnd &&
-    new Date(profile.membershipEnd) > new Date()
-  ) {
-    return true;
-  }
-  return false;
-}
+import { hasPaidAccess } from '@/lib/membership';
 
 // ---------------------------------------------------------------------------
 // GET — public all events, or ?mine=true for current user's events
