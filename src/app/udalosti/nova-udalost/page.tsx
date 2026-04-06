@@ -114,7 +114,7 @@ export default function NovaUdalostPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.detail ? `${data.error} [${data.detail}]` : (data.error || 'Nastala chyba.'));
+        setError(data.error || 'Nastala chyba.');
       } else {
         setSuccess(true);
       }

@@ -96,25 +96,43 @@ export async function POST(req: NextRequest) {
       imageUrl: imageUrl?.trim() ?? null,
     };
 
-    let event;
+    let eventId: string;
     try {
       // Try with userId first (schema has the column)
-      event = await prisma.event.create({ data: { ...eventData, userId } });
+      const event = await prisma.event.create({ data: { ...eventData, userId } });
+      eventId = event.id;
     } catch (dbErr) {
       const msg = (dbErr as Error).message ?? '';
-      // If the column doesn't exist yet in production DB, fall back without userId
+      // userId column missing in DB — use raw SQL INSERT that skips that column
       if (msg.includes('userId') || msg.includes('column')) {
-        console.warn('Event create: userId column missing, creating without userId');
-        event = await prisma.event.create({ data: eventData });
+        console.warn('Event create: userId column missing, falling back to raw INSERT');
+        const { randomUUID } = await import('crypto');
+        eventId = randomUUID();
+        await prisma.$executeRawUnsafe(
+          `INSERT INTO "Event" ("id","coworkingSlug","title","description","eventType","startDate","endDate","isAllDay","maxAttendees","price","isFree","externalUrl","imageUrl","createdAt","updatedAt")
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NOW(),NOW())`,
+          eventId,
+          eventData.coworkingSlug,
+          eventData.title,
+          eventData.description,
+          eventData.eventType,
+          eventData.startDate,
+          eventData.endDate ?? null,
+          eventData.isAllDay,
+          eventData.maxAttendees ?? null,
+          eventData.price ?? null,
+          eventData.isFree,
+          eventData.externalUrl ?? null,
+          eventData.imageUrl ?? null,
+        );
       } else {
         throw dbErr;
       }
     }
 
-    return NextResponse.json({ success: true, id: event.id });
+    return NextResponse.json({ success: true, id: eventId });
   } catch (err) {
     console.error('Event create error:', err);
-    const detail = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ error: 'Chyba při ukládání eventu.', detail }, { status: 500 });
+    return NextResponse.json({ error: 'Chyba při ukládání eventu.' }, { status: 500 });
   }
 }
