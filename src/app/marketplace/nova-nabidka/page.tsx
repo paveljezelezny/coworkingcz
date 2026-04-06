@@ -135,7 +135,7 @@ export default function NovaInzeratPage() {
       return;
     }
     if (status === 'authenticated') {
-      fetch('/api/marketplace/listings')
+      fetch('/api/marketplace/listings?mine=true')
         .then((r) => r.json())
         .then((data) => setQuota(data))
         .finally(() => setLoadingQuota(false));

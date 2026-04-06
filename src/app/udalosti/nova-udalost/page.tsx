@@ -62,14 +62,9 @@ export default function NovaUdalostPage() {
     }
     if (status === 'authenticated') {
       // Check paid access via marketplace quota endpoint (reuses same logic)
-      fetch('/api/marketplace/listings')
+      fetch('/api/marketplace/listings?mine=true')
         .then((r) => r.json())
-        .then((d) => {
-          const role = userRole;
-          // Super admin or coworking admin with claimed coworking = paid
-          // Or coworker with active membership
-          setPaidAccess(d.paid || role === 'super_admin');
-        })
+        .then((d) => setPaidAccess(d.paid === true))
         .catch(() => setPaidAccess(false));
     }
   }, [status, userRole]);
