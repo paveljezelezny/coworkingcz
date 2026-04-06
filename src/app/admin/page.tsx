@@ -211,6 +211,9 @@ export default function AdminDashboard() {
                     Kapacita
                   </th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                    Plán
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                     Status
                   </th>
                   <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">
@@ -229,6 +232,15 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {coworking.capacity || '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      {(() => {
+                        const cap = coworking.capacity || 0;
+                        if (cap <= 0) return <span className="text-gray-400">—</span>;
+                        if (cap < 30) return <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Malý</span>;
+                        if (cap <= 60) return <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Střední</span>;
+                        return <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">Velký</span>;
+                      })()}
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <div className="flex gap-2 flex-wrap">

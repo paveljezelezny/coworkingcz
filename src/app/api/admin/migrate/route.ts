@@ -1,7 +1,22 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+
+// DELETE /api/admin/migrate?action=delete-events — super_admin only
+export async function DELETE(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if ((session?.user as any)?.role !== 'super_admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  const action = new URL(req.url).searchParams.get('action');
+  if (action === 'delete-events') {
+    await prisma.$executeRawUnsafe(`DELETE FROM "EventRegistration"`);
+    await prisma.$executeRawUnsafe(`DELETE FROM "Event"`);
+    return NextResponse.json({ ok: true, message: 'Všechny eventy smazány' });
+  }
+  return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
+}
 
 export async function POST() {
   const session = await getServerSession(authOptions);

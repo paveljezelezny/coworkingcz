@@ -1656,6 +1656,27 @@ export default function ProfilPage() {
                   <ShieldCheck className="w-4 h-4 text-gray-400" />
                   <span>{roleLabel(profile.role)}</span>
                 </div>
+                {/* Membership tier badge */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Award className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  {(() => {
+                    const t = profile.membershipTier;
+                    if (!t || t === 'free') return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">Zdarma</span>;
+                    if (t.startsWith('trial')) return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-teal-100 text-teal-700">Trial 30 dní</span>;
+                    if (t === 'monthly') return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Měsíční</span>;
+                    if (t === 'yearly') return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Roční</span>;
+                    if (t === 'corporate') return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">Firemní</span>;
+                    return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">{t}</span>;
+                  })()}
+                  {profile.membershipEnd && (
+                    <span className="text-xs text-gray-400">do {formatDate(profile.membershipEnd)}</span>
+                  )}
+                </div>
+                {/* User ID */}
+                <div className="flex items-start gap-2 text-gray-400">
+                  <span className="text-xs font-bold text-gray-300 flex-shrink-0 mt-0.5">#</span>
+                  <span className="text-xs font-mono break-all leading-relaxed">{profile.id}</span>
+                </div>
                 {!profile.isPublic && (
                   <div className="flex items-center gap-2 text-gray-500">
                     <Lock className="w-4 h-4 text-gray-400" />
