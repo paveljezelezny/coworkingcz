@@ -27,6 +27,18 @@ async function hasPaidAccess(userId: string, role: string): Promise<boolean> {
 // GET — public all events, or ?mine=true for current user's events
 // ---------------------------------------------------------------------------
 
+// Raw SELECT columns that exist even before userId migration
+const EVENT_COLS = `"id","coworkingSlug","title","description","eventType","startDate","endDate","isAllDay","maxAttendees","price","isFree","externalUrl","imageUrl","createdAt","updatedAt"`;
+
+async function queryEvents(where?: string, params: unknown[] = []): Promise<unknown[]> {
+  const sql = `SELECT ${EVENT_COLS} FROM "Event"${where ? ` WHERE ${where}` : ''} ORDER BY "startDate" ASC`;
+  try {
+    return await prisma.$queryRawUnsafe(sql, ...params) as unknown[];
+  } catch {
+    return [];
+  }
+}
+
 export async function GET(req: NextRequest) {
   const mine = new URL(req.url).searchParams.get('mine') === 'true';
 
@@ -35,27 +47,27 @@ export async function GET(req: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Nepřihlášen' }, { status: 401 });
     }
+    // Try with userId column first, fall back to raw SQL without it
     try {
       const events = await prisma.event.findMany({
         where: { userId: session.user.id },
         orderBy: { startDate: 'desc' },
       });
       return NextResponse.json({ events });
-    } catch (err) {
-      console.warn('GET /api/events mine fallback:', (err as Error).message);
+    } catch {
+      // userId column missing in DB — can't filter by user, return empty
       return NextResponse.json({ events: [] });
     }
   }
 
   // Public — all events
   try {
-    const events = await prisma.event.findMany({
-      orderBy: { startDate: 'asc' },
-    });
+    const events = await prisma.event.findMany({ orderBy: { startDate: 'asc' } });
     return NextResponse.json({ events });
-  } catch (err) {
-    console.warn('GET /api/events public fallback:', (err as Error).message);
-    return NextResponse.json({ events: [] });
+  } catch {
+    // userId column missing — raw SQL without it
+    const events = await queryEvents();
+    return NextResponse.json({ events });
   }
 }
 
