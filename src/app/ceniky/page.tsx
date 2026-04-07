@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Check, X, Globe, Users, Award, HelpCircle, Plus,
-  Building2, User, ChevronDown, Gift, ArrowRight,
+  Building2, User, ChevronDown, Gift, ArrowRight, Zap,
   BadgeCheck, CalendarPlus, ShoppingBag,
 } from 'lucide-react';
 import { PLATFORM_PRICING, COWORKER_MEMBERSHIP, COWORKER_MEMBERSHIP_BENEFITS } from '@/lib/types';
