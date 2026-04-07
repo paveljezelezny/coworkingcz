@@ -1,4 +1,4 @@
-import { Search, Users, Zap, Award, Globe, ArrowRight, Calendar, Plus } from 'lucide-react';
+import { ArrowRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import CoworkingCard from '@/components/CoworkingCard';
 import HeroSection from '@/components/HeroSection';
@@ -8,7 +8,7 @@ import {
   getUpcomingEvents,
   getLatestMarketplaceListings,
 } from '@/lib/data/coworkings';
-import { PLATFORM_PRICING, COWORKER_MEMBERSHIP, MarketplaceListing } from '@/lib/types';
+import { MarketplaceListing } from '@/lib/types';
 
 // force-dynamic so the random 8 coworkings reshuffle on each request
 export const dynamic = 'force-dynamic';
@@ -219,100 +219,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* For Coworking Spaces CTA */}
-      <section className="py-16 sm:py-24 bg-gradient-to-br from-blue-50 to-orange-50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="section-title">Máte coworking prostor?</h2>
-            <p className="section-subtitle">Zaregistrujte jej a získejte nové členy</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {PLATFORM_PRICING.map((tier, idx) => (
-              <div
-                key={tier.tier}
-                className="bg-white rounded-xl border-2 border-gray-100 p-8 hover:border-blue-600 hover:shadow-lg transition-all"
-              >
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{tier.name}</h3>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold text-blue-600">{tier.monthlyPrice}</span>
-                  <span className="text-gray-600"> Kč/měsíc</span>
-                </div>
-
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-center gap-3 text-sm text-gray-600">
-                    <Users className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                    Až {tier.maxSeats} míst
-                  </li>
-                  <li className="flex items-center gap-3 text-sm text-gray-600">
-                    <Globe className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                    {tier.includedAddresses} adresa/y
-                  </li>
-                  <li className="flex items-center gap-3 text-sm text-gray-600">
-                    <Award className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                    20% sleva na roční plán
-                  </li>
-                </ul>
-
-                <button className="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-                  Zaregistrovat
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Link
-              href="/ceniky"
-              className="text-blue-600 hover:text-blue-700 font-semibold flex items-center justify-center gap-2"
-            >
-              Zobrazit všechny plány
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Coworker Membership */}
-      <section className="py-16 sm:py-24 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl p-8 sm:p-12 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Členství pro coworkery</h2>
-            <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
-              Přidej se do komunity a získej přístup k nejlepším coworkingům v České republice
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white/10 backdrop-blur rounded-xl p-6">
-                <div className="text-3xl font-bold mb-1">{COWORKER_MEMBERSHIP.monthlyPrice} Kč</div>
-                <div className="text-blue-100 text-sm mb-3">měsíčně</div>
-                <div className="text-xs text-blue-200">Flexibilní, bez závazků</div>
-              </div>
-              <div className="bg-white/20 backdrop-blur rounded-xl p-6 ring-2 ring-white/40">
-                <div className="text-xs font-bold text-orange-300 mb-1 tracking-widest">NEJLEPŠÍ VOLBA</div>
-                <div className="text-3xl font-bold mb-1">{COWORKER_MEMBERSHIP.yearlyPrice} Kč</div>
-                <div className="text-blue-100 text-sm mb-2">ročně</div>
-                <div className="text-xs text-green-300 font-medium">
-                  Ušetříš {COWORKER_MEMBERSHIP.yearlyMonthlySaving} Kč ročně
-                </div>
-              </div>
-              <div className="bg-white/10 backdrop-blur rounded-xl p-6">
-                <div className="text-3xl font-bold mb-1">{COWORKER_MEMBERSHIP.teamYearlyPrice} Kč</div>
-                <div className="text-blue-100 text-sm mb-3">ročně / tým</div>
-                <div className="text-xs text-blue-200">Až {COWORKER_MEMBERSHIP.teamMaxMembers} lidí z jedné firmy</div>
-              </div>
-            </div>
-
-            <Link
-              href="/registrace"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              Stát se členem
-            </Link>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
