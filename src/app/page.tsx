@@ -1,4 +1,4 @@
-import { ArrowRight, Plus, Calendar, MapPin, Tag } from 'lucide-react';
+import { ArrowRight, Plus, Calendar, MapPin, Tag, Users } from 'lucide-react';
 import Link from 'next/link';
 import CoworkingCard from '@/components/CoworkingCard';
 import HeroSection from '@/components/HeroSection';
@@ -163,13 +163,74 @@ async function fetchMarketplaceListings(): Promise<HomeListing[]> {
   }
 }
 
+// ─── Newest coworkers ─────────────────────────────────────────────────────────
+
+interface HomeCoworker {
+  id: string;
+  name: string;
+  profession: string | null;
+  company: string | null;
+  avatarUrl: string | null;
+  homeCoworkingSlug: string | null;
+}
+
+async function fetchNewestCoworkers(): Promise<HomeCoworker[]> {
+  try {
+    type RawRow = {
+      id: string; name: string | null; profession: string | null;
+      avatarUrl: string | null; userImage: string | null;
+      homeCoworkingSlug: string | null; isPhotoPublic: boolean;
+      company?: string | null;
+    };
+    let rows: RawRow[];
+    try {
+      rows = (await prisma.$queryRawUnsafe(`
+        SELECT cp.id, u.name, cp.profession, cp."avatarUrl", u.image AS "userImage",
+               cp."homeCoworkingSlug", cp.company,
+               COALESCE(cp."isPhotoPublic", true) AS "isPhotoPublic"
+        FROM "CoworkerProfile" cp
+        INNER JOIN "User" u ON u.id = cp."userId"
+        WHERE COALESCE(cp."isPublic", true) = true
+          AND cp."membershipTier" IS NOT NULL
+          AND cp."membershipTier" NOT IN ('free')
+        ORDER BY cp."createdAt" DESC
+        LIMIT 8
+      `)) as RawRow[];
+    } catch {
+      rows = (await prisma.$queryRawUnsafe(`
+        SELECT cp.id, u.name, cp.profession, cp."avatarUrl", u.image AS "userImage",
+               cp."homeCoworkingSlug",
+               COALESCE(cp."isPhotoPublic", true) AS "isPhotoPublic"
+        FROM "CoworkerProfile" cp
+        INNER JOIN "User" u ON u.id = cp."userId"
+        WHERE COALESCE(cp."isPublic", true) = true
+          AND cp."membershipTier" IS NOT NULL
+          AND cp."membershipTier" NOT IN ('free')
+        ORDER BY cp."createdAt" DESC
+        LIMIT 8
+      `)) as RawRow[];
+    }
+    return rows.map(r => ({
+      id: r.id,
+      name: r.name ?? '(bez jména)',
+      profession: r.profession ?? null,
+      company: r.company ?? null,
+      avatarUrl: r.isPhotoPublic ? (r.avatarUrl ?? r.userImage ?? null) : null,
+      homeCoworkingSlug: r.homeCoworkingSlug ?? null,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function Home() {
-  const [events, marketplaceListings, slugNameMap] = await Promise.all([
+  const [events, marketplaceListings, slugNameMap, newestCoworkers] = await Promise.all([
     fetchUpcomingEvents(),
     fetchMarketplaceListings(),
     buildSlugNameMap(),
+    fetchNewestCoworkers(),
   ]);
 
   const featuredCoworkings = getFeaturedCoworkings();
@@ -194,10 +255,10 @@ export default async function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {featuredCoworkings.map((coworking, idx) => (
-              <div key={coworking.id} className="animate-slide-up" style={{ animationDelay: `${idx * 100}ms` }}>
-                <CoworkingCard coworking={coworking} />
+              <div key={coworking.id} className="animate-slide-up" style={{ animationDelay: `${Math.min(idx, 7) * 60}ms` }}>
+                <CoworkingCard coworking={coworking} compact />
               </div>
             ))}
           </div>
@@ -210,6 +271,73 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── Noví coworkeři v komunitě ── */}
+      {newestCoworkers.length > 0 && (
+        <section className="py-12 sm:py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-end mb-8">
+              <div>
+                <h2 className="section-title">Noví coworkeři v komunitě</h2>
+                <p className="section-subtitle">Nedávno se přidali do naší sítě</p>
+              </div>
+              <Link href="/coworkeri"
+                className="hidden sm:flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold">
+                Zobrazit všechny <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
+              {newestCoworkers.map((cw) => {
+                const initials = cw.name.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase();
+                const coworkingLabel = cw.homeCoworkingSlug ? (slugNameMap[cw.homeCoworkingSlug] ?? cw.homeCoworkingSlug) : null;
+                return (
+                  <Link
+                    key={cw.id}
+                    href="/coworkeri"
+                    className="flex flex-col items-center text-center p-3 bg-white rounded-xl border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all group"
+                  >
+                    {/* Avatar */}
+                    <div className="mb-2 flex-shrink-0">
+                      {cw.avatarUrl ? (
+                        <img src={cw.avatarUrl} alt={cw.name} className="w-14 h-14 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+                          {initials || '?'}
+                        </div>
+                      )}
+                    </div>
+                    {/* Name */}
+                    <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1 w-full">
+                      {cw.name}
+                    </p>
+                    {/* Profession or company */}
+                    {(cw.profession || cw.company) && (
+                      <p className="text-xs text-gray-400 line-clamp-1 mt-0.5 w-full">
+                        {cw.profession || cw.company}
+                      </p>
+                    )}
+                    {/* Home coworking */}
+                    {coworkingLabel && (
+                      <p className="text-xs text-blue-500 line-clamp-1 mt-0.5 w-full flex items-center justify-center gap-0.5">
+                        <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+                        {coworkingLabel}
+                      </p>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="mt-6 sm:hidden">
+              <Link href="/coworkeri"
+                className="block w-full py-3 px-4 bg-blue-600 text-white text-center font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                Zobrazit všechny coworkery
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Upcoming Events (from DB) ── */}
       <section className="py-16 sm:py-24 bg-gray-50">

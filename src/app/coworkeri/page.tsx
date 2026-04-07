@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import {
   Search, X, LayoutGrid, List, MapPin, Globe, Linkedin,
   Phone, Mail, MessageSquare, Building2, ChevronDown,
-  ExternalLink, Users, Award,
+  ExternalLink, Users,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -34,15 +34,6 @@ interface CoworkingInfo {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function membershipBadge(tier: string | null) {
-  if (!tier) return null;
-  if (tier.startsWith('trial')) return { label: 'Trial', cls: 'bg-teal-100 text-teal-700' };
-  if (tier === 'monthly') return { label: 'Měsíční', cls: 'bg-green-100 text-green-700' };
-  if (tier === 'yearly') return { label: 'Roční', cls: 'bg-blue-100 text-blue-700' };
-  if (tier === 'team') return { label: 'Týmový', cls: 'bg-indigo-100 text-indigo-700' };
-  if (tier === 'premium') return { label: 'Premium', cls: 'bg-amber-100 text-amber-700' };
-  return { label: tier, cls: 'bg-gray-100 text-gray-600' };
-}
 
 function CoworkerAvatar({ name, src, size = 'md' }: { name: string; src: string | null; size?: 'sm' | 'md' | 'lg' }) {
   const sz = size === 'lg' ? 'w-20 h-20 text-2xl' : size === 'md' ? 'w-14 h-14 text-lg' : 'w-10 h-10 text-sm';
@@ -71,8 +62,6 @@ function CoworkerModal({
     return () => document.removeEventListener('keydown', h);
   }, [onClose]);
 
-  const badge = membershipBadge(coworker.membershipTier);
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
@@ -97,18 +86,13 @@ function CoworkerModal({
               {coworker.profession && (
                 <p className="text-gray-500 text-sm mt-0.5">{coworker.profession}</p>
               )}
-              <div className="flex flex-wrap gap-2 mt-2">
-                {badge && (
-                  <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 ${badge.cls}`}>
-                    <Award className="w-3 h-3" /> {badge.label}
-                  </span>
-                )}
-                {coworkingName && (
+              {coworkingName && (
+                <div className="flex flex-wrap gap-2 mt-2">
                   <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 flex items-center gap-1">
                     <Building2 className="w-3 h-3" /> {coworkingName}
                   </span>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -189,7 +173,6 @@ function CoworkerCard({
   coworkingName: string | null;
   onClick: () => void;
 }) {
-  const badge = membershipBadge(coworker.membershipTier);
   return (
     <button
       onClick={onClick}
@@ -204,18 +187,13 @@ function CoworkerCard({
           {coworker.profession && (
             <p className="text-sm text-gray-500 line-clamp-1 mt-0.5">{coworker.profession}</p>
           )}
-          <div className="flex flex-wrap gap-1.5 mt-1.5">
-            {badge && (
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badge.cls}`}>
-                {badge.label}
-              </span>
-            )}
-            {coworkingName && (
+          {coworkingName && (
+            <div className="flex flex-wrap gap-1.5 mt-1.5">
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 flex items-center gap-1">
                 <MapPin className="w-2.5 h-2.5" /> {coworkingName}
               </span>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -248,7 +226,6 @@ function CoworkerRow({
   coworkingName: string | null;
   onClick: () => void;
 }) {
-  const badge = membershipBadge(coworker.membershipTier);
   return (
     <button
       onClick={onClick}
@@ -271,11 +248,6 @@ function CoworkerRow({
         </div>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
-        {badge && (
-          <span className={`hidden sm:inline text-xs font-semibold px-2 py-0.5 rounded-full ${badge.cls}`}>
-            {badge.label}
-          </span>
-        )}
         {coworker.skills.slice(0, 2).map((s, i) => (
           <span key={i} className="hidden md:inline px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">{s}</span>
         ))}

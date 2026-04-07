@@ -1712,20 +1712,28 @@ function profileCompleteness(cw: CoworkingSpace): number {
 }
 
 export const getFeaturedCoworkings = () => {
-  // Top tier: isFeatured nastavuje pouze super_admin — vždy první pozice
-  const topTier = coworkingsData
-    .filter((cw) => cw.isFeatured)
-    .sort((a, b) => profileCompleteness(b) - profileCompleteness(a))
-    .slice(0, 8);
+  // Tier 1: zvýrazněné (isFeatured)
+  const tier1 = coworkingsData.filter((cw) => cw.isFeatured);
+  const tier1Ids = new Set(tier1.map((cw) => cw.id));
 
-  const topIds = new Set(topTier.map((cw) => cw.id));
+  // Tier 2: ověřené, ale ne zvýrazněné
+  const tier2 = coworkingsData.filter((cw) => !tier1Ids.has(cw.id) && cw.isVerified);
+  const tier2Ids = new Set(tier2.map((cw) => cw.id));
 
-  // Random 8 from the rest — shuffle with Math.random() for per-request variation
-  const rest = coworkingsData.filter((cw) => !topIds.has(cw.id));
+  // Tier 3: mají speciální nabídku, ale nejsou ve tier1/2
+  const tier3 = coworkingsData.filter(
+    (cw) => !tier1Ids.has(cw.id) && !tier2Ids.has(cw.id) && (cw as unknown as Record<string, unknown>).specialDeal && ((cw as unknown as { specialDeal?: { enabled?: boolean } }).specialDeal?.enabled)
+  );
+  const tier3Ids = new Set(tier3.map((cw) => cw.id));
+
+  // Tier 4: zbytek — náhodně zamíchaný
+  const rest = coworkingsData.filter(
+    (cw) => !tier1Ids.has(cw.id) && !tier2Ids.has(cw.id) && !tier3Ids.has(cw.id)
+  );
   const shuffled = rest.slice().sort(() => Math.random() - 0.5);
-  const randomEight = shuffled.slice(0, 8);
 
-  return [...topTier, ...randomEight];
+  // Max 16 celkem (4×4 na desktopu)
+  return [...tier1, ...tier2, ...tier3, ...shuffled].slice(0, 16);
 };
 
 export const getUpcomingEvents = () => {

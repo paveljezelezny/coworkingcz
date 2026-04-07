@@ -7,9 +7,10 @@ import { CoworkingSpace, AMENITY_LABELS } from '@/lib/types';
 
 interface CoworkingCardProps {
   coworking: CoworkingSpace;
+  compact?: boolean;
 }
 
-export default function CoworkingCard({ coworking }: CoworkingCardProps) {
+export default function CoworkingCard({ coworking, compact = false }: CoworkingCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [currentPhotoIdx, setCurrentPhotoIdx] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -56,7 +57,7 @@ export default function CoworkingCard({ coworking }: CoworkingCardProps) {
       >
         {/* Image with crossfade slideshow */}
         <div
-          className={`relative w-full h-48 bg-gradient-to-br ${getGradientColor(coworking.name)} overflow-hidden flex-shrink-0`}
+          className={`relative w-full bg-gradient-to-br ${getGradientColor(coworking.name)} overflow-hidden flex-shrink-0 ${compact ? 'h-32' : 'h-48'}`}
         >
           {photos.length > 0 ? (
             photos.map((photo, idx) => (
@@ -117,27 +118,31 @@ export default function CoworkingCard({ coworking }: CoworkingCardProps) {
             </div>
           </div>
 
-          {/* Short description */}
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2 flex-grow">
-            {coworking.shortDescription}
-          </p>
+          {/* Short description — hidden in compact mode */}
+          {!compact && (
+            <p className="text-sm text-gray-600 mb-3 line-clamp-2 flex-grow">
+              {coworking.shortDescription}
+            </p>
+          )}
 
-          {/* Amenities */}
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {amenityLabels.map((label, idx) => (
-              <span
-                key={idx}
-                className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded font-medium"
-              >
-                {label}
-              </span>
-            ))}
-            {coworking.amenities.length > 3 && (
-              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded font-medium">
-                +{coworking.amenities.length - 3}
-              </span>
-            )}
-          </div>
+          {/* Amenities — hidden in compact mode */}
+          {!compact && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {amenityLabels.map((label, idx) => (
+                <span
+                  key={idx}
+                  className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded font-medium"
+                >
+                  {label}
+                </span>
+              ))}
+              {coworking.amenities.length > 3 && (
+                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded font-medium">
+                  +{coworking.amenities.length - 3}
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Info row: capacity + prices */}
           <div className="border-t border-gray-100 pt-3 mb-4 space-y-1.5">
