@@ -234,21 +234,24 @@ export default function HeroSection({ cities }: HeroSectionProps) {
           ))}
         </div>
 
-        {/* Desktop layout */}
-        <div className="hidden sm:flex items-stretch gap-4 mb-10">
-          {/* Left column: tiles 0 & 1 */}
-          <div className="flex flex-col gap-3 w-52 lg:w-60 flex-shrink-0">
-            <HeroTile tile={TILES[0]} isLight={isLightBg} />
-            <HeroTile tile={TILES[1]} isLight={isLightBg} />
-          </div>
+        {/* ── Desktop layout ── */}
+        <div className="hidden sm:block">
 
-          {/* Center: search */}
-          <div className="flex-1 flex items-center">
-            <div className="w-full">
+          {/* Row 1: tiles | form | tiles — all same height via items-stretch */}
+          <div className="flex items-stretch gap-4 mb-5">
+
+            {/* Left tiles */}
+            <div className="flex flex-col gap-3 w-52 lg:w-60 flex-shrink-0">
+              <HeroTile tile={TILES[0]} isLight={isLightBg} />
+              <HeroTile tile={TILES[1]} isLight={isLightBg} />
+            </div>
+
+            {/* Center: form fills full height of tiles */}
+            <div className="flex-1">
               <form
                 method="get"
                 action="/coworkingy"
-                className="bg-white/10 backdrop-blur-md border border-white/25 rounded-xl p-4 space-y-4 sm:space-y-3 shadow-2xl"
+                className="h-full bg-white/10 backdrop-blur-md border border-white/25 rounded-xl p-4 shadow-2xl flex flex-col justify-between gap-3"
               >
                 <div className="relative">
                   <MapPin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
@@ -282,21 +285,48 @@ export default function HeroSection({ cities }: HeroSectionProps) {
                 </button>
               </form>
             </div>
+
+            {/* Right tiles */}
+            <div className="flex flex-col gap-3 w-52 lg:w-60 flex-shrink-0">
+              <HeroTile tile={TILES[2]} isLight={isLightBg} />
+              <HeroTile tile={TILES[3]} isLight={isLightBg} />
+            </div>
           </div>
 
-          {/* Right column: tiles 2 & 3 */}
-          <div className="flex flex-col gap-3 w-52 lg:w-60 flex-shrink-0">
-            <HeroTile tile={TILES[2]} isLight={isLightBg} />
-            <HeroTile tile={TILES[3]} isLight={isLightBg} />
+          {/* Row 2: stats only below center search, spacers align with tiles */}
+          <div className="flex gap-4">
+            <div className="w-52 lg:w-60 flex-shrink-0" />
+            <div className="flex-1 grid grid-cols-3 gap-4 text-center">
+              <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
+                <div className={`text-3xl font-bold transition-colors duration-700 ${statsTextClass}`}>
+                  <AnimatedCounter target={COWORKING_COUNT} suffix="+" duration={1800} />
+                </div>
+                <p className={`text-sm mt-1 transition-colors duration-700 ${statsSubClass}`}>coworkingů</p>
+              </div>
+              <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
+                <div className={`text-3xl font-bold transition-colors duration-700 ${statsTextClass}`}>
+                  <AnimatedCounter target={CITY_COUNT} suffix="+" duration={1800} />
+                </div>
+                <p className={`text-sm mt-1 transition-colors duration-700 ${statsSubClass}`}>měst</p>
+              </div>
+              <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
+                <div className={`text-3xl font-bold transition-colors duration-700 ${statsTextClass}`}>
+                  <AnimatedCounter target={MEMBER_COUNT} suffix="+" duration={2200} />
+                </div>
+                <p className={`text-sm mt-1 transition-colors duration-700 ${statsSubClass}`}>coworkerů</p>
+              </div>
+            </div>
+            <div className="w-52 lg:w-60 flex-shrink-0" />
           </div>
+
         </div>
 
-        {/* Mobile search (below tiles on mobile) */}
-        <div className="sm:hidden mb-8">
+        {/* ── Mobile: search + stats ── */}
+        <div className="sm:hidden mb-4">
           <form
             method="get"
             action="/coworkingy"
-            className="bg-white/10 backdrop-blur-md border border-white/25 rounded-xl p-4 space-y-3 shadow-2xl"
+            className="bg-white/10 backdrop-blur-md border border-white/25 rounded-xl p-4 space-y-3 shadow-2xl mb-6"
           >
             <div className="relative">
               <MapPin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
@@ -329,27 +359,27 @@ export default function HeroSection({ cities }: HeroSectionProps) {
               Hledat coworking
             </button>
           </form>
-        </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 sm:gap-8 text-center">
-          <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
-            <div className={`text-3xl sm:text-4xl font-bold transition-colors duration-700 ${statsTextClass}`}>
-              <AnimatedCounter target={COWORKING_COUNT} suffix="+" duration={1800} />
+          {/* Mobile stats */}
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div className={`text-2xl font-bold ${statsTextClass}`}>
+                <AnimatedCounter target={COWORKING_COUNT} suffix="+" duration={1800} />
+              </div>
+              <p className={`text-xs mt-1 ${statsSubClass}`}>coworkingů</p>
             </div>
-            <p className={`text-sm mt-1 transition-colors duration-700 ${statsSubClass}`}>coworkingů</p>
-          </div>
-          <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
-            <div className={`text-3xl sm:text-4xl font-bold transition-colors duration-700 ${statsTextClass}`}>
-              <AnimatedCounter target={CITY_COUNT} suffix="+" duration={1800} />
+            <div>
+              <div className={`text-2xl font-bold ${statsTextClass}`}>
+                <AnimatedCounter target={CITY_COUNT} suffix="+" duration={1800} />
+              </div>
+              <p className={`text-xs mt-1 ${statsSubClass}`}>měst</p>
             </div>
-            <p className={`text-sm mt-1 transition-colors duration-700 ${statsSubClass}`}>měst</p>
-          </div>
-          <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
-            <div className={`text-3xl sm:text-4xl font-bold transition-colors duration-700 ${statsTextClass}`}>
-              <AnimatedCounter target={MEMBER_COUNT} suffix="+" duration={2200} />
+            <div>
+              <div className={`text-2xl font-bold ${statsTextClass}`}>
+                <AnimatedCounter target={MEMBER_COUNT} suffix="+" duration={2200} />
+              </div>
+              <p className={`text-xs mt-1 ${statsSubClass}`}>coworkerů</p>
             </div>
-            <p className={`text-sm mt-1 transition-colors duration-700 ${statsSubClass}`}>coworkerů</p>
           </div>
         </div>
 
