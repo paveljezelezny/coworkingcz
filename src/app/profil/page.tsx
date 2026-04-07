@@ -1562,13 +1562,13 @@ export default function ProfilPage() {
   }, [authStatus]);
 
   // Fetch coworkings list for homeCoworking dropdown
+  // /api/coworkings returns a raw array (not { coworkings: [] })
   useEffect(() => {
     fetch('/api/coworkings')
       .then(r => r.json())
-      .then((data: { coworkings?: Array<{ slug: string; name: string }> }) => {
-        if (data.coworkings) {
-          setCoworkingOptions(data.coworkings.map(c => ({ slug: c.slug, name: c.name })));
-        }
+      .then((data: Array<{ slug: string; name: string }> | { coworkings?: Array<{ slug: string; name: string }> }) => {
+        const list = Array.isArray(data) ? data : (data.coworkings ?? []);
+        setCoworkingOptions(list.map(c => ({ slug: c.slug, name: c.name })));
       })
       .catch(() => {});
   }, []);

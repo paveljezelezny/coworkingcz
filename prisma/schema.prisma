@@ -102,6 +102,7 @@ model CoworkerProfile {
   homeCoworkingId   String?
   homeCoworkingSlug String?
   phone             String?
+  company           String?
   isPhonePublic     Boolean  @default(false)
   isEmailPublic     Boolean  @default(false)
   isPhotoPublic     Boolean  @default(true)

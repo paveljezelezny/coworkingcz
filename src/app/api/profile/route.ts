@@ -56,7 +56,6 @@ export async function GET() {
             membershipEnd: true,
             homeCoworkingSlug: true,
             phone: true,
-            company: true,
             isPhonePublic: true,
             isEmailPublic: true,
             isPhotoPublic: true,
@@ -111,6 +110,20 @@ export async function GET() {
     }
   }
 
+  // Fetch company via raw SQL (not in generated Prisma client yet)
+  let company: string | null = null;
+  if (user.coworkerProfile) {
+    try {
+      const rows = await prisma.$queryRawUnsafe(
+        `SELECT company FROM "CoworkerProfile" WHERE "userId" = $1 LIMIT 1`,
+        userId
+      ) as Array<{ company: string | null }>;
+      company = rows[0]?.company ?? null;
+    } catch {
+      // column doesn't exist yet — ignore, returns null
+    }
+  }
+
   const profile = user.coworkerProfile as Record<string, unknown> | null;
 
   return NextResponse.json({
@@ -132,7 +145,7 @@ export async function GET() {
     membershipEnd: profile?.membershipEnd ?? null,
     homeCoworkingSlug: profile?.homeCoworkingSlug ?? null,
     phone: profile?.phone ?? null,
-    company: profile?.company ?? null,
+    company,
     isPhonePublic: profile?.isPhonePublic ?? false,
     isEmailPublic: profile?.isEmailPublic ?? false,
     isPhotoPublic: profile?.isPhotoPublic ?? true,
@@ -171,6 +184,8 @@ export async function PUT(req: NextRequest) {
   }
 
   // Upsert CoworkerProfile
+  // NOTE: company is NOT in the generated Prisma client (schema not yet regenerated),
+  // so we handle it separately via raw SQL after the Prisma upsert.
   const profileData: Record<string, unknown> = {};
   if (bio !== undefined)              profileData.bio = bio.trim() || null;
   if (profession !== undefined)       profileData.profession = profession.trim() || null;
@@ -181,7 +196,6 @@ export async function PUT(req: NextRequest) {
   if (avatarUrl !== undefined)        profileData.avatarUrl = avatarUrl || null;
   if (homeCoworkingSlug !== undefined) profileData.homeCoworkingSlug = homeCoworkingSlug?.trim() || null;
   if (phone !== undefined)            profileData.phone = phone?.trim() || null;
-  if (company !== undefined)          profileData.company = company?.trim() || null;
   if (isPhonePublic !== undefined)    profileData.isPhonePublic = Boolean(isPhonePublic);
   if (isEmailPublic !== undefined)    profileData.isEmailPublic = Boolean(isEmailPublic);
   if (isPhotoPublic !== undefined)    profileData.isPhotoPublic = Boolean(isPhotoPublic);
@@ -201,6 +215,26 @@ export async function PUT(req: NextRequest) {
       create: { userId, ...profileData },
       update: profileData,
     });
+  }
+
+  // Handle `company` via raw SQL (column added via DDL but not in generated Prisma client)
+  if (company !== undefined) {
+    const companyValue = company?.trim() || null;
+    try {
+      await prisma.$executeRawUnsafe(
+        `UPDATE "CoworkerProfile" SET "company" = $1 WHERE "userId" = $2`,
+        companyValue,
+        userId
+      );
+    } catch {
+      // Column might not exist yet — run migration then retry
+      await ensureProfileColumns();
+      await prisma.$executeRawUnsafe(
+        `UPDATE "CoworkerProfile" SET "company" = $1 WHERE "userId" = $2`,
+        companyValue,
+        userId
+      );
+    }
   }
 
   return NextResponse.json({ success: true });
