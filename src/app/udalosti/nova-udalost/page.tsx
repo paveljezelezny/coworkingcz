@@ -9,7 +9,7 @@ import {
   Calendar, Clock, MapPin, Users, DollarSign,
   Globe, Image, Lock, Zap, Upload, X, Link2,
 } from 'lucide-react';
-import { coworkingsData } from '@/lib/data/coworkings';
+interface CoworkingOption { slug: string; name: string; city: string; }
 
 const EVENT_TYPES = [
   { id: 'workshop',    label: 'Workshop',    emoji: '🎓' },
@@ -43,6 +43,7 @@ export default function NovaUdalostPage() {
   const router = useRouter();
 
   const [paidAccess, setPaidAccess] = useState<boolean | null>(null);
+  const [coworkings, setCoworkings] = useState<CoworkingOption[]>([]);
   const [form, setForm] = useState<FormData>({
     title: '', description: '', eventType: '',
     coworkingSlug: '', location: '', startDate: '', startTime: '09:00',
@@ -79,11 +80,15 @@ export default function NovaUdalostPage() {
       return;
     }
     if (status === 'authenticated') {
-      // Check paid access via marketplace quota endpoint (reuses same logic)
-      fetch('/api/marketplace/listings?mine=true')
-        .then((r) => r.json())
-        .then((d) => setPaidAccess(d.paid === true))
-        .catch(() => setPaidAccess(false));
+      // Fetch paid access check and coworking list in parallel
+      Promise.all([
+        fetch('/api/marketplace/listings?mine=true').then(r => r.json()).catch(() => ({})),
+        fetch('/api/coworkings').then(r => r.json()).catch(() => []),
+      ]).then(([listingsData, cwData]) => {
+        setPaidAccess(listingsData.paid === true);
+        const list: CoworkingOption[] = Array.isArray(cwData) ? cwData : [];
+        setCoworkings(list.sort((a, b) => a.name.localeCompare(b.name, 'cs')));
+      }).catch(() => setPaidAccess(false));
     }
   }, [status, userRole]);
 
@@ -365,13 +370,11 @@ export default function NovaUdalostPage() {
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
                   >
                     <option value="">— Vyberte coworking —</option>
-                    {coworkingsData
-                      .sort((a, b) => a.name.localeCompare(b.name, 'cs'))
-                      .map((cw) => (
-                        <option key={cw.slug} value={cw.slug}>
-                          {cw.name} — {cw.city}
-                        </option>
-                      ))}
+                    {coworkings.map((cw) => (
+                      <option key={cw.slug} value={cw.slug}>
+                        {cw.name} — {cw.city}
+                      </option>
+                    ))}
                   </select>
                   <div className="relative">
                     <MapPin className="absolute left-4 top-3.5 w-4 h-4 text-gray-400" />

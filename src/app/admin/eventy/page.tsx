@@ -6,7 +6,7 @@ import {
   X, ChevronDown, ChevronUp, MapPin, DollarSign,
 } from 'lucide-react';
 import Link from 'next/link';
-import { coworkingsData } from '@/lib/data/coworkings';
+interface CoworkingItem { slug: string; name: string; }
 
 interface AdminEvent {
   id: string;
@@ -39,13 +39,12 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
   other: 'Jiné',
 };
 
-const slugToName: Record<string, string> = Object.fromEntries(
-  coworkingsData.map((c) => [c.slug, c.name])
-);
+// slugToName is populated dynamically from /api/coworkings
 
 export default function AdminEventyPage() {
   const [events, setEvents] = useState<AdminEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [slugToName, setSlugToName] = useState<Record<string, string>>({});
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('');
   const [actionId, setActionId] = useState<string | null>(null);
@@ -55,9 +54,16 @@ export default function AdminEventyPage() {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/events');
-      const data = await res.json();
-      setEvents(data.events ?? []);
+      const [eventsRes, cwRes] = await Promise.all([
+        fetch('/api/admin/events').then(r => r.json()).catch(() => ({ events: [] })),
+        fetch('/api/coworkings').then(r => r.json()).catch(() => []),
+      ]);
+      setEvents(eventsRes.events ?? []);
+      const map: Record<string, string> = {};
+      if (Array.isArray(cwRes)) {
+        for (const cw of cwRes as CoworkingItem[]) map[cw.slug] = cw.name;
+      }
+      setSlugToName(map);
     } catch {
       setEvents([]);
     } finally {

@@ -5,7 +5,6 @@ import {
   Calendar, Users, DollarSign, X, ChevronLeft, ChevronRight,
   ExternalLink, Plus, Lock, MapPin, Clock,
 } from 'lucide-react';
-import { coworkingsData, getCitiesWithCount } from '@/lib/data/coworkings';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 
@@ -28,10 +27,11 @@ interface DbEvent {
   imageUrl?: string | null;
 }
 
-// Resolve coworking slug → display name from static data
-const slugToName: Record<string, string> = Object.fromEntries(
-  coworkingsData.map((c) => [c.slug, c.name])
-);
+interface CoworkingItem {
+  slug: string;
+  name: string;
+  city: string;
+}
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   workshop: 'Workshop',
@@ -47,10 +47,12 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
 function DayEventsModal({
   date,
   events,
+  slugToName,
   onClose,
 }: {
   date: Date;
   events: DbEvent[];
+  slugToName: Record<string, string>;
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -202,20 +204,39 @@ export default function UdalostiPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [allEvents, setAllEvents] = useState<DbEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [coworkings, setCoworkings] = useState<CoworkingItem[]>([]);
+  const [slugToName, setSlugToName] = useState<Record<string, string>>({});
 
   // Calendar day popup
   const [popupDate, setPopupDate] = useState<Date | null>(null);
   const [popupEvents, setPopupEvents] = useState<DbEvent[]>([]);
 
   useEffect(() => {
-    fetch('/api/events')
-      .then((r) => r.json())
-      .then((d) => setAllEvents(d.events ?? []))
-      .catch(() => setAllEvents([]))
-      .finally(() => setLoading(false));
+    // Fetch both in parallel
+    Promise.all([
+      fetch('/api/events').then(r => r.json()).catch(() => ({ events: [] })),
+      fetch('/api/coworkings').then(r => r.json()).catch(() => []),
+    ]).then(([eventsData, cwData]) => {
+      setAllEvents(eventsData.events ?? []);
+      const list: CoworkingItem[] = Array.isArray(cwData) ? cwData : [];
+      setCoworkings(list);
+      const map: Record<string, string> = {};
+      for (const cw of list) map[cw.slug] = cw.name;
+      setSlugToName(map);
+    }).finally(() => setLoading(false));
   }, []);
 
-  const cities = getCitiesWithCount();
+  // Build city list from fetched data
+  const cities = useMemo(() => {
+    const cityCount: Record<string, number> = {};
+    for (const cw of coworkings) {
+      cityCount[cw.city] = (cityCount[cw.city] || 0) + 1;
+    }
+    return Object.entries(cityCount)
+      .map(([city, count]) => ({ city, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [coworkings]);
+
   const eventTypes = [
     { id: 'workshop', label: 'Workshop' },
     { id: 'networking', label: 'Networking' },
@@ -233,7 +254,7 @@ export default function UdalostiPage() {
         return matchCity && matchType;
       })
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-  }, [allEvents, selectedCity, selectedEventType]);
+  }, [allEvents, selectedCity, selectedEventType, slugToName]);
 
   // Calendar functions
   const getDaysInMonth = (date: Date) => {
@@ -665,6 +686,7 @@ export default function UdalostiPage() {
         <DayEventsModal
           date={popupDate}
           events={popupEvents}
+          slugToName={slugToName}
           onClose={() => { setPopupDate(null); setPopupEvents([]); }}
         />
       )}
