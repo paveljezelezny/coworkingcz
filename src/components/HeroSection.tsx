@@ -26,7 +26,7 @@ const TILES = [
     id: 'coworkers',
     label: 'Najdi coworkery',
     sub: 'Komunita po celém Česku',
-    href: '/coworkeři',
+    href: '/coworkeri',
     icon: Users,
     bg: 'bg-teal-400/25',
     bgLight: 'bg-teal-600/15',

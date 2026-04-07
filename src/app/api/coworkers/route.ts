@@ -56,7 +56,7 @@ export async function GET() {
       rows = (await prisma.$queryRawUnsafe(`
         SELECT
           cp.id,
-          cp.name,
+          u.name                               AS name,
           cp.profession,
           cp.bio,
           cp.skills,
@@ -79,7 +79,7 @@ export async function GET() {
         WHERE COALESCE(cp."isPublic", true) = true
           AND cp."membershipTier" IS NOT NULL
           AND cp."membershipTier" NOT IN ('free')
-        ORDER BY cp.name ASC NULLS LAST
+        ORDER BY u.name ASC NULLS LAST
       `)) as Record<string, unknown>[];
     } catch {
       // Step 3: fallback — new columns missing, use only guaranteed columns
@@ -87,7 +87,7 @@ export async function GET() {
         rows = (await prisma.$queryRawUnsafe(`
           SELECT
             cp.id,
-            cp.name,
+            u.name                        AS name,
             cp.profession,
             cp.bio,
             cp.skills,
@@ -103,7 +103,7 @@ export async function GET() {
           WHERE COALESCE(cp."isPublic", true) = true
             AND cp."membershipTier" IS NOT NULL
             AND cp."membershipTier" NOT IN ('free')
-          ORDER BY cp.name ASC NULLS LAST
+          ORDER BY u.name ASC NULLS LAST
         `)) as Record<string, unknown>[];
       } catch (inner) {
         console.error('[/api/coworkers] fallback query failed:', inner);

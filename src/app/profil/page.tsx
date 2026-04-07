@@ -1747,7 +1747,16 @@ export default function ProfilPage() {
                 }}
               />
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{profile.name || '(bez jména)'}</h1>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{profile.name || '(bez jména)'}</h1>
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                    profile.isPublic
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-red-100 text-red-600'
+                  }`}>
+                    {profile.isPublic ? '● Veřejný' : '● Neveřejný'}
+                  </span>
+                </div>
                 {profile.profession && (
                   <p className="text-gray-500 mt-0.5">{profile.profession}</p>
                 )}
@@ -1763,11 +1772,6 @@ export default function ProfilPage() {
                     <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 flex items-center gap-1">
                       <Award className="w-3 h-3" />
                       {membershipLabel(profile.membershipTier)}
-                    </span>
-                  )}
-                  {!profile.isPublic && (
-                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 flex items-center gap-1">
-                      <Lock className="w-3 h-3" /> Soukromý profil
                     </span>
                   )}
                 </div>
@@ -2137,11 +2141,23 @@ export default function ProfilPage() {
             {/* Contact */}
             <div className="bg-white rounded-xl border border-gray-200 p-5">
               <h3 className="font-bold text-gray-900 mb-4">Kontakt</h3>
-              <a href={`mailto:${profile.email}`}
-                className="flex items-center gap-3 py-2 hover:bg-gray-50 rounded-lg px-2 -mx-2 transition-colors group">
-                <Mail className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                <span className="text-sm text-gray-700 truncate">{profile.email}</span>
-              </a>
+              <div className="space-y-1">
+                <a href={`mailto:${profile.email}`}
+                  className="flex items-center gap-3 py-2 hover:bg-gray-50 rounded-lg px-2 -mx-2 transition-colors">
+                  <Mail className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-700 truncate">{profile.email}</span>
+                </a>
+                {profile.phone && (
+                  <a href={`tel:${profile.phone}`}
+                    className="flex items-center gap-3 py-2 hover:bg-gray-50 rounded-lg px-2 -mx-2 transition-colors">
+                    <Phone className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                    <span className="text-sm text-gray-700">{profile.phone}</span>
+                    {!profile.isPhonePublic && (
+                      <span className="text-xs text-gray-400 ml-auto">skrytý</span>
+                    )}
+                  </a>
+                )}
+              </div>
             </div>
 
             {/* Account info */}
