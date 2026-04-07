@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Check, X, Globe, Users, Award, HelpCircle, Plus,
-  Building2, User, ChevronDown, Gift, ArrowRight, Zap,
-  BadgeCheck, CalendarPlus, Megaphone, Star, ShoppingBag,
+  Building2, User, ChevronDown, Gift, ArrowRight,
+  BadgeCheck, CalendarPlus, ShoppingBag,
 } from 'lucide-react';
 import { PLATFORM_PRICING, COWORKER_MEMBERSHIP, COWORKER_MEMBERSHIP_BENEFITS } from '@/lib/types';
 
@@ -222,26 +222,7 @@ export default function CenikyPage() {
                       </li>
                     </ul>
 
-                    {/* Add-on upsell block */}
-                    <div className={`rounded-xl p-4 mb-6 border ${idx === 1 ? 'bg-blue-700/20 border-blue-400/30' : 'bg-gray-50 border-gray-200'}`}>
-                      <p className={`text-xs font-bold uppercase tracking-wide mb-2.5 ${idx === 1 ? 'text-blue-100' : 'text-gray-500'}`}>
-                        Rozšíření +190 Kč/měs
-                      </p>
-                      <ul className="space-y-2">
-                        <li className={`flex items-start gap-2 text-xs ${idx === 1 ? 'text-blue-100' : 'text-gray-600'}`}>
-                          <Zap className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-yellow-400" />
-                          Neomezené přidávání eventů ve vašem prostoru
-                        </li>
-                        <li className={`flex items-start gap-2 text-xs ${idx === 1 ? 'text-blue-100' : 'text-gray-600'}`}>
-                          <Megaphone className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-yellow-400" />
-                          Neomezená inzerce na marketplace
-                        </li>
-                        <li className={`flex items-start gap-2 text-xs ${idx === 1 ? 'text-blue-100' : 'text-gray-600'}`}>
-                          <Star className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-yellow-400" />
-                          Každý týden topovaný v „doporučených"
-                        </li>
-                      </ul>
-                    </div>
+                    {/* Add-on upsell block — skryto, zatím neaktivní */}
 
                     {/* Primary CTA */}
                     <button
