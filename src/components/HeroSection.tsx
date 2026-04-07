@@ -20,6 +20,7 @@ function shuffle(arr: string[]): string[] {
 }
 
 /* ─── Tiles config ───────────────────────────────────────── */
+// bg: dark-mode pastel; bgLight: light-mode pastel (when bg photo is bright)
 const TILES = [
   {
     id: 'coworkers',
@@ -27,6 +28,11 @@ const TILES = [
     sub: 'Komunita po celém Česku',
     href: '/coworkeři',
     icon: Users,
+    bg: 'bg-teal-400/25',
+    bgLight: 'bg-teal-600/15',
+    border: 'border-teal-300/50',
+    iconColor: 'text-teal-200',
+    iconColorLight: 'text-teal-800',
   },
   {
     id: 'marketplace',
@@ -34,6 +40,11 @@ const TILES = [
     sub: 'Inzeráty a nabídky',
     href: '/marketplace',
     icon: ShoppingBag,
+    bg: 'bg-emerald-400/20',
+    bgLight: 'bg-emerald-600/12',
+    border: 'border-emerald-300/50',
+    iconColor: 'text-emerald-200',
+    iconColorLight: 'text-emerald-800',
   },
   {
     id: 'coworking',
@@ -41,6 +52,11 @@ const TILES = [
     sub: '101+ prostorů v ČR',
     href: '/coworkingy',
     icon: Building2,
+    bg: 'bg-blue-400/25',
+    bgLight: 'bg-blue-600/15',
+    border: 'border-blue-300/50',
+    iconColor: 'text-blue-200',
+    iconColorLight: 'text-blue-800',
   },
   {
     id: 'events',
@@ -48,6 +64,11 @@ const TILES = [
     sub: 'Workshopy, networking…',
     href: '/udalosti',
     icon: Calendar,
+    bg: 'bg-violet-400/20',
+    bgLight: 'bg-violet-600/12',
+    border: 'border-violet-300/50',
+    iconColor: 'text-violet-200',
+    iconColorLight: 'text-violet-800',
   },
 ];
 
@@ -102,29 +123,33 @@ function HeroTile({
   isLight: boolean;
 }) {
   const Icon = tile.icon;
+  const bgCls    = isLight ? tile.bgLight    : tile.bg;
+  const iconCls  = isLight ? tile.iconColorLight : tile.iconColor;
+  const borderCls = tile.border;
+
   return (
     <Link
       href={tile.href}
       className={`
         group relative flex flex-col justify-between p-5 rounded-xl
-        border-2 border-white/70 backdrop-blur-sm
-        hover:bg-white/20 hover:border-white transition-all duration-200
-        ${isLight ? 'bg-black/10' : 'bg-white/10'}
+        border-2 backdrop-blur-sm
+        hover:brightness-110 hover:scale-[1.02] transition-all duration-200
+        ${bgCls} ${borderCls}
         min-h-[110px] sm:min-h-[120px]
       `}
     >
       <div>
-        <Icon className={`w-6 h-6 mb-2 ${isLight ? 'text-gray-800' : 'text-white'}`} />
+        <Icon className={`w-6 h-6 mb-2 ${iconCls}`} />
         <p className={`font-bold text-base sm:text-lg leading-tight ${isLight ? 'text-gray-900' : 'text-white'}`}>
           {tile.label}
         </p>
       </div>
-      <p className={`text-xs mt-1 ${isLight ? 'text-gray-700' : 'text-white/75'}`}>
+      <p className={`text-xs mt-1 ${isLight ? 'text-gray-700' : 'text-white/80'}`}>
         {tile.sub}
       </p>
       <span className={`
         absolute bottom-3 right-3 text-xs font-bold opacity-0 group-hover:opacity-100
-        transition-opacity ${isLight ? 'text-gray-700' : 'text-white/70'}
+        transition-opacity ${isLight ? 'text-gray-600' : 'text-white/70'}
       `}>→</span>
     </Link>
   );
@@ -163,8 +188,8 @@ export default function HeroSection({ cities }: HeroSectionProps) {
 
   useEffect(() => {
     if (photos.length < 2) return;
-    const DISPLAY_MS = 10_000;
-    const FADE_MS = 1_200;
+    const DISPLAY_MS = 20_000;
+    const FADE_MS = 2_500;
     const tick = () => {
       const next = (idxRef.current + 1) % photos.length;
       setTopIdx(next);
@@ -210,7 +235,7 @@ export default function HeroSection({ cities }: HeroSectionProps) {
           alt=""
           aria-hidden
           crossOrigin="anonymous"
-          style={{ transition: 'opacity 1200ms ease-in-out' }}
+          style={{ transition: 'opacity 2500ms ease-in-out' }}
           className={`absolute inset-0 w-full h-full object-cover ${fading ? 'opacity-100' : 'opacity-0'}`}
         />
         <div className={overlayClass} style={{ transition: 'background 800ms ease' }} />
