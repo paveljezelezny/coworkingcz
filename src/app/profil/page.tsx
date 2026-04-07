@@ -8,7 +8,8 @@ import {
   Loader2, Check, X, Plus, Trash2, ShieldCheck,
   Calendar, ExternalLink, Lock, Zap, Tag, MapPin,
   ToggleLeft, ToggleRight, ChevronDown, ChevronUp,
-  Upload, Link2, Image,
+  Upload, Link2, Image, Phone, Eye, EyeOff, Camera,
+  Building2, MessageSquare, ZoomIn, ZoomOut,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -31,6 +32,12 @@ interface ProfileData {
   membershipTier: string | null;
   membershipStart: string | null;
   membershipEnd: string | null;
+  homeCoworkingSlug: string | null;
+  phone: string | null;
+  isPhonePublic: boolean;
+  isEmailPublic: boolean;
+  isPhotoPublic: boolean;
+  allowContact: boolean;
 }
 
 interface MyListing {
@@ -218,15 +225,193 @@ function MembershipCard({ tier, end, role }: { tier: string | null; end: string 
 
 // ─── Avatar ──────────────────────────────────────────────────────────────────
 
-function Avatar({ name, image, size = 'lg' }: { name: string; image?: string | null; size?: 'sm' | 'lg' }) {
+function Avatar({ name, image, size = 'lg', onClick }: {
+  name: string;
+  image?: string | null;
+  size?: 'sm' | 'lg';
+  onClick?: () => void;
+}) {
   const sz = size === 'lg' ? 'w-20 h-20 text-2xl' : 'w-10 h-10 text-sm';
-  if (image) {
-    return <img src={image} alt={name} className={`${sz} rounded-full object-cover flex-shrink-0`} />;
-  }
-  const initials = name ? name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() : '?';
-  return (
+  const inner = image ? (
+    <img src={image} alt={name} className={`${sz} rounded-full object-cover flex-shrink-0`} />
+  ) : (
     <div className={`${sz} rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold flex-shrink-0`}>
-      {initials}
+      {name ? name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() : '?'}
+    </div>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        onClick={onClick}
+        className="relative group flex-shrink-0 focus:outline-none"
+        title="Změnit profilovou fotku"
+      >
+        {inner}
+        <span className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <Camera className="w-6 h-6 text-white" />
+        </span>
+      </button>
+    );
+  }
+  return inner;
+}
+
+// ─── Avatar Crop Modal ────────────────────────────────────────────────────────
+
+function AvatarCropModal({
+  src,
+  onConfirm,
+  onClose,
+}: {
+  src: string;
+  onConfirm: (dataUrl: string) => void;
+  onClose: () => void;
+}) {
+  const SIZE = 240; // circle diameter in px
+  const [offsetX, setOffsetX] = useState(0);
+  const [offsetY, setOffsetY] = useState(0);
+  const [scale, setScale] = useState(1);
+  const [dragging, setDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [imgNatural, setImgNatural] = useState({ w: 0, h: 0 });
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, [onClose]);
+
+  // When img loads, auto-fit scale so it fills the circle
+  const handleImgLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
+    setImgNatural({ w, h });
+    const fit = SIZE / Math.min(w, h);
+    setScale(fit);
+    setOffsetX(0);
+    setOffsetY(0);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setDragging(true);
+    setDragStart({ x: e.clientX - offsetX, y: e.clientY - offsetY });
+  };
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!dragging) return;
+    setOffsetX(e.clientX - dragStart.x);
+    setOffsetY(e.clientY - dragStart.y);
+  };
+  const handleMouseUp = () => setDragging(false);
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    setScale(s => Math.min(5, Math.max(0.5, s - e.deltaY * 0.002)));
+  };
+
+  const handleConfirm = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    canvas.width = SIZE;
+    canvas.height = SIZE;
+    // Clip to circle
+    ctx.beginPath();
+    ctx.arc(SIZE / 2, SIZE / 2, SIZE / 2, 0, Math.PI * 2);
+    ctx.clip();
+    // Draw image with current transform
+    const imgW = imgNatural.w * scale;
+    const imgH = imgNatural.h * scale;
+    ctx.drawImage(
+      document.querySelector('.crop-img') as HTMLImageElement,
+      SIZE / 2 - imgW / 2 + offsetX,
+      SIZE / 2 - imgH / 2 + offsetY,
+      imgW,
+      imgH
+    );
+    onConfirm(canvas.toDataURL('image/jpeg', 0.85));
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-900">Upravit profilovou fotku</h3>
+          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg">
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mb-4 text-center">Táhni fotku pro přesun · kolečko myši pro zoom</p>
+
+        {/* Crop area */}
+        <div className="flex justify-center mb-5">
+          <div
+            ref={containerRef}
+            className="relative overflow-hidden rounded-full border-4 border-blue-500 shadow-lg cursor-grab active:cursor-grabbing select-none"
+            style={{ width: SIZE, height: SIZE }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onWheel={handleWheel}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={src}
+              alt="crop"
+              className="crop-img absolute max-w-none pointer-events-none"
+              style={{
+                width: imgNatural.w * scale,
+                height: imgNatural.h * scale,
+                top: SIZE / 2 - (imgNatural.h * scale) / 2 + offsetY,
+                left: SIZE / 2 - (imgNatural.w * scale) / 2 + offsetX,
+                userSelect: 'none',
+              }}
+              draggable={false}
+              onLoad={handleImgLoad}
+            />
+          </div>
+        </div>
+
+        {/* Zoom controls */}
+        <div className="flex items-center gap-3 mb-5 justify-center">
+          <button onClick={() => setScale(s => Math.max(0.5, s - 0.1))} className="p-2 hover:bg-gray-100 rounded-lg">
+            <ZoomOut className="w-4 h-4 text-gray-600" />
+          </button>
+          <input
+            type="range" min={0.5} max={5} step={0.05}
+            value={scale}
+            onChange={e => setScale(parseFloat(e.target.value))}
+            className="flex-1"
+          />
+          <button onClick={() => setScale(s => Math.min(5, s + 0.1))} className="p-2 hover:bg-gray-100 rounded-lg">
+            <ZoomIn className="w-4 h-4 text-gray-600" />
+          </button>
+        </div>
+
+        {/* Hidden canvas for export */}
+        <canvas ref={canvasRef} className="hidden" />
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleConfirm}
+            className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors"
+          >
+            Použít fotku
+          </button>
+          <button
+            onClick={onClose}
+            className="py-3 px-5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
+          >
+            Zrušit
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

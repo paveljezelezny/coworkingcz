@@ -99,8 +99,14 @@ model CoworkerProfile {
   membershipStart DateTime?
   membershipEnd   DateTime?
 
-  homeCoworkingId String?
-  freeVisits      FreeVisit[]
+  homeCoworkingId   String?
+  homeCoworkingSlug String?
+  phone             String?
+  isPhonePublic     Boolean  @default(false)
+  isEmailPublic     Boolean  @default(false)
+  isPhotoPublic     Boolean  @default(true)
+  allowContact      Boolean  @default(false)
+  freeVisits        FreeVisit[]
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
