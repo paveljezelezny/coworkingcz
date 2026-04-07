@@ -12,6 +12,7 @@ async function ensureProfileColumns() {
     `ALTER TABLE "CoworkerProfile" ADD COLUMN IF NOT EXISTS "isEmailPublic" BOOLEAN NOT NULL DEFAULT FALSE`,
     `ALTER TABLE "CoworkerProfile" ADD COLUMN IF NOT EXISTS "isPhotoPublic" BOOLEAN NOT NULL DEFAULT TRUE`,
     `ALTER TABLE "CoworkerProfile" ADD COLUMN IF NOT EXISTS "allowContact" BOOLEAN NOT NULL DEFAULT FALSE`,
+    `ALTER TABLE "CoworkerProfile" ADD COLUMN IF NOT EXISTS "company" TEXT`,
   ];
   for (const sql of ddl) {
     try { await prisma.$executeRawUnsafe(sql); } catch { /* column already exists */ }
@@ -55,6 +56,7 @@ export async function GET() {
             membershipEnd: true,
             homeCoworkingSlug: true,
             phone: true,
+            company: true,
             isPhonePublic: true,
             isEmailPublic: true,
             isPhotoPublic: true,
@@ -130,6 +132,7 @@ export async function GET() {
     membershipEnd: profile?.membershipEnd ?? null,
     homeCoworkingSlug: profile?.homeCoworkingSlug ?? null,
     phone: profile?.phone ?? null,
+    company: profile?.company ?? null,
     isPhonePublic: profile?.isPhonePublic ?? false,
     isEmailPublic: profile?.isEmailPublic ?? false,
     isPhotoPublic: profile?.isPhotoPublic ?? true,
@@ -150,7 +153,7 @@ export async function PUT(req: NextRequest) {
   const {
     name, bio, profession, skills, linkedinUrl, websiteUrl,
     isPublic, avatarUrl,
-    homeCoworkingSlug, phone,
+    homeCoworkingSlug, phone, company,
     isPhonePublic, isEmailPublic, isPhotoPublic, allowContact,
   } = body;
 
@@ -178,6 +181,7 @@ export async function PUT(req: NextRequest) {
   if (avatarUrl !== undefined)        profileData.avatarUrl = avatarUrl || null;
   if (homeCoworkingSlug !== undefined) profileData.homeCoworkingSlug = homeCoworkingSlug?.trim() || null;
   if (phone !== undefined)            profileData.phone = phone?.trim() || null;
+  if (company !== undefined)          profileData.company = company?.trim() || null;
   if (isPhonePublic !== undefined)    profileData.isPhonePublic = Boolean(isPhonePublic);
   if (isEmailPublic !== undefined)    profileData.isEmailPublic = Boolean(isEmailPublic);
   if (isPhotoPublic !== undefined)    profileData.isPhotoPublic = Boolean(isPhotoPublic);

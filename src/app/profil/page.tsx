@@ -34,6 +34,7 @@ interface ProfileData {
   membershipEnd: string | null;
   homeCoworkingSlug: string | null;
   phone: string | null;
+  company: string | null;
   isPhonePublic: boolean;
   isEmailPublic: boolean;
   isPhotoPublic: boolean;
@@ -101,6 +102,14 @@ function formatDate(iso: string | null): string {
 function daysLeft(end: string | null): number {
   if (!end) return 0;
   return Math.ceil((new Date(end).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+}
+
+// Ensure URL has https:// prefix
+function normalizeUrl(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
 }
 
 function roleLabel(role: string): string {
@@ -248,8 +257,8 @@ function Avatar({ name, image, size = 'lg', onClick }: {
         title="Změnit profilovou fotku"
       >
         {inner}
-        <span className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <Camera className="w-6 h-6 text-white" />
+        <span className="absolute inset-0 rounded-full bg-black/30 transition-opacity flex items-center justify-center">
+          <Camera className="w-6 h-6 text-white drop-shadow" />
         </span>
       </button>
     );
@@ -1513,8 +1522,25 @@ export default function ProfilPage() {
   const [editLinkedin, setEditLinkedin] = useState('');
   const [editWebsite, setEditWebsite] = useState('');
   const [editIsPublic, setEditIsPublic] = useState(true);
+  const [editPhone, setEditPhone] = useState('');
+  const [editCompany, setEditCompany] = useState('');
+  const [editIsPhonePublic, setEditIsPhonePublic] = useState(false);
+  const [editIsEmailPublic, setEditIsEmailPublic] = useState(false);
+  const [editIsPhotoPublic, setEditIsPhotoPublic] = useState(true);
+  const [editAllowContact, setEditAllowContact] = useState(false);
+  const [editHomeCoworking, setEditHomeCoworking] = useState('');
+  const [editHomeCoworkingOther, setEditHomeCoworkingOther] = useState('');
   const [newSkill, setNewSkill] = useState('');
   const skillInputRef = useRef<HTMLInputElement>(null);
+
+  // Avatar state
+  const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
+  const [editAvatarUrl, setEditAvatarUrl] = useState<string | null>(null);
+  const [showCropModal, setShowCropModal] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Coworkings list for dropdown
+  const [coworkingOptions, setCoworkingOptions] = useState<Array<{ slug: string; name: string }>>([]);
 
   // Redirect if unauthenticated
   useEffect(() => {
@@ -1535,6 +1561,18 @@ export default function ProfilPage() {
       .catch(() => setLoading(false));
   }, [authStatus]);
 
+  // Fetch coworkings list for homeCoworking dropdown
+  useEffect(() => {
+    fetch('/api/coworkings')
+      .then(r => r.json())
+      .then((data: { coworkings?: Array<{ slug: string; name: string }> }) => {
+        if (data.coworkings) {
+          setCoworkingOptions(data.coworkings.map(c => ({ slug: c.slug, name: c.name })));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Populate edit form when entering edit mode
   const enterEditMode = () => {
     if (!profile) return;
@@ -1545,6 +1583,17 @@ export default function ProfilPage() {
     setEditLinkedin(profile.linkedinUrl);
     setEditWebsite(profile.websiteUrl);
     setEditIsPublic(profile.isPublic);
+    setEditPhone(profile.phone ?? '');
+    setEditCompany(profile.company ?? '');
+    setEditIsPhonePublic(profile.isPhonePublic);
+    setEditIsEmailPublic(profile.isEmailPublic);
+    setEditIsPhotoPublic(profile.isPhotoPublic);
+    setEditAllowContact(profile.allowContact);
+    const homeSlug = profile.homeCoworkingSlug ?? '';
+    // Detect if slug is "other" (not in list — will be resolved after coworkings load)
+    setEditHomeCoworking(homeSlug);
+    setEditHomeCoworkingOther('');
+    setEditAvatarUrl(profile.avatarUrl);
     setSaveError('');
     setSaveSuccess(false);
     setIsEditMode(true);
@@ -1572,6 +1621,13 @@ export default function ProfilPage() {
     setSaveError('');
     setSaveSuccess(false);
     try {
+      const linkedinUrl = normalizeUrl(editLinkedin);
+      const websiteUrl = normalizeUrl(editWebsite);
+      // homeCoworkingSlug: if dropdown is 'other' use the text field, otherwise use slug
+      const homeCoworkingSlug = editHomeCoworking === '__other__'
+        ? (editHomeCoworkingOther.trim() || null)
+        : (editHomeCoworking || null);
+
       const res = await fetch('/api/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -1580,9 +1636,17 @@ export default function ProfilPage() {
           bio: editBio,
           profession: editProfession,
           skills: editSkills,
-          linkedinUrl: editLinkedin,
-          websiteUrl: editWebsite,
+          linkedinUrl,
+          websiteUrl,
           isPublic: editIsPublic,
+          phone: editPhone,
+          company: editCompany,
+          isPhonePublic: editIsPhonePublic,
+          isEmailPublic: editIsEmailPublic,
+          isPhotoPublic: editIsPhotoPublic,
+          allowContact: editAllowContact,
+          homeCoworkingSlug,
+          avatarUrl: editAvatarUrl,
         }),
       });
       if (!res.ok) {
@@ -1596,9 +1660,17 @@ export default function ProfilPage() {
         bio: editBio,
         profession: editProfession,
         skills: editSkills,
-        linkedinUrl: editLinkedin,
-        websiteUrl: editWebsite,
+        linkedinUrl,
+        websiteUrl,
         isPublic: editIsPublic,
+        phone: editPhone || null,
+        company: editCompany || null,
+        isPhonePublic: editIsPhonePublic,
+        isEmailPublic: editIsEmailPublic,
+        isPhotoPublic: editIsPhotoPublic,
+        allowContact: editAllowContact,
+        homeCoworkingSlug,
+        avatarUrl: editAvatarUrl,
       } : prev);
       setSaveSuccess(true);
       setIsEditMode(false);
@@ -1649,7 +1721,31 @@ export default function ProfilPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 mb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="flex items-center gap-5">
-              <Avatar name={profile.name} image={profile.image ?? profile.avatarUrl} size="lg" />
+              {/* Avatar — clickable in edit mode to change photo */}
+              <Avatar
+                name={profile.name}
+                image={isEditMode ? (editAvatarUrl ?? profile.image) : (profile.avatarUrl ?? profile.image)}
+                size="lg"
+                onClick={isEditMode ? () => fileInputRef.current?.click() : undefined}
+              />
+              {/* Hidden file input for avatar upload */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = ev => {
+                    setAvatarSrc(ev.target?.result as string);
+                    setShowCropModal(true);
+                  };
+                  reader.readAsDataURL(file);
+                  e.target.value = '';
+                }}
+              />
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{profile.name || '(bez jména)'}</h1>
                 {profile.profession && (
@@ -1803,17 +1899,59 @@ export default function ProfilPage() {
                   <p className="text-xs text-gray-400 mt-1">Stiskni Enter nebo klikni + pro přidání</p>
                 </div>
 
+                {/* Company */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Firma / projekt</label>
+                  <div className="relative">
+                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      value={editCompany}
+                      onChange={e => setEditCompany(e.target.value)}
+                      placeholder="Název firmy nebo projektu"
+                      className="input-field w-full pl-10"
+                    />
+                  </div>
+                </div>
+
+                {/* Phone */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Telefon (mobil)</label>
+                  <div className="flex gap-3 items-start">
+                    <div className="relative flex-1">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="tel"
+                        value={editPhone}
+                        onChange={e => setEditPhone(e.target.value)}
+                        placeholder="+420 777 000 000"
+                        className="input-field w-full pl-10"
+                      />
+                    </div>
+                    <button
+                      onClick={() => setEditIsPhonePublic(!editIsPhonePublic)}
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-semibold transition-colors flex-shrink-0 ${editIsPhonePublic ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-500'}`}
+                      title={editIsPhonePublic ? 'Telefon je veřejný' : 'Telefon je skrytý'}
+                    >
+                      {editIsPhonePublic ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                      {editIsPhonePublic ? 'Veřejný' : 'Skrytý'}
+                    </button>
+                  </div>
+                </div>
+
                 {/* LinkedIn */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">LinkedIn URL</label>
-                  <div className="relative">
-                    <Linkedin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <div className="flex rounded-lg border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
+                    <span className="flex items-center gap-1 px-3 bg-gray-50 border-r border-gray-300 text-xs text-gray-500 font-medium whitespace-nowrap flex-shrink-0">
+                      <Linkedin className="w-3.5 h-3.5" /> https://
+                    </span>
                     <input
-                      type="url"
-                      value={editLinkedin}
-                      onChange={e => setEditLinkedin(e.target.value)}
-                      placeholder="https://linkedin.com/in/tvuj-profil"
-                      className="input-field w-full pl-10"
+                      type="text"
+                      value={editLinkedin.replace(/^https?:\/\//i, '')}
+                      onChange={e => setEditLinkedin(e.target.value ? `https://${e.target.value.replace(/^https?:\/\//i, '')}` : '')}
+                      placeholder="linkedin.com/in/tvuj-profil"
+                      className="flex-1 px-3 py-2 text-sm bg-white outline-none"
                     />
                   </div>
                 </div>
@@ -1821,30 +1959,109 @@ export default function ProfilPage() {
                 {/* Website */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">Webová stránka</label>
-                  <div className="relative">
-                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <div className="flex rounded-lg border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
+                    <span className="flex items-center gap-1 px-3 bg-gray-50 border-r border-gray-300 text-xs text-gray-500 font-medium whitespace-nowrap flex-shrink-0">
+                      <Globe className="w-3.5 h-3.5" /> https://
+                    </span>
                     <input
-                      type="url"
-                      value={editWebsite}
-                      onChange={e => setEditWebsite(e.target.value)}
-                      placeholder="https://tvoje-stranka.cz"
-                      className="input-field w-full pl-10"
+                      type="text"
+                      value={editWebsite.replace(/^https?:\/\//i, '')}
+                      onChange={e => setEditWebsite(e.target.value ? `https://${e.target.value.replace(/^https?:\/\//i, '')}` : '')}
+                      placeholder="tvoje-stranka.cz"
+                      className="flex-1 px-3 py-2 text-sm bg-white outline-none"
                     />
                   </div>
                 </div>
 
-                {/* Public toggle */}
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">Veřejný profil</p>
-                    <p className="text-xs text-gray-500 mt-0.5">Ostatní uživatelé tě uvidí v adresáři</p>
+                {/* Home coworking */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Domácí coworking</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <select
+                      value={editHomeCoworking}
+                      onChange={e => {
+                        setEditHomeCoworking(e.target.value);
+                        if (e.target.value !== '__other__') setEditHomeCoworkingOther('');
+                      }}
+                      className="input-field w-full pl-10 pr-8 appearance-none"
+                    >
+                      <option value="">— Nevybráno —</option>
+                      {coworkingOptions.map(c => (
+                        <option key={c.slug} value={c.slug}>{c.name}</option>
+                      ))}
+                      <option value="__other__">Jiný…</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   </div>
-                  <button
-                    onClick={() => setEditIsPublic(!editIsPublic)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${editIsPublic ? 'bg-blue-600' : 'bg-gray-300'}`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${editIsPublic ? 'translate-x-6' : 'translate-x-1'}`} />
-                  </button>
+                  {editHomeCoworking === '__other__' && (
+                    <input
+                      type="text"
+                      value={editHomeCoworkingOther}
+                      onChange={e => setEditHomeCoworkingOther(e.target.value)}
+                      placeholder="Název nebo slug coworkingu"
+                      className="input-field w-full mt-2"
+                    />
+                  )}
+                </div>
+
+                {/* Visibility toggles */}
+                <div className="space-y-3">
+                  {/* Public profile */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                    <div>
+                      <p className="font-semibold text-gray-900 text-sm">Veřejný profil</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Ostatní tě uvidí v adresáři coworkerů</p>
+                    </div>
+                    <button
+                      onClick={() => setEditIsPublic(!editIsPublic)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${editIsPublic ? 'bg-blue-600' : 'bg-gray-300'}`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${editIsPublic ? 'translate-x-6' : 'translate-x-1'}`} />
+                    </button>
+                  </div>
+
+                  {/* Email public */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                    <div>
+                      <p className="font-semibold text-gray-900 text-sm">Zobrazit e-mail veřejně</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Ostatní uvidí tvůj e-mail v profilu</p>
+                    </div>
+                    <button
+                      onClick={() => setEditIsEmailPublic(!editIsEmailPublic)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${editIsEmailPublic ? 'bg-blue-600' : 'bg-gray-300'}`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${editIsEmailPublic ? 'translate-x-6' : 'translate-x-1'}`} />
+                    </button>
+                  </div>
+
+                  {/* Photo public */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                    <div>
+                      <p className="font-semibold text-gray-900 text-sm">Zobrazit profilovou fotku</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Ostatní uvidí tvou fotku v adresáři</p>
+                    </div>
+                    <button
+                      onClick={() => setEditIsPhotoPublic(!editIsPhotoPublic)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${editIsPhotoPublic ? 'bg-blue-600' : 'bg-gray-300'}`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${editIsPhotoPublic ? 'translate-x-6' : 'translate-x-1'}`} />
+                    </button>
+                  </div>
+
+                  {/* Allow contact */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                    <div>
+                      <p className="font-semibold text-gray-900 text-sm">Umožnit kontaktování</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Ostatní tě mohou kontaktovat přes platformu</p>
+                    </div>
+                    <button
+                      onClick={() => setEditAllowContact(!editAllowContact)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${editAllowContact ? 'bg-blue-600' : 'bg-gray-300'}`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${editAllowContact ? 'translate-x-6' : 'translate-x-1'}`} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -2016,6 +2233,22 @@ export default function ProfilPage() {
           </div>
         </div>
       </div>
+
+      {/* Avatar crop modal */}
+      {showCropModal && avatarSrc && (
+        <AvatarCropModal
+          src={avatarSrc}
+          onConfirm={(dataUrl) => {
+            setEditAvatarUrl(dataUrl);
+            setShowCropModal(false);
+            setAvatarSrc(null);
+          }}
+          onClose={() => {
+            setShowCropModal(false);
+            setAvatarSrc(null);
+          }}
+        />
+      )}
     </div>
   );
 }
