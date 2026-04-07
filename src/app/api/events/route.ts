@@ -8,23 +8,19 @@ import { hasPaidAccess } from '@/lib/membership';
 // Migration helper — adds userId column if missing (runs inline on first need)
 // ---------------------------------------------------------------------------
 
-async function ensureUserIdColumn(): Promise<boolean> {
-  try {
-    await prisma.$executeRawUnsafe(
-      `ALTER TABLE "Event" ADD COLUMN IF NOT EXISTS "userId" TEXT`
-    );
-    // Try to add FK — ignore if already exists
-    await prisma.$executeRawUnsafe(`
-      DO $$ BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Event_userId_fkey') THEN
-          ALTER TABLE "Event" ADD CONSTRAINT "Event_userId_fkey"
-            FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-        END IF;
-      END $$
-    `);
-    return true;
-  } catch {
-    return false;
+async function ensureEventColumns(): Promise<void> {
+  const ddl = [
+    `ALTER TABLE "Event" ADD COLUMN IF NOT EXISTS "userId" TEXT`,
+    `ALTER TABLE "Event" ADD COLUMN IF NOT EXISTS "location" TEXT`,
+    `DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Event_userId_fkey') THEN
+         ALTER TABLE "Event" ADD CONSTRAINT "Event_userId_fkey"
+           FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+       END IF;
+     END $$`,
+  ];
+  for (const sql of ddl) {
+    try { await prisma.$executeRawUnsafe(sql); } catch { /* ignore */ }
   }
 }
 
@@ -52,7 +48,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ events });
     } catch {
       // Column missing — run migration, then retry
-      await ensureUserIdColumn();
+      await ensureEventColumns();
       try {
         // After migration: assign orphaned (null userId) events to super_admin
         if (role === 'super_admin') {
@@ -115,7 +111,7 @@ export async function POST(req: NextRequest) {
       title, description, eventType,
       startDate, endDate, isAllDay,
       maxAttendees, price, isFree,
-      externalUrl, imageUrl,
+      externalUrl, imageUrl, location,
       coworkingSlug,
     } = body;
 
@@ -134,6 +130,7 @@ export async function POST(req: NextRequest) {
       maxAttendees: maxAttendees ? parseInt(maxAttendees) : null,
       price: !isFree && price ? parseFloat(price) : null,
       isFree: isFree ?? true,
+      location: location?.trim() ?? null,
       externalUrl: externalUrl?.trim() ?? null,
       imageUrl: imageUrl?.trim() ?? null,
     };
@@ -146,7 +143,7 @@ export async function POST(req: NextRequest) {
       const msg = (dbErr as Error).message ?? '';
       if (msg.includes('userId') || msg.includes('column')) {
         // Run migration inline, then retry
-        await ensureUserIdColumn();
+        await ensureEventColumns();
         try {
           const event = await prisma.event.create({ data: { ...eventData, userId } });
           eventId = event.id;

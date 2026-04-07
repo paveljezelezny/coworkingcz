@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Edit, Trash2, Plus, ChevronDown, Users, Building2 } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, ChevronDown, Users, Building2, Tag, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { CoworkingSpace, AMENITY_LABELS } from '@/lib/types';
 
@@ -149,6 +149,20 @@ export default function AdminDashboard() {
             >
               <Users className="w-4 h-4" />
               Uživatelé
+            </Link>
+            <Link
+              href="/admin/inzeraty"
+              className="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <Tag className="w-4 h-4" />
+              Inzeráty
+            </Link>
+            <Link
+              href="/admin/eventy"
+              className="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <Calendar className="w-4 h-4" />
+              Eventy
             </Link>
           </nav>
         </div>

@@ -8,6 +8,7 @@ import {
   Loader2, Check, X, Plus, Trash2, ShieldCheck,
   Calendar, ExternalLink, Lock, Zap, Tag, MapPin,
   ToggleLeft, ToggleRight, ChevronDown, ChevronUp,
+  Upload, Link2, Image,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -56,6 +57,7 @@ interface MyEvent {
   isFree: boolean;
   price: number | null;
   maxAttendees?: number | null;
+  location?: string | null;
   externalUrl: string | null;
   imageUrl?: string | null;
   description?: string | null;
@@ -587,6 +589,7 @@ interface EventEditForm {
   isFree: boolean;
   price: string;
   maxAttendees: string;
+  location: string;
   externalUrl: string;
   imageUrl: string;
   coworkingSlug: string;
@@ -616,28 +619,49 @@ function EventEditModal({
     isFree: event.isFree,
     price: event.price ? String(event.price) : '',
     maxAttendees: '',
+    location: event.location ?? '',
     externalUrl: event.externalUrl ?? '',
-    imageUrl: '',
+    imageUrl: event.imageUrl ?? '',
     coworkingSlug: event.coworkingSlug,
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [imageMode, setImageMode] = useState<'upload' | 'url'>('upload');
+  const [imagePreview, setImagePreview] = useState<string>(event.imageUrl ?? '');
+  const [imageError, setImageError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageFile = (file: File) => {
+    setImageError('');
+    if (!file.type.startsWith('image/')) { setImageError('Vyberte obrázek (jpg, png, webp…)'); return; }
+    if (file.size > 1024 * 1024) { setImageError('Obrázek musí být menší než 1 MB'); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      set('imageUrl', dataUrl);
+      setImagePreview(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Load full event data
   useEffect(() => {
     fetch(`/api/events?mine=true`)
       .then(r => r.json())
-      .then((data: { events: Array<MyEvent & { description?: string | null; endDate?: string | null; isAllDay?: boolean; maxAttendees?: number | null; imageUrl?: string | null }> }) => {
+      .then((data: { events: Array<MyEvent & { description?: string | null; endDate?: string | null; isAllDay?: boolean; maxAttendees?: number | null; imageUrl?: string | null; location?: string | null }> }) => {
         const full = data.events?.find((e) => e.id === event.id);
         if (full) {
+          const img = full.imageUrl ?? '';
           setForm(prev => ({
             ...prev,
             description: full.description ?? '',
             endDate: toDateInput(full.endDate),
             isAllDay: full.isAllDay ?? false,
             maxAttendees: full.maxAttendees ? String(full.maxAttendees) : '',
-            imageUrl: full.imageUrl ?? '',
+            location: full.location ?? '',
+            imageUrl: img,
           }));
+          setImagePreview(img);
         }
       })
       .catch(() => {});
@@ -671,6 +695,7 @@ function EventEditModal({
           isFree: form.isFree,
           price: !form.isFree && form.price ? form.price : null,
           maxAttendees: form.maxAttendees || null,
+          location: form.location || null,
           externalUrl: form.externalUrl || null,
           imageUrl: form.imageUrl || null,
           coworkingSlug: form.coworkingSlug,
@@ -685,7 +710,9 @@ function EventEditModal({
         startDate: form.startDate,
         isFree: form.isFree,
         price: !form.isFree && form.price ? parseFloat(form.price) : null,
+        location: form.location || null,
         externalUrl: form.externalUrl || null,
+        imageUrl: form.imageUrl || null,
         coworkingSlug: form.coworkingSlug,
       });
       onClose();
@@ -782,16 +809,31 @@ function EventEditModal({
             </div>
           </div>
 
-          {/* Coworking slug */}
-          <div>
-            <label className={labelCls}>Coworking slug</label>
-            <input
-              type="text"
-              value={form.coworkingSlug}
-              onChange={e => set('coworkingSlug', e.target.value)}
-              placeholder="např. coworking-brno"
-              className={inputCls}
-            />
+          {/* Coworking slug + Adresa */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelCls}>Coworking slug</label>
+              <input
+                type="text"
+                value={form.coworkingSlug}
+                onChange={e => set('coworkingSlug', e.target.value)}
+                placeholder="např. coworking-brno"
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Adresa / místo <span className="text-gray-400 font-normal">(volitelné)</span></label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={form.location}
+                  onChange={e => set('location', e.target.value)}
+                  placeholder="Přesná adresa"
+                  className={`${inputCls} pl-9`}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Vstupné */}
@@ -855,6 +897,62 @@ function EventEditModal({
                 placeholder="https://"
                 className={inputCls}
               />
+            </div>
+          </div>
+
+          {/* Obrázek */}
+          <div>
+            <label className={labelCls}>Obrázek eventu <span className="text-gray-400 font-normal">(volitelné, max 1 MB)</span></label>
+            <div className="border border-gray-200 rounded-xl overflow-hidden">
+              <div className="flex border-b border-gray-100">
+                <button type="button"
+                  onClick={() => { setImageMode('upload'); }}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${imageMode === 'upload' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-50'}`}>
+                  <Upload className="w-4 h-4" /> Nahrát soubor
+                </button>
+                <button type="button"
+                  onClick={() => { setImageMode('url'); setImagePreview(''); }}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${imageMode === 'url' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-50'}`}>
+                  <Link2 className="w-4 h-4" /> URL adresa
+                </button>
+              </div>
+              <div className="p-3">
+                {imageMode === 'upload' ? (
+                  <div>
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+                      onChange={e => e.target.files?.[0] && handleImageFile(e.target.files[0])} />
+                    {imagePreview ? (
+                      <div className="relative">
+                        <img src={imagePreview} alt="preview" className="w-full h-36 object-cover rounded-lg" />
+                        <button type="button"
+                          onClick={() => { setImagePreview(''); set('imageUrl', ''); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                          className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button type="button" onClick={() => fileInputRef.current?.click()}
+                        onDragOver={e => e.preventDefault()}
+                        onDrop={e => { e.preventDefault(); e.dataTransfer.files?.[0] && handleImageFile(e.dataTransfer.files[0]); }}
+                        className="w-full border-2 border-dashed border-gray-200 rounded-lg py-6 flex flex-col items-center gap-2 text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-colors">
+                        <Image className="w-6 h-6" />
+                        <span className="text-xs">Klikni nebo přetáhni obrázek</span>
+                        <span className="text-xs text-gray-300">Max 1 MB · jpg, png, webp</span>
+                      </button>
+                    )}
+                    {imageError && <p className="text-xs text-red-500 mt-1">{imageError}</p>}
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <Globe className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+                    <input type="url"
+                      value={form.imageUrl.startsWith('data:') ? '' : form.imageUrl}
+                      onChange={e => set('imageUrl', e.target.value)}
+                      placeholder="https://… URL obrázku eventu"
+                      className={`${inputCls} pl-9`} />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

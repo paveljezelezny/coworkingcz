@@ -1,7 +1,10 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Calendar, Users, DollarSign, X, ChevronLeft, ChevronRight, ExternalLink, Plus, Lock } from 'lucide-react';
+import {
+  Calendar, Users, DollarSign, X, ChevronLeft, ChevronRight,
+  ExternalLink, Plus, Lock, MapPin, Clock,
+} from 'lucide-react';
 import { coworkingsData, getCitiesWithCount } from '@/lib/data/coworkings';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
@@ -20,6 +23,7 @@ interface DbEvent {
   isFree: boolean;
   price?: number | null;
   maxAttendees?: number | null;
+  location?: string | null;
   externalUrl?: string | null;
   imageUrl?: string | null;
 }
@@ -28,6 +32,164 @@ interface DbEvent {
 const slugToName: Record<string, string> = Object.fromEntries(
   coworkingsData.map((c) => [c.slug, c.name])
 );
+
+const EVENT_TYPE_LABELS: Record<string, string> = {
+  workshop: 'Workshop',
+  networking: 'Networking',
+  meetup: 'Meetup',
+  conference: 'Konference',
+  party: 'Party',
+  other: 'Jiné',
+};
+
+// ─── Day popup modal ─────────────────────────────────────────────────────────
+
+function DayEventsModal({
+  date,
+  events,
+  onClose,
+}: {
+  date: Date;
+  events: DbEvent[];
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, [onClose]);
+
+  const dayLabel = date.toLocaleDateString('cs-CZ', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  });
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+      onClick={onClose}
+    >
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div
+        className="relative w-full sm:max-w-lg max-h-[85vh] overflow-y-auto bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 capitalize">{dayLabel}</h2>
+            <p className="text-sm text-gray-500">
+              {events.length} {events.length === 1 ? 'event' : events.length < 5 ? 'eventy' : 'eventů'}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Events list */}
+        <div className="px-4 py-4 space-y-4">
+          {events.map((event) => (
+            <div
+              key={event.id}
+              className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
+            >
+              {/* Image */}
+              {event.imageUrl && (
+                <div className="h-36 w-full overflow-hidden">
+                  <img
+                    src={event.imageUrl}
+                    alt={event.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              {!event.imageUrl && (
+                <div className="h-16 bg-gradient-to-r from-blue-500 to-blue-700 flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-white/60" />
+                </div>
+              )}
+
+              <div className="p-4">
+                {/* Type badge */}
+                {event.eventType && (
+                  <span className="inline-block text-xs font-semibold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full mb-2">
+                    {EVENT_TYPE_LABELS[event.eventType] ?? event.eventType}
+                  </span>
+                )}
+
+                <h3 className="text-base font-bold text-gray-900 mb-1">{event.title}</h3>
+
+                {event.description && (
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-3">{event.description}</p>
+                )}
+
+                <div className="space-y-1.5 text-sm text-gray-600">
+                  {/* Date/time */}
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+                    <span>
+                      {event.isAllDay
+                        ? 'Celodenní akce'
+                        : new Date(event.startDate).toLocaleTimeString('cs-CZ', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                      {event.endDate && !event.isAllDay && (
+                        <> – {new Date(event.endDate).toLocaleTimeString('cs-CZ', {
+                          hour: '2-digit', minute: '2-digit',
+                        })}</>
+                      )}
+                    </span>
+                  </div>
+
+                  {/* Location */}
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+                    <span>
+                      {slugToName[event.coworkingSlug] ?? event.coworkingSlug}
+                      {event.location && <>, {event.location}</>}
+                    </span>
+                  </div>
+
+                  {/* Price */}
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="w-3.5 h-3.5 text-orange-500 flex-shrink-0" />
+                    <span>{event.isFree ? 'Vstup zdarma' : `${event.price ?? '?'} Kč`}</span>
+                  </div>
+
+                  {/* Capacity */}
+                  {event.maxAttendees && (
+                    <div className="flex items-center gap-2">
+                      <Users className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+                      <span>Max {event.maxAttendees} účastníků</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* CTA */}
+                {event.externalUrl && (
+                  <a
+                    href={event.externalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors text-sm"
+                  >
+                    Zjistit víc <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main page ───────────────────────────────────────────────────────────────
 
 export default function UdalostiPage() {
   const { data: session } = useSession();
@@ -40,6 +202,10 @@ export default function UdalostiPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [allEvents, setAllEvents] = useState<DbEvent[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Calendar day popup
+  const [popupDate, setPopupDate] = useState<Date | null>(null);
+  const [popupEvents, setPopupEvents] = useState<DbEvent[]>([]);
 
   useEffect(() => {
     fetch('/api/events')
@@ -75,7 +241,9 @@ export default function UdalostiPage() {
   };
 
   const getFirstDayOfMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+    // Convert Sunday=0 to Monday=0 (Czech week starts Monday)
+    const day = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+    return day === 0 ? 6 : day - 1;
   };
 
   const getEventsForDate = (date: Date) => {
@@ -87,6 +255,12 @@ export default function UdalostiPage() {
         eventDate.getFullYear() === date.getFullYear()
       );
     });
+  };
+
+  const handleDayClick = (date: Date, dayEvents: DbEvent[]) => {
+    if (dayEvents.length === 0) return;
+    setPopupDate(date);
+    setPopupEvents(dayEvents);
   };
 
   const handlePrevMonth = () => {
@@ -261,11 +435,7 @@ export default function UdalostiPage() {
                         <div>
                           <div className="flex items-center gap-3 mb-3">
                             <span className="text-xs font-semibold px-3 py-1 bg-blue-50 text-blue-700 rounded-full">
-                              {event.eventType === 'workshop' && 'Workshop'}
-                              {event.eventType === 'networking' && 'Networking'}
-                              {event.eventType === 'meetup' && 'Meetup'}
-                              {event.eventType === 'conference' && 'Konference'}
-                              {event.eventType === 'party' && 'Party'}
+                              {EVENT_TYPE_LABELS[event.eventType ?? ''] ?? event.eventType}
                             </span>
                             <span className="text-xs text-gray-600 font-medium">
                               {slugToName[event.coworkingSlug] ?? event.coworkingSlug}
@@ -290,6 +460,12 @@ export default function UdalostiPage() {
                               minute: '2-digit',
                             })}
                           </span>
+                          {event.location && (
+                            <span className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4 text-blue-600" />
+                              {event.location}
+                            </span>
+                          )}
                           {event.maxAttendees && (
                             <span className="flex items-center gap-2">
                               <Users className="w-4 h-4 text-blue-600" />
@@ -370,22 +546,23 @@ export default function UdalostiPage() {
             </div>
 
             {/* Calendar Grid */}
-            <div className="grid grid-cols-7 gap-2 mb-6">
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-6">
               {/* Day headers */}
               {['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'].map((day) => (
                 <div
                   key={day}
-                  className="text-center font-bold text-gray-600 py-2"
+                  className="text-center font-bold text-gray-600 py-2 text-sm"
                 >
                   {day}
                 </div>
               ))}
 
-              {/* Calendar days */}
+              {/* Empty cells before first day */}
               {Array.from({ length: getFirstDayOfMonth(currentMonth) }).map((_, i) => (
                 <div key={`empty-${i}`} className="aspect-square" />
               ))}
 
+              {/* Calendar days */}
               {Array.from({ length: getDaysInMonth(currentMonth) }).map((_, i) => {
                 const date = new Date(
                   currentMonth.getFullYear(),
@@ -393,29 +570,37 @@ export default function UdalostiPage() {
                   i + 1
                 );
                 const dayEvents = getEventsForDate(date);
-                const isToday =
-                  date.toDateString() === new Date().toDateString();
+                const isToday = date.toDateString() === new Date().toDateString();
+                const hasEvents = dayEvents.length > 0;
 
                 return (
                   <div
                     key={i + 1}
-                    className={`aspect-square rounded-lg border-2 p-2 flex flex-col justify-start overflow-hidden cursor-pointer hover:shadow-md transition-all ${
+                    onClick={() => handleDayClick(date, dayEvents)}
+                    className={`aspect-square rounded-lg border-2 p-1.5 flex flex-col justify-start overflow-hidden transition-all ${
+                      hasEvents
+                        ? 'cursor-pointer hover:shadow-md hover:scale-[1.03]'
+                        : 'cursor-default'
+                    } ${
                       isToday
                         ? 'border-blue-600 bg-blue-50'
-                        : 'border-gray-100 hover:border-blue-300'
+                        : hasEvents
+                        ? 'border-blue-300 hover:border-blue-500'
+                        : 'border-gray-100'
                     }`}
                   >
-                    <span className={`text-sm font-bold ${isToday ? 'text-blue-600' : 'text-gray-900'}`}>
+                    <span className={`text-xs sm:text-sm font-bold ${isToday ? 'text-blue-600' : 'text-gray-900'}`}>
                       {i + 1}
                     </span>
-                    <div className="flex flex-col gap-0.5 mt-1">
+                    <div className="flex flex-col gap-0.5 mt-0.5">
                       {dayEvents.slice(0, 2).map((e) => (
                         <div
                           key={e.id}
-                          className="text-xs bg-blue-600 text-white px-1 py-0.5 rounded truncate"
+                          className="text-xs bg-blue-600 text-white px-1 py-0.5 rounded truncate leading-tight"
                           title={e.title}
                         >
-                          {e.title.slice(0, 10)}...
+                          <span className="hidden sm:inline">{e.title.length > 10 ? e.title.slice(0, 10) + '…' : e.title}</span>
+                          <span className="sm:hidden">●</span>
                         </div>
                       ))}
                       {dayEvents.length > 2 && (
@@ -429,15 +614,25 @@ export default function UdalostiPage() {
               })}
             </div>
 
+            {/* Hint */}
+            <p className="text-xs text-gray-400 mb-6 text-center">
+              Kliknutím na den s eventem zobrazíte detail
+            </p>
+
             {/* Legend */}
             <div className="border-t border-gray-200 pt-6">
               <h3 className="font-bold text-gray-900 mb-4">Eventy pro vybrané období</h3>
               {filteredEvents.length > 0 ? (
                 <div className="space-y-2">
                   {filteredEvents.slice(0, 5).map((event) => (
-                    <div
+                    <button
                       key={event.id}
-                      className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                      type="button"
+                      onClick={() => {
+                        const d = new Date(event.startDate);
+                        handleDayClick(d, getEventsForDate(d));
+                      }}
+                      className="w-full flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors text-left"
                     >
                       <div className="w-3 h-3 bg-blue-600 rounded-full flex-shrink-0" />
                       <div className="flex-1 min-w-0">
@@ -445,10 +640,14 @@ export default function UdalostiPage() {
                           {event.title}
                         </p>
                         <p className="text-xs text-gray-600">
-                          {new Date(event.startDate).toLocaleDateString('cs-CZ')}
+                          {new Date(event.startDate).toLocaleDateString('cs-CZ', {
+                            day: 'numeric', month: 'long',
+                          })}
+                          {event.location && ` · ${event.location}`}
                         </p>
                       </div>
-                    </div>
+                      <ExternalLink className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                    </button>
                   ))}
                 </div>
               ) : (
@@ -460,6 +659,15 @@ export default function UdalostiPage() {
           </div>
         )}
       </div>
+
+      {/* Day popup */}
+      {popupDate && (
+        <DayEventsModal
+          date={popupDate}
+          events={popupEvents}
+          onClose={() => { setPopupDate(null); setPopupEvents([]); }}
+        />
+      )}
     </div>
   );
 }

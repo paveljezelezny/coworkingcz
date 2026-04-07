@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Users, Shield, User, Building2, Search, X, Check, Edit2 } from 'lucide-react';
+import { Users, Shield, User, Building2, Search, X, Check, Edit2, Tag, Calendar } from 'lucide-react';
 import Link from 'next/link';
 
 interface AdminUser {
@@ -230,6 +230,12 @@ export default function AdminUsersPage() {
             </Link>
             <Link href="/admin/uzivatele" className="px-4 py-3 text-sm font-medium text-blue-600 border-b-2 border-blue-600 flex items-center gap-2">
               <Users className="w-4 h-4" /> Uživatelé
+            </Link>
+            <Link href="/admin/inzeraty" className="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 flex items-center gap-2">
+              <Tag className="w-4 h-4" /> Inzeráty
+            </Link>
+            <Link href="/admin/eventy" className="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 flex items-center gap-2">
+              <Calendar className="w-4 h-4" /> Eventy
             </Link>
           </nav>
         </div>

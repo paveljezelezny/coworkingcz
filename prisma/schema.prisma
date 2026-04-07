@@ -167,6 +167,7 @@ model Event {
   maxAttendees    Int?
   price           Float?
   isFree          Boolean  @default(true)
+  location        String?
   externalUrl     String?
   imageUrl        String?
   registrations   EventRegistration[]

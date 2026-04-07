@@ -48,6 +48,7 @@ export async function PATCH(
       ...(body.isFree !== undefined ? { isFree: Boolean(body.isFree) } : {}),
       ...(body.price !== undefined ? { price: !body.isFree && body.price ? parseFloat(body.price) : null } : {}),
       ...(body.maxAttendees !== undefined ? { maxAttendees: body.maxAttendees ? parseInt(body.maxAttendees) : null } : {}),
+      ...(body.location !== undefined ? { location: body.location?.trim() || null } : {}),
       ...(body.externalUrl !== undefined ? { externalUrl: body.externalUrl?.trim() || null } : {}),
       ...(body.imageUrl !== undefined ? { imageUrl: body.imageUrl?.trim() || null } : {}),
       ...(body.coworkingSlug !== undefined ? { coworkingSlug: body.coworkingSlug } : {}),

@@ -25,6 +25,7 @@ interface FormData {
   description: string;
   eventType: string;
   coworkingSlug: string;
+  location: string;
   startDate: string;
   startTime: string;
   endDate: string;
@@ -44,7 +45,7 @@ export default function NovaUdalostPage() {
   const [paidAccess, setPaidAccess] = useState<boolean | null>(null);
   const [form, setForm] = useState<FormData>({
     title: '', description: '', eventType: '',
-    coworkingSlug: '', startDate: '', startTime: '09:00',
+    coworkingSlug: '', location: '', startDate: '', startTime: '09:00',
     endDate: '', endTime: '11:00',
     isAllDay: false, isFree: true, price: '',
     maxAttendees: '', externalUrl: '', imageUrl: '',
@@ -114,6 +115,7 @@ export default function NovaUdalostPage() {
           description: form.description,
           eventType: form.eventType,
           coworkingSlug: form.coworkingSlug,
+          location: form.location || null,
           startDate: startISO,
           endDate: endISO,
           isAllDay: form.isAllDay,
@@ -195,7 +197,7 @@ export default function NovaUdalostPage() {
               Zpět na kalendář akcí
             </Link>
             <button
-              onClick={() => { setSuccess(false); setImagePreview(''); setImageError(''); setImageMode('upload'); setForm({ title: '', description: '', eventType: '', coworkingSlug: '', startDate: '', startTime: '09:00', endDate: '', endTime: '11:00', isAllDay: false, isFree: true, price: '', maxAttendees: '', externalUrl: '', imageUrl: '' }); }}
+              onClick={() => { setSuccess(false); setImagePreview(''); setImageError(''); setImageMode('upload'); setForm({ title: '', description: '', eventType: '', coworkingSlug: '', location: '', startDate: '', startTime: '09:00', endDate: '', endTime: '11:00', isAllDay: false, isFree: true, price: '', maxAttendees: '', externalUrl: '', imageUrl: '' }); }}
               className="w-full py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
             >
               Přidat další event
@@ -356,20 +358,32 @@ export default function NovaUdalostPage() {
                   <MapPin className="w-4 h-4 text-blue-600" />
                   Místo konání
                 </h2>
-                <select
-                  value={form.coworkingSlug}
-                  onChange={(e) => set('coworkingSlug', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-                >
-                  <option value="">— Vyberte coworking —</option>
-                  {coworkingsData
-                    .sort((a, b) => a.name.localeCompare(b.name, 'cs'))
-                    .map((cw) => (
-                      <option key={cw.slug} value={cw.slug}>
-                        {cw.name} — {cw.city}
-                      </option>
-                    ))}
-                </select>
+                <div className="space-y-3">
+                  <select
+                    value={form.coworkingSlug}
+                    onChange={(e) => set('coworkingSlug', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                  >
+                    <option value="">— Vyberte coworking —</option>
+                    {coworkingsData
+                      .sort((a, b) => a.name.localeCompare(b.name, 'cs'))
+                      .map((cw) => (
+                        <option key={cw.slug} value={cw.slug}>
+                          {cw.name} — {cw.city}
+                        </option>
+                      ))}
+                  </select>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-3.5 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      value={form.location}
+                      onChange={(e) => set('location', e.target.value)}
+                      placeholder="Přesná adresa nebo místo konání (volitelné)"
+                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                  </div>
+                </div>
               </section>
 
               {/* ── Kapacita a vstupné ────────────────────────────── */}
