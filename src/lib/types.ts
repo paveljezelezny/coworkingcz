@@ -206,12 +206,13 @@ export const PLATFORM_PRICING: PlatformPricing[] = [
 ];
 
 export const COWORKER_MEMBERSHIP = {
-  monthlyPrice: 79,
-  yearlyPrice: 790,
+  monthlyPrice: 99,
+  yearlyPrice: 590,
+  yearlyMonthlyPrice: Math.round(590 / 12), // 49 Kč/měs
   teamYearlyPrice: 1590,        // tým až 5 lidí
   teamMaxMembers: 5,
   freeVisitsPerMonth: 1,
-  yearlyMonthlySaving: Math.round(79 * 12 - 790), // 158 Kč
+  yearlyMonthlySaving: Math.round(99 * 12 - 590), // 598 Kč
 };
 
 export const COWORKER_MEMBERSHIP_BENEFITS = [

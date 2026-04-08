@@ -86,8 +86,9 @@ export default function CenikyPage() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const monthlySaving     = COWORKER_MEMBERSHIP.yearlyMonthlySaving;
-  const freeMonths        = Math.round(monthlySaving / COWORKER_MEMBERSHIP.monthlyPrice);
+  const monthlySaving       = COWORKER_MEMBERSHIP.yearlyMonthlySaving;
+  const yearlyMonthlyPrice  = COWORKER_MEMBERSHIP.yearlyMonthlyPrice; // 49 Kč/měs
+  const yearlyDiscount      = Math.round((1 - yearlyMonthlyPrice / COWORKER_MEMBERSHIP.monthlyPrice) * 100); // ~50 %
   const pricePerPersonMonth = Math.round(COWORKER_MEMBERSHIP.teamYearlyPrice / COWORKER_MEMBERSHIP.teamMaxMembers / 12);
 
   // ── Trial badge shown on every CTA ──────────────────────────────────────
@@ -412,19 +413,26 @@ export default function CenikyPage() {
               </div>
               <div className="mb-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-1">Roční</h3>
-                <p className="text-sm text-gray-500">Ušetříš {monthlySaving} Kč ročně</p>
+                <p className="text-sm text-gray-500">Nejlepší cena, platba jednou ročně</p>
               </div>
               <div className="mb-3">
+                {/* Hlavní cena: měsíční ekvivalent */}
                 <div className="flex items-end gap-1">
-                  <span className="text-5xl font-bold text-blue-600">{COWORKER_MEMBERSHIP.yearlyPrice}</span>
-                  <span className="text-blue-400 mb-2 text-lg">Kč</span>
+                  <span className="text-5xl font-bold text-blue-600">{yearlyMonthlyPrice}</span>
+                  <span className="text-blue-400 mb-2 text-lg">Kč<span className="text-sm font-normal">/měs</span></span>
                 </div>
-                <p className="text-sm text-gray-500">ročně</p>
+                {/* Roční platba + sleva badge */}
+                <div className="flex items-center gap-2 mt-1.5">
+                  <p className="text-sm text-gray-500">platba ročně {COWORKER_MEMBERSHIP.yearlyPrice} Kč</p>
+                  <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                    Sleva {yearlyDiscount}&nbsp;%
+                  </span>
+                </div>
               </div>
               <div className="mb-6">
                 <span className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-lg px-3 py-1.5 text-xs text-green-700 font-medium">
                   <Check className="w-3.5 h-3.5" />
-                  Ušetříš {monthlySaving} Kč = {freeMonths} měsíce zdarma
+                  Ušetříš {monthlySaving} Kč oproti měsíčnímu plánu
                 </span>
               </div>
               <ul className="space-y-3 mb-8 flex-grow">
@@ -451,46 +459,36 @@ export default function CenikyPage() {
               <FreeLink role="coworker" />
             </div>
 
-            {/* Firemní */}
-            <div className="border-2 border-gray-200 rounded-2xl p-8 hover:border-purple-400 hover:shadow-lg transition-all flex flex-col">
+            {/* Firemní — připravujeme */}
+            <div className="border-2 border-gray-200 rounded-2xl p-8 flex flex-col opacity-75">
               <div className="mb-6">
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 bg-purple-100 text-purple-600 rounded-full mb-2">
+                  Brzy dostupné
+                </span>
                 <h3 className="text-xl font-bold text-gray-900 mb-1">Firemní</h3>
                 <p className="text-sm text-gray-500">Tým až {COWORKER_MEMBERSHIP.teamMaxMembers} lidí</p>
               </div>
               <div className="mb-6">
-                <div className="flex items-end gap-1">
-                  <span className="text-5xl font-bold text-purple-600">{COWORKER_MEMBERSHIP.teamYearlyPrice}</span>
-                  <span className="text-purple-400 mb-2 text-lg">Kč</span>
-                </div>
-                <p className="text-sm text-gray-500">ročně za celý tým</p>
-                <p className="text-xs text-gray-400 mt-1">= {pricePerPersonMonth} Kč / osoba / měsíc</p>
+                <p className="text-3xl font-bold text-purple-400">Připravujeme</p>
+                <p className="text-sm text-gray-400 mt-1">Cena bude brzy zveřejněna</p>
               </div>
               <ul className="space-y-3 mb-8 flex-grow">
                 {COWORKER_MEMBERSHIP_BENEFITS.map((benefit, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-gray-700">
-                    <Check className="w-4 h-4 text-purple-500 flex-shrink-0 mt-0.5" />{benefit}
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-gray-400">
+                    <Check className="w-4 h-4 text-purple-300 flex-shrink-0 mt-0.5" />{benefit}
                   </li>
                 ))}
-                <li className="flex items-start gap-2.5 text-sm font-semibold text-purple-700">
-                  <Users className="w-4 h-4 text-purple-500 flex-shrink-0 mt-0.5" />
+                <li className="flex items-start gap-2.5 text-sm font-semibold text-purple-400">
+                  <Users className="w-4 h-4 text-purple-300 flex-shrink-0 mt-0.5" />
                   Správa celého týmu z jednoho účtu
                 </li>
               </ul>
               <button
-                onClick={() => handleCoworkerPlan('team')}
-                disabled={activating === 'team'}
-                className="w-full py-3.5 px-4 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                disabled
+                className="w-full py-3.5 px-4 bg-gray-200 text-gray-400 font-bold rounded-xl cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {activating === 'team' ? (
-                  <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Aktivuji…</>
-                ) : (
-                  <>Začít zdarma <ArrowRight className="w-4 h-4" /></>
-                )}
+                Připravujeme
               </button>
-              <p className="text-center text-xs text-green-700 font-semibold mt-2 flex items-center justify-center gap-1">
-                <Gift className="w-3.5 h-3.5" />30 dní zdarma pro celý tým
-              </p>
-              <FreeLink role="coworker" />
             </div>
 
           </div>
