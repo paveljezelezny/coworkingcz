@@ -22,18 +22,25 @@ export default function CenikyPage() {
     router.push(`/registrace?role=${role}&plan=${plan}`);
   };
 
-  // For already-logged-in users: activate trial directly
-  const activateTrial = async (plan: string, redirectTo: string) => {
-    setActivating(plan);
+  // Spustí Stripe Checkout Session a přesměruje uživatele
+  const startStripeCheckout = async (stripePlan: string) => {
+    setActivating(stripePlan);
     try {
-      await fetch('/api/trial/activate', {
+      const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: plan.includes('year') ? 'yearly' : 'monthly' }),
+        body: JSON.stringify({ plan: stripePlan }),
       });
-      router.push(redirectTo);
-    } catch {
-      router.push(redirectTo);
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url; // přesměruj na Stripe Checkout
+      } else {
+        console.error('[stripe/checkout] No URL returned:', data);
+        alert('Chyba při spouštění platby. Zkus to prosím znovu.');
+      }
+    } catch (err) {
+      console.error('[stripe/checkout] Error:', err);
+      alert('Chyba při spouštění platby. Zkus to prosím znovu.');
     } finally {
       setActivating(null);
     }
@@ -41,9 +48,7 @@ export default function CenikyPage() {
 
   const handleCoworkingPlan = (tier: string) => {
     if (session) {
-      // Already logged in — activate and go to manager
-      const plan = tier === 'large' ? 'yearly' : 'monthly';
-      activateTrial(plan, '/spravce');
+      startStripeCheckout(`coworking_${tier}`);
     } else {
       goToRegistrace('coworking', tier);
     }
@@ -51,7 +56,8 @@ export default function CenikyPage() {
 
   const handleCoworkerPlan = (plan: string) => {
     if (session) {
-      activateTrial(plan, '/profil');
+      // plan = 'monthly' | 'yearly'
+      startStripeCheckout(`coworker_${plan}`);
     } else {
       goToRegistrace('coworker', plan);
     }

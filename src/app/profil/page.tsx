@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Mail, Globe, Linkedin, Award, Pencil, LogOut,
   Loader2, Check, X, Plus, Trash2, ShieldCheck,
@@ -1506,6 +1506,8 @@ function MyEventsSection() {
 export default function ProfilPage() {
   const { data: session, status: authStatus } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const paymentStatus = searchParams.get('payment'); // 'success' | 'cancelled'
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -1709,7 +1711,26 @@ export default function ProfilPage() {
     <div className="min-h-screen bg-gray-50 pt-8 pb-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Success banner */}
+        {/* Stripe payment success banner */}
+        {paymentStatus === 'success' && (
+          <div className="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 rounded-xl px-5 py-4">
+            <Check className="w-5 h-5 flex-shrink-0 text-green-600" />
+            <div>
+              <p className="font-semibold">Platba proběhla úspěšně 🎉</p>
+              <p className="text-sm text-green-700">Tvoje členství je aktivní. Výhody se projeví do pár minut.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Stripe payment cancelled banner */}
+        {paymentStatus === 'cancelled' && (
+          <div className="mb-6 flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-5 py-4">
+            <X className="w-5 h-5 flex-shrink-0 text-amber-600" />
+            <p className="text-sm">Platba byla zrušena. Kdykoli se můžeš vrátit a zkusit to znovu.</p>
+          </div>
+        )}
+
+        {/* Profile save success banner */}
         {saveSuccess && (
           <div className="mb-6 flex items-center gap-2 bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3 text-sm">
             <Check className="w-4 h-4 flex-shrink-0" />
