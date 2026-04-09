@@ -90,13 +90,19 @@ export default function COWOSPage() {
 
       if (res.ok) {
         const sub = await res.json();
-        setSubscription(sub);
-        await fetchStats();
+        if (sub && sub.id) {
+          setSubscription(sub);
+          await fetchStats();
+        } else {
+          setError('Aktivace proběhla, ale vrátila prázdnou odpověď. Zkuste obnovit stránku.');
+        }
       } else {
-        setError('Chyba při aktivaci COW.OS');
+        const data = await res.json().catch(() => ({}));
+        const detail = data.detail ? ` (${data.detail})` : '';
+        setError(`Chyba při aktivaci COW.OS${detail}`);
       }
     } catch (err) {
-      setError('Chyba při připojení k serveru');
+      setError('Chyba při připojení k serveru: ' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setActivating(false);
     }

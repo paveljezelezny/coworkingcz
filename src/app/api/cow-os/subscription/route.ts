@@ -4,6 +4,8 @@ import { verifyCowOsOwner } from '@/lib/cow-os/auth';
 import { ensureCowOsTables } from '@/lib/cow-os/ensure-tables';
 import { randomUUID } from 'crypto';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get('slug');
   const auth = await verifyCowOsOwner(slug);
@@ -24,7 +26,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(sub);
   } catch (error) {
     console.error('GET subscription error:', error);
-    return NextResponse.json({ error: 'Chyba při načítání' }, { status: 500 });
+    // Return null so frontend shows activation screen instead of blocking
+    return NextResponse.json(null);
   }
 }
 
@@ -33,13 +36,21 @@ export async function POST(req: NextRequest) {
   const auth = await verifyCowOsOwner(slug);
 
   if (!auth.authorized) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
+    return NextResponse.json(
+      { error: auth.error, detail: `Auth failed for slug=${slug}` },
+      { status: auth.status }
+    );
   }
 
   try {
     // Auto-create all COW.OS tables if they don't exist yet
     await ensureCowOsTables();
+  } catch (err) {
+    console.error('ensureCowOsTables failed:', err);
+    // Continue anyway — tables might already exist from manual migration
+  }
 
+  try {
     // Check if subscription already exists
     const existing = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
       `SELECT * FROM "CowOsSubscription" WHERE "coworkingSlug" = $1`,
@@ -79,7 +90,11 @@ export async function POST(req: NextRequest) {
     const sub = result.length > 0 ? result[0] : null;
     return NextResponse.json(sub, { status: 201 });
   } catch (error) {
-    console.error('POST subscription error:', error);
-    return NextResponse.json({ error: 'Chyba při aktivaci' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('POST subscription error:', msg);
+    return NextResponse.json(
+      { error: 'Chyba při aktivaci', detail: msg },
+      { status: 500 }
+    );
   }
 }

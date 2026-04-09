@@ -1,20 +1,35 @@
 /**
  * Auto-migration: ensures all COW.OS tables exist.
- * Called lazily on first COW.OS activation — no manual migration needed.
- * Uses CREATE TABLE IF NOT EXISTS so it's safe to call repeatedly.
+ * Lightweight check first — only runs DDL if tables are actually missing.
  */
 import { prisma } from '@/lib/prisma';
 
 let tablesEnsured = false;
 
 export async function ensureCowOsTables(): Promise<void> {
-  // Skip if already verified in this process lifecycle
   if (tablesEnsured) return;
 
-  const statements = [
-    `CREATE TABLE IF NOT EXISTS "CowOsSubscription" (
-      "id" TEXT NOT NULL,
-      "coworkingSlug" TEXT NOT NULL,
+  // Quick check: if CowOsSubscription table exists, assume all tables exist
+  try {
+    await prisma.$queryRawUnsafe(
+      `SELECT 1 FROM information_schema.tables WHERE table_name = 'CowOsSubscription' LIMIT 1`
+    );
+    const result = await prisma.$queryRawUnsafe<{ exists: boolean }[]>(
+      `SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'CowOsSubscription') as exists`
+    );
+    if (result[0]?.exists) {
+      tablesEnsured = true;
+      return;
+    }
+  } catch {
+    // If even this check fails, proceed to create tables
+  }
+
+  // Tables don't exist — create them all in one batch
+  const ddl = `
+    CREATE TABLE IF NOT EXISTS "CowOsSubscription" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "coworkingSlug" TEXT NOT NULL UNIQUE,
       "userId" TEXT NOT NULL,
       "tier" TEXT NOT NULL DEFAULT 'free',
       "maxMembers" INTEGER NOT NULL DEFAULT 5,
@@ -24,14 +39,12 @@ export async function ensureCowOsTables(): Promise<void> {
       "startDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
       "currentPeriodEnd" TIMESTAMP(3),
       "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      CONSTRAINT "CowOsSubscription_pkey" PRIMARY KEY ("id")
-    )`,
-    `CREATE UNIQUE INDEX IF NOT EXISTS "CowOsSubscription_coworkingSlug_key" ON "CowOsSubscription"("coworkingSlug")`,
+      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
 
-    `CREATE TABLE IF NOT EXISTS "CowOsBillingProfile" (
-      "id" TEXT NOT NULL,
-      "coworkingSlug" TEXT NOT NULL,
+    CREATE TABLE IF NOT EXISTS "CowOsBillingProfile" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "coworkingSlug" TEXT NOT NULL UNIQUE,
       "companyName" TEXT NOT NULL,
       "ico" TEXT NOT NULL,
       "dic" TEXT,
@@ -46,13 +59,11 @@ export async function ensureCowOsTables(): Promise<void> {
       "logoUrl" TEXT,
       "courtRegistration" TEXT,
       "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      CONSTRAINT "CowOsBillingProfile_pkey" PRIMARY KEY ("id")
-    )`,
-    `CREATE UNIQUE INDEX IF NOT EXISTS "CowOsBillingProfile_coworkingSlug_key" ON "CowOsBillingProfile"("coworkingSlug")`,
+      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
 
-    `CREATE TABLE IF NOT EXISTS "CowOsMembershipPlan" (
-      "id" TEXT NOT NULL,
+    CREATE TABLE IF NOT EXISTS "CowOsMembershipPlan" (
+      "id" TEXT NOT NULL PRIMARY KEY,
       "coworkingSlug" TEXT NOT NULL,
       "name" TEXT NOT NULL,
       "description" TEXT,
@@ -63,12 +74,11 @@ export async function ensureCowOsTables(): Promise<void> {
       "sortOrder" INTEGER NOT NULL DEFAULT 0,
       "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
       "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      CONSTRAINT "CowOsMembershipPlan_pkey" PRIMARY KEY ("id")
-    )`,
-    `CREATE UNIQUE INDEX IF NOT EXISTS "CowOsMembershipPlan_coworkingSlug_name_key" ON "CowOsMembershipPlan"("coworkingSlug", "name")`,
+      UNIQUE("coworkingSlug", "name")
+    );
 
-    `CREATE TABLE IF NOT EXISTS "CowOsMember" (
-      "id" TEXT NOT NULL,
+    CREATE TABLE IF NOT EXISTS "CowOsMember" (
+      "id" TEXT NOT NULL PRIMARY KEY,
       "coworkingSlug" TEXT NOT NULL,
       "userId" TEXT,
       "email" TEXT NOT NULL,
@@ -85,12 +95,11 @@ export async function ensureCowOsTables(): Promise<void> {
       "notes" TEXT,
       "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
       "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      CONSTRAINT "CowOsMember_pkey" PRIMARY KEY ("id")
-    )`,
-    `CREATE UNIQUE INDEX IF NOT EXISTS "CowOsMember_coworkingSlug_email_key" ON "CowOsMember"("coworkingSlug", "email")`,
+      UNIQUE("coworkingSlug", "email")
+    );
 
-    `CREATE TABLE IF NOT EXISTS "CowOsInvoice" (
-      "id" TEXT NOT NULL,
+    CREATE TABLE IF NOT EXISTS "CowOsInvoice" (
+      "id" TEXT NOT NULL PRIMARY KEY,
       "coworkingSlug" TEXT NOT NULL,
       "memberId" TEXT NOT NULL,
       "invoiceNumber" TEXT NOT NULL,
@@ -116,12 +125,11 @@ export async function ensureCowOsTables(): Promise<void> {
       "variableSymbol" TEXT NOT NULL,
       "qrPaymentCode" TEXT,
       "notes" TEXT,
-      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      CONSTRAINT "CowOsInvoice_pkey" PRIMARY KEY ("id")
-    )`,
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
 
-    `CREATE TABLE IF NOT EXISTS "CowOsResource" (
-      "id" TEXT NOT NULL,
+    CREATE TABLE IF NOT EXISTS "CowOsResource" (
+      "id" TEXT NOT NULL PRIMARY KEY,
       "coworkingSlug" TEXT NOT NULL,
       "name" TEXT NOT NULL,
       "type" TEXT NOT NULL,
@@ -131,12 +139,11 @@ export async function ensureCowOsTables(): Promise<void> {
       "isActive" BOOLEAN NOT NULL DEFAULT TRUE,
       "sortOrder" INTEGER NOT NULL DEFAULT 0,
       "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      CONSTRAINT "CowOsResource_pkey" PRIMARY KEY ("id")
-    )`,
+      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
 
-    `CREATE TABLE IF NOT EXISTS "CowOsResourceBooking" (
-      "id" TEXT NOT NULL,
+    CREATE TABLE IF NOT EXISTS "CowOsResourceBooking" (
+      "id" TEXT NOT NULL PRIMARY KEY,
       "coworkingSlug" TEXT NOT NULL,
       "resourceId" TEXT NOT NULL,
       "memberId" TEXT NOT NULL,
@@ -149,22 +156,19 @@ export async function ensureCowOsTables(): Promise<void> {
       "invoiceId" TEXT,
       "status" TEXT NOT NULL DEFAULT 'confirmed',
       "notes" TEXT,
-      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      CONSTRAINT "CowOsResourceBooking_pkey" PRIMARY KEY ("id")
-    )`,
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
 
-    // Key indexes
-    `CREATE INDEX IF NOT EXISTS "CowOsSubscription_userId_idx" ON "CowOsSubscription"("userId")`,
-    `CREATE INDEX IF NOT EXISTS "CowOsMember_coworkingSlug_idx" ON "CowOsMember"("coworkingSlug")`,
-    `CREATE INDEX IF NOT EXISTS "CowOsMember_coworkingSlug_status_idx" ON "CowOsMember"("coworkingSlug", "status")`,
-    `CREATE INDEX IF NOT EXISTS "CowOsInvoice_coworkingSlug_idx" ON "CowOsInvoice"("coworkingSlug")`,
-    `CREATE INDEX IF NOT EXISTS "CowOsInvoice_memberId_idx" ON "CowOsInvoice"("memberId")`,
-    `CREATE INDEX IF NOT EXISTS "CowOsMembershipPlan_coworkingSlug_idx" ON "CowOsMembershipPlan"("coworkingSlug")`,
-  ];
+    CREATE INDEX IF NOT EXISTS "CowOsSubscription_userId_idx" ON "CowOsSubscription"("userId");
+    CREATE INDEX IF NOT EXISTS "CowOsMember_coworkingSlug_idx" ON "CowOsMember"("coworkingSlug");
+    CREATE INDEX IF NOT EXISTS "CowOsMember_coworkingSlug_status_idx" ON "CowOsMember"("coworkingSlug", "status");
+    CREATE INDEX IF NOT EXISTS "CowOsInvoice_coworkingSlug_idx" ON "CowOsInvoice"("coworkingSlug");
+    CREATE INDEX IF NOT EXISTS "CowOsInvoice_memberId_idx" ON "CowOsInvoice"("memberId");
+    CREATE INDEX IF NOT EXISTS "CowOsMembershipPlan_coworkingSlug_idx" ON "CowOsMembershipPlan"("coworkingSlug");
+    CREATE INDEX IF NOT EXISTS "CowOsResource_coworkingSlug_idx" ON "CowOsResource"("coworkingSlug");
+    CREATE INDEX IF NOT EXISTS "CowOsResourceBooking_resourceId_date_idx" ON "CowOsResourceBooking"("resourceId", "date");
+  `;
 
-  for (const sql of statements) {
-    await prisma.$executeRawUnsafe(sql);
-  }
-
+  await prisma.$executeRawUnsafe(ddl);
   tablesEnsured = true;
 }
