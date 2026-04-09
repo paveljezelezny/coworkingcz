@@ -10,6 +10,7 @@ import {
   ToggleLeft, ToggleRight, ChevronDown, ChevronUp,
   Upload, Link2, Image, Phone, Eye, EyeOff, Camera,
   Building2, MessageSquare, ZoomIn, ZoomOut,
+  FileText, Download, AlertTriangle,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -130,6 +131,175 @@ function SkillTag({ label, onRemove }: { label: string; onRemove?: () => void })
         </button>
       )}
     </span>
+  );
+}
+
+// ─── Stripe invoice types ────────────────────────────────────────────────────
+
+interface StripeInvoice {
+  id: string;
+  number: string | null;
+  amount: number;
+  currency: string;
+  status: string;
+  date: number;
+  periodStart: number;
+  periodEnd: number;
+  description: string | null;
+  pdfUrl: string | null;
+}
+
+interface StripeSubscription {
+  id: string;
+  status: string;
+  cancelAtPeriodEnd: boolean;
+  currentPeriodEnd: number | null;
+  trialEnd: number | null;
+  interval: string | null;
+}
+
+// ─── DokladySection ───────────────────────────────────────────────────────────
+
+function DokladySection() {
+  const [invoices, setInvoices] = useState<StripeInvoice[]>([]);
+  const [subscription, setSubscription] = useState<StripeSubscription | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelDone, setCancelDone] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/stripe/invoices')
+      .then(r => r.json())
+      .then(d => {
+        setInvoices(d.invoices ?? []);
+        setSubscription(d.subscription ?? null);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleCancel = async () => {
+    if (!confirm('Opravdu chceš zrušit předplatné? Zůstane aktivní do konce aktuálního období.')) return;
+    setCancelling(true);
+    try {
+      const r = await fetch('/api/stripe/cancel', { method: 'POST' });
+      const d = await r.json();
+      if (d.success) {
+        setCancelDone(true);
+        setSubscription(prev => prev ? { ...prev, cancelAtPeriodEnd: true } : prev);
+      }
+    } catch {}
+    setCancelling(false);
+  };
+
+  const fmtDate = (unix: number) =>
+    new Date(unix * 1000).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  const fmtAmount = (amount: number, currency: string) =>
+    new Intl.NumberFormat('cs-CZ', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount / 100);
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <FileText className="w-5 h-5 text-gray-500" />
+        <h3 className="font-bold text-gray-900">Doklady &amp; předplatné</h3>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-6">
+          <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+        </div>
+      ) : (
+        <>
+          {/* Stav předplatného */}
+          {subscription && (
+            <div className="mb-4 p-3 bg-gray-50 rounded-lg text-sm space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600">Stav</span>
+                <span className={`font-semibold ${
+                  subscription.status === 'active'   ? 'text-green-600' :
+                  subscription.status === 'trialing' ? 'text-teal-600' :
+                  'text-gray-600'
+                }`}>
+                  {subscription.status === 'active'   ? 'Aktivní' :
+                   subscription.status === 'trialing' ? 'Trial' :
+                   subscription.status}
+                  {subscription.cancelAtPeriodEnd && ' (ruší se)'}
+                </span>
+              </div>
+              {subscription.trialEnd && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Konec trialu</span>
+                  <span className="text-gray-800">{fmtDate(subscription.trialEnd)}</span>
+                </div>
+              )}
+              {subscription.currentPeriodEnd && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Další obnova / konec</span>
+                  <span className="text-gray-800">{fmtDate(subscription.currentPeriodEnd)}</span>
+                </div>
+              )}
+              {subscription.interval && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Interval</span>
+                  <span className="text-gray-800">
+                    {subscription.interval === 'month' ? 'Měsíčně' : 'Ročně'}
+                  </span>
+                </div>
+              )}
+
+              {/* Cancel tlačítko */}
+              {!subscription.cancelAtPeriodEnd && !cancelDone && (
+                <button
+                  onClick={handleCancel}
+                  disabled={cancelling}
+                  className="mt-3 w-full flex items-center justify-center gap-2 py-2 px-3 text-xs text-red-600 border border-red-200 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {cancelling ? <Loader2 className="w-3 h-3 animate-spin" /> : <X className="w-3 h-3" />}
+                  Zrušit předplatné (doběhne do konce období)
+                </button>
+              )}
+              {(subscription.cancelAtPeriodEnd || cancelDone) && (
+                <div className="mt-2 flex items-center gap-2 text-xs text-amber-700 bg-amber-50 rounded px-3 py-2">
+                  <AlertTriangle className="w-3 h-3 flex-shrink-0" />
+                  Předplatné se zruší na konci aktuálního období. Do té doby máš plný přístup.
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Seznam faktur */}
+          {invoices.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-4">
+              Zatím žádné doklady.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {invoices.map(inv => (
+                <div key={inv.id} className="flex items-center justify-between gap-3 py-2 border-b border-gray-100 last:border-0">
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-gray-800 truncate">
+                      {inv.description ?? 'Předplatné COWORKINGS.cz'}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {fmtDate(inv.date)} · {fmtAmount(inv.amount, inv.currency)}
+                    </div>
+                  </div>
+                  <Link
+                    href={`/profil/doklad/${inv.id}`}
+                    target="_blank"
+                    className="flex-shrink-0 flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded-lg transition-colors"
+                  >
+                    <Download className="w-3 h-3" />
+                    Doklad
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
 }
 
@@ -2158,6 +2328,9 @@ function ProfilPageInner() {
 
             {/* Membership card */}
             <MembershipCard tier={profile.membershipTier} end={profile.membershipEnd} role={userRole} />
+
+            {/* Doklady & předplatné */}
+            <DokladySection />
 
             {/* Contact */}
             <div className="bg-white rounded-xl border border-gray-200 p-5">

@@ -99,6 +99,11 @@ model CoworkerProfile {
   membershipStart DateTime?
   membershipEnd   DateTime?
 
+  // Stripe identifiers for subscription management
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  stripePlanInterval   String?  // 'month' | 'year' | 'trial'
+
   homeCoworkingId   String?
   homeCoworkingSlug String?
   phone             String?

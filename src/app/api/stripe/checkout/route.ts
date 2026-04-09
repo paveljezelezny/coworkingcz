@@ -36,11 +36,29 @@ export async function POST(req: NextRequest) {
 
     const baseUrl = process.env.NEXTAUTH_URL || 'https://coworkingcz.vercel.app';
 
+    // Find or create Stripe customer for this email so invoices are linked correctly
+    let customerId: string | undefined;
+    try {
+      const existing = await stripe.customers.list({ email: session.user.email, limit: 1 });
+      if (existing.data.length > 0) {
+        customerId = existing.data[0].id;
+      } else {
+        const newCustomer = await stripe.customers.create({
+          email: session.user.email,
+          name: session.user.name || undefined,
+          metadata: { userId: session.user.id || '' },
+        });
+        customerId = newCustomer.id;
+      }
+    } catch {
+      // Non-fatal — checkout will create a customer automatically if this fails
+    }
+
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
-      customer_email: session.user.email,
+      ...(customerId ? { customer: customerId } : { customer_email: session.user.email }),
       // Metadata pro webhook — identifikace uživatele a plánu
       metadata: {
         userId:    session.user.id || '',
@@ -48,6 +66,8 @@ export async function POST(req: NextRequest) {
         plan,
       },
       subscription_data: {
+        // ── 30 dní trial zdarma, kartou se to ověří hned, strhne po trialu ──
+        trial_period_days: 30,
         metadata: {
           userId:    session.user.id || '',
           userEmail: session.user.email,
