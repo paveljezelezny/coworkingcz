@@ -1,8 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Users, Shield, User, Building2, Search, X, Check, Edit2, Tag, Calendar } from 'lucide-react';
+import { Users, Shield, User, Building2, Search, X, Check, Edit2, Tag, Calendar, Zap } from 'lucide-react';
 import Link from 'next/link';
+
+interface CoworkingClaim {
+  coworkingSlug: string;
+  coworkingName: string;
+  status: string;
+}
 
 interface AdminUser {
   id: string;
@@ -14,6 +20,9 @@ interface AdminUser {
   membershipTier: string | null;
   membershipStart: string | null;
   membershipEnd: string | null;
+  coworkingClaims: CoworkingClaim[];
+  hasCoworkingOwnership: boolean;
+  effectiveMembership: string | null;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -29,12 +38,14 @@ const ROLE_COLORS: Record<string, string> = {
 
 function tierLabel(tier: string | null) {
   if (!tier || tier === 'free') return 'Zdarma';
+  if (tier === 'owner') return 'Vlastník';
   if (tier.startsWith('trial')) return 'Trial 30 dní';
   const map: Record<string, string> = { monthly: 'Měsíční', yearly: 'Roční', corporate: 'Firemní' };
   return map[tier] ?? tier;
 }
 function tierColor(tier: string | null) {
   if (!tier || tier === 'free') return 'bg-gray-100 text-gray-500';
+  if (tier === 'owner') return 'bg-orange-100 text-orange-700';
   if (tier.startsWith('trial')) return 'bg-teal-100 text-teal-700';
   const map: Record<string, string> = {
     monthly: 'bg-green-100 text-green-700',
@@ -93,6 +104,17 @@ function MembershipModal({ user, onClose, onSave }: {
             <p className="text-sm font-medium text-gray-900">{user.name || user.email}</p>
             <p className="text-xs text-gray-400 font-mono mt-0.5">ID: {user.id}</p>
           </div>
+
+          {user.hasCoworkingOwnership && (
+            <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg text-sm text-orange-800">
+              <div className="font-medium mb-1">⚡ Vlastník coworkingu</div>
+              <div className="text-xs text-orange-600">
+                {user.coworkingClaims.map(c => c.coworkingName).join(', ')}
+              </div>
+              <div className="text-xs text-orange-500 mt-1">Jako vlastník má automaticky plný přístup. Tady nastavuješ manuální override.</div>
+            </div>
+          )}
+
           <div>
             <label className="text-sm font-medium text-gray-700 block mb-2">Typ členství</label>
             <div className="grid grid-cols-3 gap-2">
@@ -147,7 +169,11 @@ export default function AdminUsersPage() {
   useEffect(() => {
     if (!searchQuery) { setFiltered(users); return; }
     const q = searchQuery.toLowerCase();
-    setFiltered(users.filter(u => u.email.toLowerCase().includes(q) || (u.name?.toLowerCase().includes(q) ?? false)));
+    setFiltered(users.filter(u =>
+      u.email.toLowerCase().includes(q) ||
+      (u.name?.toLowerCase().includes(q) ?? false) ||
+      u.coworkingClaims.some(c => c.coworkingName.toLowerCase().includes(q))
+    ));
   }, [users, searchQuery]);
 
   const fetchUsers = async () => {
@@ -155,7 +181,6 @@ export default function AdminUsersPage() {
       const res = await fetch('/api/admin/users?limit=500');
       if (!res.ok) throw new Error();
       const data = await res.json();
-      // API returns { users, total, page, limit, pages } — extract the array
       const list: AdminUser[] = Array.isArray(data) ? data : (data.users ?? []);
       setUsers(list); setFiltered(list);
     } catch { setError('Chyba při načítání uživatelů'); }
@@ -188,16 +213,44 @@ export default function AdminUsersPage() {
     });
     if (res.ok) {
       setUsers(prev => prev.map(u => u.id === userId
-        ? { ...u, membershipTier: data.membershipTier || null, membershipEnd: data.membershipEnd || null, membershipStart: data.membershipStart || null }
+        ? {
+            ...u,
+            membershipTier: data.membershipTier || null,
+            membershipEnd: data.membershipEnd || null,
+            membershipStart: data.membershipStart || null,
+            effectiveMembership: u.hasCoworkingOwnership ? 'owner' : (data.membershipTier || null),
+          }
         : u
       ));
     }
   };
 
+  // Sync ownership → give full yearly membership
+  const handleSyncOwnerMembership = async (userId: string) => {
+    setSavingId(userId);
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, syncOwnerMembership: true }),
+      });
+      if (res.ok) {
+        const result = await res.json();
+        const end = new Date(result.end).toISOString();
+        setUsers(prev => prev.map(u => u.id === userId
+          ? { ...u, membershipTier: 'yearly', membershipEnd: end, effectiveMembership: 'owner' }
+          : u
+        ));
+        setSuccessId(userId);
+        setTimeout(() => setSuccessId(null), 2000);
+      }
+    } finally { setSavingId(null); }
+  };
+
   const counts = {
     total: users.length,
     super_admin: users.filter(u => u.role === 'super_admin').length,
-    coworking_admin: users.filter(u => u.role === 'coworking_admin').length,
+    owners: users.filter(u => u.hasCoworkingOwnership).length,
     coworker: users.filter(u => u.role === 'coworker').length,
     paid: users.filter(u => u.membershipTier && u.membershipTier !== 'free').length,
   };
@@ -249,9 +302,9 @@ export default function AdminUsersPage() {
           {[
             { label: 'Celkem', value: counts.total, color: 'text-gray-900' },
             { label: 'Super Admin', value: counts.super_admin, color: 'text-purple-600' },
-            { label: 'Správci', value: counts.coworking_admin, color: 'text-blue-600' },
+            { label: 'Vlastníci coworkingů', value: counts.owners, color: 'text-orange-600' },
             { label: 'Uživatelé', value: counts.coworker, color: 'text-gray-600' },
-            { label: 'Platící', value: counts.paid, color: 'text-green-600' },
+            { label: 'Platící členství', value: counts.paid, color: 'text-green-600' },
           ].map(s => (
             <div key={s.label} className="bg-white rounded-lg border border-gray-200 p-4">
               <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
@@ -264,7 +317,7 @@ export default function AdminUsersPage() {
 
         <div className="mb-4 relative">
           <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-          <input type="text" placeholder="Hledat podle jména nebo emailu..."
+          <input type="text" placeholder="Hledat podle jména, emailu nebo coworkingu..."
             value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
@@ -276,16 +329,23 @@ export default function AdminUsersPage() {
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Uživatel</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 hidden md:table-cell">Email</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Členství</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
+                    <span className="flex items-center gap-1">Členství <span className="text-xs font-normal text-gray-400">(osobní)</span></span>
+                  </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 hidden lg:table-cell">Expirace</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
+                    <span className="flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5 text-orange-500" />Cowork tier</span>
+                  </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Role</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filtered.map((user) => {
                   const expired = user.membershipEnd && new Date(user.membershipEnd) < new Date();
+                  const needsSync = user.hasCoworkingOwnership && (!user.membershipTier || user.membershipTier === 'free');
                   return (
-                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={user.id} className={`hover:bg-gray-50 transition-colors ${user.hasCoworkingOwnership ? 'bg-orange-50/30' : ''}`}>
+                      {/* User */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           {user.image
@@ -298,7 +358,11 @@ export default function AdminUsersPage() {
                           </div>
                         </div>
                       </td>
+
+                      {/* Email */}
                       <td className="px-4 py-3 text-sm text-gray-600 hidden md:table-cell">{user.email}</td>
+
+                      {/* Personal membership */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${tierColor(user.membershipTier)} ${expired ? 'opacity-50' : ''}`}>
@@ -310,16 +374,59 @@ export default function AdminUsersPage() {
                           </button>
                         </div>
                       </td>
+
+                      {/* Expiry */}
                       <td className="px-4 py-3 text-sm hidden lg:table-cell">
                         {user.membershipEnd
                           ? <span className={expired ? 'text-red-500 font-medium' : 'text-gray-600'}>{new Date(user.membershipEnd).toLocaleDateString('cs-CZ')}</span>
                           : <span className="text-gray-400">—</span>
                         }
                       </td>
+
+                      {/* Cowork tier */}
+                      <td className="px-4 py-3">
+                        {user.hasCoworkingOwnership ? (
+                          <div className="space-y-1">
+                            {user.coworkingClaims.map(claim => (
+                              <div key={claim.coworkingSlug} className="flex items-center gap-1.5">
+                                <Link
+                                  href={`/coworking/${claim.coworkingSlug}`}
+                                  target="_blank"
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-100 text-orange-800 rounded-full text-xs font-medium hover:bg-orange-200 transition-colors"
+                                  title={claim.coworkingSlug}
+                                >
+                                  <Building2 className="w-3 h-3" />
+                                  {claim.coworkingName.length > 18 ? claim.coworkingName.slice(0, 18) + '…' : claim.coworkingName}
+                                </Link>
+                                {needsSync && (
+                                  <button
+                                    onClick={() => handleSyncOwnerMembership(user.id)}
+                                    disabled={savingId === user.id}
+                                    className="p-1 rounded bg-orange-100 hover:bg-orange-200 text-orange-600 transition-colors"
+                                    title="Přiřadit roční členství (vlastník coworkingu)"
+                                  >
+                                    {savingId === user.id
+                                      ? <span className="text-xs">…</span>
+                                      : <Zap className="w-3 h-3" />
+                                    }
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                            {successId === user.id && (
+                              <span className="text-xs text-green-600 font-medium">✓ Sync hotov</span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-300 text-xs">—</span>
+                        )}
+                      </td>
+
+                      {/* Role */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${ROLE_COLORS[user.role] || 'bg-gray-100 text-gray-700'}`}>
-                            {successId === user.id ? '✓ Uloženo' : ROLE_LABELS[user.role] || user.role}
+                            {ROLE_LABELS[user.role] || user.role}
                           </span>
                           <select value={user.role} disabled={savingId === user.id}
                             onChange={e => handleRoleChange(user.id, e.target.value)}
@@ -340,7 +447,11 @@ export default function AdminUsersPage() {
             <div className="px-6 py-12 text-center"><p className="text-gray-600">Žádní uživatelé nenalezeni</p></div>
           )}
         </div>
-        <p className="mt-4 text-xs text-gray-400">Změna role se projeví při příštím přihlášení uživatele (JWT refresh).</p>
+
+        <div className="mt-4 flex items-start gap-6 text-xs text-gray-400">
+          <p>Změna role se projeví při příštím přihlášení uživatele (JWT refresh).</p>
+          <p className="flex items-center gap-1"><Zap className="w-3 h-3 text-orange-400" /> = vlastník coworkingu bez osobního členství — klikni pro automatický sync na roční tier.</p>
+        </div>
       </div>
     </div>
   );

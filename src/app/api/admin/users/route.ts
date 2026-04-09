@@ -35,6 +35,16 @@ export async function GET(req: NextRequest) {
             membershipEnd: true,
           },
         },
+        // Include all claimed coworkings
+        coworkingClaims: {
+          where: { status: 'approved' },
+          select: {
+            coworkingSlug: true,
+            coworkingName: true,
+            status: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        },
       },
       orderBy: { createdAt: 'desc' },
       take: limit,
@@ -44,17 +54,25 @@ export async function GET(req: NextRequest) {
   ]);
 
   return NextResponse.json({
-    users: users.map((u) => ({
-      id: u.id,
-      email: u.email,
-      name: u.name,
-      image: u.image,
-      role: u.role,
-      createdAt: u.createdAt,
-      membershipTier: u.coworkerProfile?.membershipTier ?? null,
-      membershipStart: u.coworkerProfile?.membershipStart ?? null,
-      membershipEnd: u.coworkerProfile?.membershipEnd ?? null,
-    })),
+    users: users.map((u) => {
+      const hasApprovedClaim = u.coworkingClaims.length > 0;
+      return {
+        id: u.id,
+        email: u.email,
+        name: u.name,
+        image: u.image,
+        role: u.role,
+        createdAt: u.createdAt,
+        membershipTier: u.coworkerProfile?.membershipTier ?? null,
+        membershipStart: u.coworkerProfile?.membershipStart ?? null,
+        membershipEnd: u.coworkerProfile?.membershipEnd ?? null,
+        // Coworking ownership
+        coworkingClaims: u.coworkingClaims,
+        hasCoworkingOwnership: hasApprovedClaim,
+        // Effective membership: if owner, always consider as full member
+        effectiveMembership: hasApprovedClaim ? 'owner' : (u.coworkerProfile?.membershipTier ?? null),
+      };
+    }),
     total,
     page,
     limit,
@@ -68,7 +86,7 @@ export async function PATCH(req: NextRequest) {
   if (!isSuperAdmin(session)) return NextResponse.json({ error: 'Přístup odmítnut' }, { status: 403 });
 
   const body = await req.json();
-  const { userId, role, membershipTier, membershipEnd, membershipStart } = body;
+  const { userId, role, membershipTier, membershipEnd, membershipStart, syncOwnerMembership } = body;
   if (!userId) return NextResponse.json({ error: 'Chybí userId' }, { status: 400 });
 
   const currentUserId = (session!.user as any)?.id;
@@ -85,6 +103,19 @@ export async function PATCH(req: NextRequest) {
       select: { id: true, role: true },
     });
     return NextResponse.json(updated);
+  }
+
+  // Auto-sync membership for coworking owner (give them full yearly membership)
+  if (syncOwnerMembership) {
+    const now = new Date();
+    const end = new Date(now);
+    end.setFullYear(end.getFullYear() + 1);
+    await prisma.coworkerProfile.upsert({
+      where: { userId },
+      create: { userId, membershipTier: 'yearly', membershipStart: now, membershipEnd: end },
+      update: { membershipTier: 'yearly', membershipStart: now, membershipEnd: end },
+    });
+    return NextResponse.json({ ok: true, tier: 'yearly', end });
   }
 
   // Membership change
