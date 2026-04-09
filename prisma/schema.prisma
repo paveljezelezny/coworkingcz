@@ -74,6 +74,7 @@ model User {
   eventRegistrations  EventRegistration[]
   claims              CoworkingClaim[]
   ownedCoworkings     CoworkingEdit[]
+  outgoingTransfers   CoworkingTransfer[]
 
   @@index([role])
   @@index([createdAt])
@@ -172,6 +173,23 @@ model CoworkingEdit {
   updatedAt     DateTime @updatedAt
 
   @@index([userId])
+}
+
+model CoworkingTransfer {
+  id            String   @id @default(cuid())
+  coworkingSlug String
+  fromUserId    String
+  fromUser      User     @relation(fields: [fromUserId], references: [id])
+  toEmail       String
+  token         String   @unique
+  status        String   @default("pending") // pending | accepted | cancelled
+  message       String?  @db.Text
+  createdAt     DateTime @default(now())
+  expiresAt     DateTime
+
+  @@index([coworkingSlug])
+  @@index([token])
+  @@index([status])
 }
 
 // ==========================================

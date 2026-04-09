@@ -9,6 +9,7 @@ import { Building2, Settings, LogOut, Plus, ExternalLink, Clock, User } from 'lu
 interface Claim {
   coworkingSlug: string;
   coworkingName: string;
+  status: string;
   createdAt: string;
 }
 
@@ -17,6 +18,8 @@ export default function SprvcePage() {
   const router = useRouter();
   const [claims, setClaims] = useState<Claim[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cowOsActive, setCowOsActive] = useState<Record<string, boolean>>({});
+  const [pendingClaims, setPendingClaims] = useState<Claim[]>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -33,7 +36,25 @@ export default function SprvcePage() {
       const res = await fetch('/api/claims');
       if (res.ok) {
         const data = await res.json();
-        setClaims(data.claims || []);
+        const allClaims = data.claims || [];
+        const approvedClaims = allClaims.filter((c: Claim) => c.status === 'approved');
+        setPendingClaims(allClaims.filter((c: Claim) => c.status === 'pending'));
+        setClaims(approvedClaims);
+        // Check COW.OS subscription status for each coworking in parallel
+        const checks = approvedClaims.map(async (claim: Claim) => {
+          try {
+            const r = await fetch(`/api/cow-os/subscription?slug=${claim.coworkingSlug}`);
+            if (r.ok) {
+              const sub = await r.json();
+              return { slug: claim.coworkingSlug, active: !!sub?.id };
+            }
+          } catch {}
+          return { slug: claim.coworkingSlug, active: false };
+        });
+        const results = await Promise.all(checks);
+        const map: Record<string, boolean> = {};
+        results.forEach((r) => { map[r.slug] = r.active; });
+        setCowOsActive(map);
       }
     } finally {
       setLoading(false);
@@ -148,10 +169,14 @@ export default function SprvcePage() {
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/spravce/${claim.coworkingSlug}/cow-os`}
-                    className="flex items-center gap-1.5 px-3 py-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 font-semibold rounded-lg hover:bg-amber-100 transition-colors"
+                    className={`flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg transition-colors ${
+                      cowOsActive[claim.coworkingSlug]
+                        ? 'text-white bg-emerald-600 hover:bg-emerald-700'
+                        : 'text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100'
+                    }`}
                   >
                     🐄
-                    <span className="hidden sm:inline">COW.OS</span>
+                    <span className="hidden sm:inline">{cowOsActive[claim.coworkingSlug] ? 'Vstoupit do COW.OS' : 'COW.OS'}</span>
                   </Link>
                   <Link
                     href={`/coworking/${claim.coworkingSlug}`}
@@ -171,6 +196,24 @@ export default function SprvcePage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Pending claims */}
+        {pendingClaims.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Čekající žádosti</h3>
+            <div className="space-y-3">
+              {pendingClaims.map((c) => (
+                <div key={c.coworkingSlug} className="bg-yellow-50 border border-yellow-200 rounded-xl px-5 py-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-yellow-600" />
+                    <span className="text-gray-800 font-medium">{c.coworkingName}</span>
+                  </div>
+                  <span className="text-xs font-semibold text-yellow-700 bg-yellow-100 px-2.5 py-1 rounded-full">Čeká na schválení</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
