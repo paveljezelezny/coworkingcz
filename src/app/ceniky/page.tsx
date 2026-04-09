@@ -103,7 +103,7 @@ export default function CenikyPage() {
     { name: 'Prioritní podpora',                              small: false, medium: true,  large: true  },
     { name: 'Dedikovaný account manager',                     small: false, medium: false, large: true  },
     { name: 'COW.OS — správa členů (do 5 zdarma)',            small: true,  medium: true,  large: true  },
-    { name: 'COW.OS — plná verze (20/100+ členů)',            small: false, medium: true,  large: true  },
+    { name: 'COW.OS — plná verze (25/100+ členů)',            small: false, medium: true,  large: true  },
     { name: 'COW.OS — automatická fakturace a QR',            small: false, medium: true,  large: true  },
   ];
 
@@ -198,8 +198,8 @@ export default function CenikyPage() {
               const isMedium = tier.tier === 'medium';
               const isSmall  = tier.tier === 'small';
               const yearlyPrice     = Math.round(tier.monthlyPrice * 12 * (1 - tier.yearlyDiscount));
-              const cowOsPrice      = isSmall ? 450 : isMedium ? 750 : null;
-              const cowOsMembers    = isSmall ? 20  : isMedium ? 100 : null;
+              const cowOsPrice      = isSmall ? 490 : isMedium ? 790 : null;
+              const cowOsMembers    = isSmall ? 25  : isMedium ? 100 : null;
               const comboPrice      = cowOsPrice ? tier.monthlyPrice + cowOsPrice : null;
               const comboYearlyPrice = comboPrice ? Math.round(comboPrice * 12 * (1 - tier.yearlyDiscount)) : null;
               return { tier, idx, isLarge, isMedium, isSmall, yearlyPrice, cowOsPrice, cowOsMembers, comboPrice, comboYearlyPrice };
@@ -301,7 +301,7 @@ export default function CenikyPage() {
               );
             };
 
-            const BottomCard = ({ tier, idx, isLarge, comboPrice, comboYearlyPrice, cowOsMembers }: typeof tierData[0]) => {
+            const BottomCard = ({ tier, idx, isLarge, comboPrice, comboYearlyPrice, cowOsMembers, cowOsPrice }: typeof tierData[0]) => {
               const isLoadingCombo = activating === `coworking_${tier.tier}_cowos`;
               return (
                 <div className={`flex flex-col h-full rounded-2xl border-2 overflow-hidden ${
@@ -312,10 +312,15 @@ export default function CenikyPage() {
                   {/* Header */}
                   <div className={`px-6 py-5 text-center flex-shrink-0 ${isLarge ? 'bg-amber-100/60' : 'bg-emerald-100/60'}`}>
                     <span className="text-lg font-bold text-gray-900">🐄 Plná verze + COW.OS</span>
-                    {comboPrice && (
+                    {cowOsPrice && (
                       <div className="mt-1">
-                        <span className="text-2xl font-bold text-emerald-700">{comboPrice} Kč</span>
-                        <span className="text-sm text-gray-500 ml-1">/ měsíc</span>
+                        <span className="text-2xl font-bold text-emerald-700">+{cowOsPrice} Kč</span>
+                        <span className="text-sm text-gray-500 ml-1">/ měsíc k plánu</span>
+                      </div>
+                    )}
+                    {comboPrice && (
+                      <div className="mt-0.5 text-xs text-gray-500">
+                        celkem {comboPrice} Kč / měsíc
                       </div>
                     )}
                     {isLarge && (
@@ -376,7 +381,7 @@ export default function CenikyPage() {
                               : <>Začít s plnou verzí a COW.OS <ArrowRight className="w-4 h-4" /></>}
                           </button>
                           <p className="text-center text-xs text-emerald-700 font-semibold mt-2 flex items-center justify-center gap-1">
-                            <Gift className="w-3.5 h-3.5" />30 dní zdarma — pak {comboPrice} Kč/měs
+                            <Gift className="w-3.5 h-3.5" />30 dní zdarma — pak +{cowOsPrice} Kč/měs
                           </p>
                         </>
                       )}

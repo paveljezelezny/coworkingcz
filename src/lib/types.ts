@@ -176,7 +176,7 @@ export const PLATFORM_PRICING: PlatformPricing[] = [
   {
     tier: 'small',
     name: 'Malý cowork',
-    maxSeats: 20,
+    maxSeats: 25,
     maxArea: 500,
     monthlyPrice: 490,
     yearlyDiscount: 0.20,
