@@ -8,6 +8,28 @@ interface RouteParams {
   params: { slug: string };
 }
 
+/**
+ * Resolve URL slug to internal slug + CoworkingEdit record.
+ * Supports both original slug and customSlug.
+ */
+async function resolveEdit(urlSlug: string) {
+  // Try original slug first
+  let edit = await prisma.coworkingEdit.findUnique({
+    where: { coworkingSlug: urlSlug },
+  });
+  if (edit) return edit;
+
+  // Try customSlug
+  try {
+    edit = await prisma.coworkingEdit.findFirst({
+      where: { customSlug: urlSlug } as any,
+    });
+  } catch {
+    // customSlug column may not exist yet before migration
+  }
+  return edit ?? null;
+}
+
 // GET /api/coworkings/[slug]/edit — load edit data for owner
 export async function GET(req: NextRequest, { params }: RouteParams) {
   const session = await getServerSession(authOptions);
@@ -15,9 +37,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: 'Nepřihlášen' }, { status: 401 });
   }
 
-  const edit = await prisma.coworkingEdit.findUnique({
-    where: { coworkingSlug: params.slug },
-  });
+  const edit = await resolveEdit(params.slug);
 
   if (!edit) {
     return NextResponse.json({ error: 'Coworking nenalezen nebo není ve správě' }, { status: 404 });
@@ -28,7 +48,13 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: 'Přístup zamítnut' }, { status: 403 });
   }
 
-  return NextResponse.json({ data: edit.data, updatedAt: edit.updatedAt });
+  return NextResponse.json({
+    data: edit.data,
+    updatedAt: edit.updatedAt,
+    internalSlug: edit.coworkingSlug,
+    customSlug: (edit as any).customSlug ?? null,
+    slugChangedAt: (edit as any).slugChangedAt ?? null,
+  });
 }
 
 // PUT /api/coworkings/[slug]/edit — save edits
@@ -41,9 +67,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
   try {
     const body = await req.json();
 
-    const edit = await prisma.coworkingEdit.findUnique({
-      where: { coworkingSlug: params.slug },
-    });
+    const edit = await resolveEdit(params.slug);
 
     if (!edit) {
       return NextResponse.json({ error: 'Coworking nenalezen' }, { status: 404 });
@@ -74,12 +98,14 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     }
 
     const updated = await prisma.coworkingEdit.update({
-      where: { coworkingSlug: params.slug },
+      where: { coworkingSlug: edit.coworkingSlug },
       data: { data: sanitized, publishedAt: new Date() },
     });
 
-    // Revalidate the public coworking page so visitors see fresh data
-    revalidatePath(`/coworking/${params.slug}`);
+    // Revalidate both original and custom slug public pages
+    revalidatePath(`/coworking/${edit.coworkingSlug}`);
+    const customSlug = (edit as any).customSlug;
+    if (customSlug) revalidatePath(`/coworking/${customSlug}`);
 
     return NextResponse.json({ success: true, updatedAt: updated.updatedAt });
   } catch (err) {

@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import {
   MapPin, Phone, Mail, Globe, Users, Clock,
   Calendar, Star, MessageSquare, Youtube, Boxes,
@@ -24,9 +24,61 @@ export async function generateStaticParams() {
   return coworkingsData.map((coworking) => ({ slug: coworking.slug }));
 }
 
-async function getDbOverrides(slug: string) {
+/**
+ * Resolve a URL slug to the internal coworkingSlug.
+ * Returns null if neither original nor custom slug matches.
+ * Returns { internalSlug, redirectTo } if a redirect is needed.
+ */
+async function resolvePublicSlug(urlSlug: string): Promise<{
+  internalSlug: string;
+  effectiveSlug: string;
+  redirectTo?: string;
+} | null> {
+  // 1. Check if it's a direct original slug
+  const staticMatch = coworkingsData.find((c) => c.slug === urlSlug);
+  if (staticMatch) {
+    // Also check if there's a customSlug for this coworking — if so, redirect public URL
+    try {
+      const edit = await prisma.coworkingEdit.findUnique({
+        where: { coworkingSlug: urlSlug },
+        select: { coworkingSlug: true, customSlug: true } as any,
+      }) as any;
+      if (edit?.customSlug && edit.customSlug !== urlSlug) {
+        // Redirect to the pretty custom slug
+        return { internalSlug: urlSlug, effectiveSlug: edit.customSlug, redirectTo: edit.customSlug };
+      }
+    } catch {}
+    return { internalSlug: urlSlug, effectiveSlug: urlSlug };
+  }
+
+  // 2. Check if it's a customSlug
   try {
-    const edit = await prisma.coworkingEdit.findUnique({ where: { coworkingSlug: slug } });
+    const byCustom = await prisma.coworkingEdit.findFirst({
+      where: { customSlug: urlSlug } as any,
+      select: { coworkingSlug: true, customSlug: true } as any,
+    }) as any;
+    if (byCustom) {
+      return { internalSlug: byCustom.coworkingSlug, effectiveSlug: urlSlug };
+    }
+  } catch {}
+
+  // 3. Check SlugRedirect table (old slug → new slug mapping)
+  try {
+    const redir = await prisma.$queryRawUnsafe<{ toSlug: string }[]>(
+      `SELECT "toSlug" FROM "SlugRedirect" WHERE "fromSlug" = $1 LIMIT 1`,
+      urlSlug
+    );
+    if (redir.length > 0) {
+      return { internalSlug: urlSlug, effectiveSlug: redir[0].toSlug, redirectTo: redir[0].toSlug };
+    }
+  } catch {}
+
+  return null;
+}
+
+async function getDbOverrides(internalSlug: string) {
+  try {
+    const edit = await prisma.coworkingEdit.findUnique({ where: { coworkingSlug: internalSlug } });
     return (edit?.data as Record<string, any>) ?? null;
   } catch {
     return null;
@@ -59,10 +111,14 @@ function toYoutubeEmbed(url: string): string | null {
 }
 
 export default async function CoworkingDetailPage({ params }: CoworkingDetailPageProps) {
-  const base = coworkingsData.find((cw) => cw.slug === params.slug);
+  const resolved = await resolvePublicSlug(params.slug);
+  if (!resolved) notFound();
+  if (resolved.redirectTo) redirect(`/coworking/${resolved.redirectTo}`);
+
+  const base = coworkingsData.find((cw) => cw.slug === resolved.internalSlug);
   if (!base) notFound();
 
-  const overrides = await getDbOverrides(params.slug);
+  const overrides = await getDbOverrides(resolved.internalSlug);
   const coworking: any = overrides && Object.keys(overrides).length > 0
     ? { ...base, ...overrides }
     : base;

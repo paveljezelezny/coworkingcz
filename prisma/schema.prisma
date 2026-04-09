@@ -164,7 +164,9 @@ model CoworkingClaim {
 
 model CoworkingEdit {
   id            String   @id @default(cuid())
-  coworkingSlug String   @unique
+  coworkingSlug String   @unique  // internal original slug (immutable)
+  customSlug    String?  @unique  // user-chosen URL slug (max 1× per 30 days)
+  slugChangedAt DateTime?          // when customSlug was last changed
   userId        String
   user          User     @relation(fields: [userId], references: [id])
   data          Json
@@ -173,6 +175,17 @@ model CoworkingEdit {
   updatedAt     DateTime @updatedAt
 
   @@index([userId])
+  @@index([customSlug])
+}
+
+/// Maps old custom slugs to new ones (for 301 redirects after slug change)
+model SlugRedirect {
+  id        String   @id @default(cuid())
+  fromSlug  String   @unique
+  toSlug    String
+  createdAt DateTime @default(now())
+
+  @@index([fromSlug])
 }
 
 model CoworkingTransfer {
