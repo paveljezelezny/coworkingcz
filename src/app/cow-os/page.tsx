@@ -169,32 +169,16 @@ export default function CowOsPage() {
         <div className="absolute bottom-10 right-10 w-80 h-80 bg-indigo-100 rounded-full opacity-20 blur-3xl" />
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          {/* Cow icon — hand-drawn style */}
-          <div className="inline-flex items-center justify-center w-24 h-24 mb-8 rounded-2xl bg-white shadow-lg border border-blue-100">
-            <svg viewBox="0 0 64 64" className="w-16 h-16 text-blue-600" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Cow face outline */}
-              <ellipse cx="32" cy="34" rx="16" ry="18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-              {/* Ears */}
-              <path d="M16 20c-4-6-10-6-10-2s3 8 6 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              <path d="M48 20c4-6 10-6 10-2s-3 8-6 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              {/* Horns */}
-              <path d="M18 16c-2-6 0-10 3-10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              <path d="M46 16c2-6 0-10-3-10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              {/* Eyes */}
-              <circle cx="25" cy="30" r="2.5" fill="currentColor" />
-              <circle cx="39" cy="30" r="2.5" fill="currentColor" />
-              {/* Nose/muzzle */}
-              <ellipse cx="32" cy="40" rx="8" ry="6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
-              <circle cx="29" cy="40" r="1.5" fill="currentColor" opacity="0.4" />
-              <circle cx="35" cy="40" r="1.5" fill="currentColor" opacity="0.4" />
-              {/* Spot on head */}
-              <path d="M26 18c2-3 8-3 10 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.2" />
-            </svg>
+          {/* Mascot logo */}
+          <div className="mb-6">
+            <img
+              src="/cow-os-logo.png"
+              alt="COW.OS — kráva s notebookem"
+              className="mx-auto w-64 sm:w-80 h-auto drop-shadow-xl"
+              draggable={false}
+            />
           </div>
 
-          <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
-            COW<span className="text-blue-600">.OS</span>
-          </h1>
           <p className="text-2xl font-semibold text-gray-700 mb-6">
             Operační systém pro váš coworking
           </p>
