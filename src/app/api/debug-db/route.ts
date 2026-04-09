@@ -4,7 +4,11 @@ import { prisma } from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const mask = (v?: string) => v ? v.replace(/:[^@]+@/, ':***@').slice(0, 250) : 'MISSING';
+  const mask = (v?: string) => {
+    if (!v) return 'MISSING';
+    // show username + host (hide only the password between : and @)
+    return v.replace(/:\/\/([^:]+):[^@]+@/, '://$1:***@').slice(0, 300);
+  };
   const env = {
     DATABASE_URL: mask(process.env.DATABASE_URL),
     DIRECT_URL: mask(process.env.DIRECT_URL),
