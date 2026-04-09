@@ -40,18 +40,27 @@ export default function COWOSPage() {
       setError(null);
       const res = await fetch(`/api/cow-os/subscription?slug=${slug}`);
 
-      if (res.status === 404) {
+      if (res.ok) {
+        const sub = await res.json();
+        if (sub) {
+          setSubscription(sub);
+          await fetchStats();
+        } else {
+          setSubscription(null);
+          setStats(null);
+        }
+      } else if (res.status === 404) {
         setSubscription(null);
         setStats(null);
-      } else if (res.ok) {
-        const sub = await res.json();
-        setSubscription(sub);
-        await fetchStats();
       } else {
-        setError('Chyba při načítání předplatného');
+        // Don't block activation — just show the activation screen
+        setSubscription(null);
+        setStats(null);
       }
     } catch (err) {
-      setError('Chyba při připojení k serveru');
+      // Network error — still allow activation attempt
+      setSubscription(null);
+      setStats(null);
     } finally {
       setLoading(false);
     }

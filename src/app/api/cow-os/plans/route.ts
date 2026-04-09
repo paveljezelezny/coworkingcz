@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyCowOsOwner } from '@/lib/cow-os/auth';
+import { ensureCowOsTables } from '@/lib/cow-os/ensure-tables';
 import { randomUUID } from 'crypto';
 
 export async function GET(req: NextRequest) {
@@ -12,6 +13,8 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    await ensureCowOsTables();
+
     const plans = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
       `SELECT * FROM "CowOsMembershipPlan"
        WHERE "coworkingSlug" = $1

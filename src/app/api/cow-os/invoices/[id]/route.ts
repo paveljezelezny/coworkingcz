@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyCowOsOwner, verifyAuthenticated } from '@/lib/cow-os/auth';
+import { ensureCowOsTables } from '@/lib/cow-os/ensure-tables';
 
 export async function GET(
   req: NextRequest,
@@ -10,6 +11,7 @@ export async function GET(
   const slug = req.nextUrl.searchParams.get('slug');
 
   try {
+    await ensureCowOsTables();
     // Fetch invoice with member info
     const invoiceResult = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
       `SELECT i.*, m."userId", m."name" as "memberName", m."email" as "memberEmail"

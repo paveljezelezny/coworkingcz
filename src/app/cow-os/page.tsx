@@ -3,133 +3,42 @@
 import Link from 'next/link';
 import { Check } from 'lucide-react';
 
-/* ─── Hand-drawn style SVG icons in blue ──────────────────────────────────── */
-
-function IconMembers({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 48 48" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-      <circle cx="19" cy="16" r="6.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M7 38c0-7 5.5-12 12-12s12 5 12 12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="34" cy="14" r="5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeDasharray="0.5 0" opacity="0.5" />
-      <path d="M36 24c4.5 1.5 7 5 7 10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
-    </svg>
-  );
-}
-
-function IconInvoice({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 48 48" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 6h18l8 8v28a2 2 0 01-2 2H12a2 2 0 01-2-2V8a2 2 0 012-2z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M30 6v8h8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-      <line x1="16" y1="22" x2="32" y2="22" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
-      <line x1="16" y1="28" x2="28" y2="28" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
-      <line x1="16" y1="34" x2="24" y2="34" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
-      <circle cx="30" cy="34" r="2" fill="currentColor" opacity="0.3" />
-    </svg>
-  );
-}
-
-function IconRenewal({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 48 48" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-      <path d="M38 24c0 7.7-6.3 14-14 14-5 0-9.4-2.6-11.9-6.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M10 24c0-7.7 6.3-14 14-14 5 0 9.4 2.6 11.9 6.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M36 11l0 6-6 0" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M12 37l0-6 6 0" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="24" cy="24" r="3" fill="currentColor" opacity="0.15" />
-    </svg>
-  );
-}
-
-function IconQR({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 48 48" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-      {/* Phone outline */}
-      <rect x="12" y="4" width="24" height="40" rx="4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-      <line x1="12" y1="10" x2="36" y2="10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
-      <line x1="12" y1="38" x2="36" y2="38" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
-      {/* QR pattern inside */}
-      <rect x="17" y="15" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <rect x="25" y="15" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <rect x="17" y="23" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <rect x="25" y="25" width="2" height="2" fill="currentColor" opacity="0.5" />
-      <rect x="29" y="25" width="2" height="2" fill="currentColor" opacity="0.5" />
-      <rect x="27" y="29" width="2" height="2" fill="currentColor" opacity="0.5" />
-      {/* Home button dot */}
-      <circle cx="24" cy="41" r="1.2" fill="currentColor" opacity="0.3" />
-    </svg>
-  );
-}
-
-function IconTariff({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 48 48" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-      <path d="M24 4L42 14v8c0 12-7.5 19-18 22C13.5 41 6 34 6 22v-8L24 4z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-      <text x="24" y="29" textAnchor="middle" fill="currentColor" fontSize="16" fontWeight="bold" fontFamily="system-ui" opacity="0.7">Kč</text>
-    </svg>
-  );
-}
-
-function IconDashboard({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 48 48" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-      {/* Bars */}
-      <rect x="6" y="28" width="8" height="14" rx="2" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-      <rect x="20" y="18" width="8" height="24" rx="2" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-      <rect x="34" y="8" width="8" height="34" rx="2" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-      {/* Trend line */}
-      <path d="M8 24l14-10 14-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="3 2" opacity="0.4" />
-      <circle cx="38" cy="8" r="2.5" fill="currentColor" opacity="0.2" />
-    </svg>
-  );
-}
-
-/* ─── Feature icon wrapper with hover effect ──────────────────────────────── */
-
-function FeatureIcon({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="w-14 h-14 mb-5 text-blue-600 group-hover:text-blue-700 transition-colors duration-200">
-      {children}
-    </div>
-  );
-}
-
 /* ─── Page ─────────────────────────────────────────────────────────────────── */
 
 export default function CowOsPage() {
   const features = [
     {
-      icon: <IconMembers className="w-full h-full" />,
+      img: '/cow-os/cow-checklist.png',
       title: 'Správa členů',
       description:
         'Přehledná evidence všech vašich coworkerů. Přidávejte členy, přidělujte jim tarify, sledujte stav jejich členství.',
     },
     {
-      icon: <IconInvoice className="w-full h-full" />,
+      img: '/cow-os/cow-invoice.png',
       title: 'Automatická fakturace',
       description:
         'Systém automaticky generuje faktury při prolongaci členství. Každá faktura obsahuje QR platební kód pro české a slovenské banky.',
     },
     {
-      icon: <IconRenewal className="w-full h-full" />,
+      img: '/cow-os/cow-renewal.png',
       title: 'Prolongační engine',
       description:
         'Členství se automaticky prodlužuje. Žádné ruční obnovování — systém hlídá expirace a sám vytváří nové fakturační období.',
     },
     {
-      icon: <IconQR className="w-full h-full" />,
+      img: '/cow-os/cow-mobile.png',
       title: 'QR platby (SPAYD)',
       description:
         'Každá faktura obsahuje QR kód kompatibilní se všemi českými a slovenskými bankami. Stačí naskenovat a zaplatit.',
     },
     {
-      icon: <IconTariff className="w-full h-full" />,
+      img: '/cow-os/cow-app.png',
       title: 'Tarify na míru',
       description:
         'Vytvořte si vlastní tarify: Hot Desk, Fix Desk, Privátní kancelář... Každý s vlastní cenou a fakturačním intervalem.',
     },
     {
-      icon: <IconDashboard className="w-full h-full" />,
+      img: '/cow-os/cow-dashboard.png',
       title: 'Přehledný dashboard',
       description:
         'Aktivní členové, vydané faktury, měsíční příjmy — vše na jednom místě v reálném čase.',
@@ -223,7 +132,14 @@ export default function CowOsPage() {
                 key={idx}
                 className="group bg-white border border-gray-200 rounded-2xl p-8 hover:border-blue-200 hover:shadow-xl transition-all duration-300"
               >
-                <FeatureIcon>{feature.icon}</FeatureIcon>
+                <div className="mb-5 flex justify-center">
+                  <img
+                    src={feature.img}
+                    alt={feature.title}
+                    className="w-24 h-24 object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-300"
+                    draggable={false}
+                  />
+                </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">
                   {feature.title}
                 </h3>

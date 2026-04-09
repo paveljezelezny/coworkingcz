@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { ensureCowOsTables } from '@/lib/cow-os/ensure-tables';
 import { generateSpayd, czechAccountToIban } from '@/lib/cow-os/spayd';
 import { randomUUID } from 'crypto';
 
@@ -25,6 +26,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
     }
+
+    await ensureCowOsTables();
 
     const processed: string[] = [];
     const invoicesGenerated: string[] = [];

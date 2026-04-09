@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyCowOsOwner } from '@/lib/cow-os/auth';
+import { ensureCowOsTables } from '@/lib/cow-os/ensure-tables';
 import { randomUUID } from 'crypto';
 
 export async function GET(req: NextRequest) {
@@ -12,6 +13,8 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    await ensureCowOsTables();
+
     const subscription = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
       `SELECT * FROM "CowOsSubscription" WHERE "coworkingSlug" = $1`,
       auth.coworkingSlug
@@ -34,6 +37,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // Auto-create all COW.OS tables if they don't exist yet
+    await ensureCowOsTables();
+
     // Check if subscription already exists
     const existing = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
       `SELECT * FROM "CowOsSubscription" WHERE "coworkingSlug" = $1`,
@@ -41,7 +47,6 @@ export async function POST(req: NextRequest) {
     );
 
     if (existing.length > 0) {
-      // Return existing subscription
       return NextResponse.json(existing[0], { status: 200 });
     }
 

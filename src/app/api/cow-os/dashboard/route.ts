@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyCowOsOwner } from '@/lib/cow-os/auth';
+import { ensureCowOsTables } from '@/lib/cow-os/ensure-tables';
 
 export async function GET(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get('slug');
@@ -11,6 +12,8 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    await ensureCowOsTables();
+
     // Run parallel queries
     const [memberStats, invoiceStats, revenue, plansCount, subscriptionInfo] = await Promise.all([
       // 1. Count members by status
