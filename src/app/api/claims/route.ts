@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Tento coworking je již spravován jiným uživatelem' }, { status: 400 });
     }
 
-    // Create claim (auto-approved for MVP)
+    // Create claim — pending until admin approves
     await prisma.coworkingClaim.create({
       data: {
         userId,
@@ -43,30 +43,13 @@ export async function POST(req: NextRequest) {
         coworkingName,
         businessEmail,
         message,
-        status: 'approved',
+        status: 'pending',
       },
     });
 
-    // Create CoworkingEdit record (empty JSON, owner can fill it in)
-    await prisma.coworkingEdit.upsert({
-      where: { coworkingSlug },
-      create: {
-        coworkingSlug,
-        userId,
-        data: {},
-      },
-      update: {
-        userId, // transfer ownership if needed
-      },
-    });
+    // NOTE: CoworkingEdit and role upgrade happen only after admin approves (in /api/admin/claims/[id])
 
-    // Upgrade user role to coworking_admin
-    await prisma.user.update({
-      where: { id: userId },
-      data: { role: 'coworking_admin' },
-    });
-
-    return NextResponse.json({ success: true, redirectTo: `/spravce/${coworkingSlug}` });
+    return NextResponse.json({ success: true, pending: true });
   } catch (err) {
     console.error('Claim error:', err);
     return NextResponse.json({ error: 'Chyba serveru' }, { status: 500 });
@@ -81,12 +64,13 @@ export async function GET(req: NextRequest) {
   }
 
   const claims = await prisma.coworkingClaim.findMany({
-    where: { userId: session.user.id, status: 'approved' },
-    select: { coworkingSlug: true, coworkingName: true, createdAt: true },
+    where: { userId: session.user.id },
+    select: { coworkingSlug: true, coworkingName: true, status: true, createdAt: true },
+    orderBy: { createdAt: 'desc' },
   });
 
-  // Enrich with edited names from CoworkingEdit (the owner may have renamed)
-  const slugs = claims.map((c) => c.coworkingSlug);
+  // Enrich approved claims with edited names from CoworkingEdit (owner may have renamed)
+  const slugs = claims.filter((c) => c.status === 'approved').map((c) => c.coworkingSlug);
   let editedNames: Record<string, string> = {};
   if (slugs.length > 0) {
     try {

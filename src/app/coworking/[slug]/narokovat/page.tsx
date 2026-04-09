@@ -61,17 +61,20 @@ export default function ClaimPage({ params }: ClaimPageProps) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Hotovo!</h2>
-          <p className="text-gray-600 mb-6">
-            Úspěšně jsi přivlastnil <strong>{coworking.name}</strong>. Teď ho můžeš plně editovat.
+          <CheckCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Žádost odeslána!</h2>
+          <p className="text-gray-600 mb-3">
+            Tvoje žádost o správu <strong>{coworking.name}</strong> byla přijata a čeká na schválení administrátorem.
           </p>
-          <button
-            onClick={() => router.push(`/spravce/${params.slug}`)}
-            className="block w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+          <p className="text-sm text-gray-500 mb-6">
+            Jakmile bude schválena, dostaneš přístup do správcovského panelu a budeš moct editovat profil coworkingu.
+          </p>
+          <Link
+            href={`/coworking/${params.slug}`}
+            className="block w-full py-3 border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Otevřít správce →
-          </button>
+            Zpět na profil coworkingu
+          </Link>
         </div>
       </div>
     );
