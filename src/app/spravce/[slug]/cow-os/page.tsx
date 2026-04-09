@@ -278,28 +278,28 @@ export default function COWOSPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             {
-              href: './cow-os/clenove',
+              href: `/spravce/${slug}/cow-os/clenove`,
               Icon: Users,
               title: 'Členové',
               desc: 'Spravujte členy a jejich předplatná',
               color: 'text-blue-600 bg-blue-50 group-hover:bg-blue-100',
             },
             {
-              href: './cow-os/fakturace',
+              href: `/spravce/${slug}/cow-os/fakturace`,
               Icon: FileText,
               title: 'Fakturace',
               desc: 'Vytvářejte a spravujte faktury',
               color: 'text-blue-600 bg-blue-50 group-hover:bg-blue-100',
             },
             {
-              href: './cow-os/tarify',
+              href: `/spravce/${slug}/cow-os/tarify`,
               Icon: Tag,
               title: 'Tarify',
               desc: 'Nastavte a spravujte tarifní plány',
               color: 'text-blue-600 bg-blue-50 group-hover:bg-blue-100',
             },
             {
-              href: './cow-os/nastaveni',
+              href: `/spravce/${slug}/cow-os/nastaveni`,
               Icon: Settings,
               title: 'Nastavení',
               desc: 'Fakturační údaje a nastavení',

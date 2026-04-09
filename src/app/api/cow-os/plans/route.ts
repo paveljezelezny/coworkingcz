@@ -223,12 +223,12 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Check if plan has members — if so, soft delete only
-    const memberCount = await prisma.$queryRawUnsafe<{ count: number }[]>(
-      `SELECT COUNT(*) as count FROM "CowOsMember" WHERE "planId" = $1`,
+    const memberCount = await prisma.$queryRawUnsafe<{ count: string }[]>(
+      `SELECT COUNT(*)::int as count FROM "CowOsMember" WHERE "planId" = $1`,
       id
     );
 
-    const count = memberCount.length > 0 ? (memberCount[0].count as number) : 0;
+    const count = memberCount.length > 0 ? Number(memberCount[0].count) : 0;
 
     const now = new Date();
 

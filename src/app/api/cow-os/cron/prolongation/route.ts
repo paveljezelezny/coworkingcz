@@ -45,7 +45,12 @@ export async function POST(req: NextRequest) {
       const memberId = member.id as string;
       const coworkingSlug = member.coworkingSlug as string;
       const planId = member.planId as string;
-      const currentEndDate = new Date(member.endDate as string);
+      // endDate might be null if member was created before this fix — fallback to nextRenewalDate
+      const currentEndDate = member.endDate
+        ? new Date(member.endDate as string)
+        : member.nextRenewalDate
+          ? new Date(member.nextRenewalDate as string)
+          : new Date();
 
       try {
         // Fetch plan

@@ -12,8 +12,8 @@ interface Invoice {
   invoiceNumber: string;
   memberId: string;
   memberName: string;
-  amount: number;
-  issuedDate: string;
+  total: number;
+  issueDate: string;
   dueDate: string;
   status: 'draft' | 'issued' | 'paid' | 'overdue' | 'cancelled';
   paidDate?: string;
@@ -185,7 +185,13 @@ export default function InvoicingPage() {
   const checkBillingProfile = async () => {
     try {
       const res = await fetch(`/api/cow-os/billing-profile?slug=${slug}`);
-      setBillingProfileExists(res.ok);
+      if (res.ok) {
+        const data = await res.json();
+        // API returns null when no profile exists (with 200 status)
+        setBillingProfileExists(data !== null && data?.companyName);
+      } else {
+        setBillingProfileExists(false);
+      }
     } catch (err) {
       setBillingProfileExists(false);
     }
@@ -208,6 +214,20 @@ export default function InvoicingPage() {
       setError((err as Error).message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleIssue = async (id: string) => {
+    try {
+      const res = await fetch(`/api/cow-os/invoices?slug=${slug}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: 'issued' }),
+      });
+      if (!res.ok) throw new Error('Chyba');
+      await fetchInvoices();
+    } catch (err) {
+      setError((err as Error).message);
     }
   };
 
@@ -337,14 +357,14 @@ export default function InvoicingPage() {
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">{invoice.memberName}</td>
                         <td className="px-4 py-3 text-sm text-gray-600 hidden md:table-cell">
-                          {new Date(invoice.issuedDate).toLocaleDateString('cs-CZ')}
+                          {new Date(invoice.issueDate).toLocaleDateString('cs-CZ')}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600 hidden lg:table-cell">
                           {new Date(invoice.dueDate).toLocaleDateString('cs-CZ')}
                         </td>
                         <td className="px-4 py-3 text-right">
                           <p className="text-sm font-semibold text-gray-900">
-                            {new Intl.NumberFormat('cs-CZ').format(invoice.amount)} Kč
+                            {new Intl.NumberFormat('cs-CZ').format(invoice.total)} Kč
                           </p>
                         </td>
                         <td className="px-4 py-3">
@@ -361,6 +381,15 @@ export default function InvoicingPage() {
                             >
                               <Eye className="w-4 h-4" />
                             </Link>
+                            {invoice.status === 'draft' && (
+                              <button
+                                onClick={() => handleIssue(invoice.id)}
+                                className="p-1.5 hover:bg-blue-50 rounded text-gray-400 hover:text-blue-700 transition-colors"
+                                title="Vystavit"
+                              >
+                                <FileText className="w-4 h-4" />
+                              </button>
+                            )}
                             {invoice.status === 'issued' && (
                               <button
                                 onClick={() => handleMarkPaid(invoice.id)}

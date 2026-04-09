@@ -27,12 +27,12 @@ export async function GET(req: NextRequest) {
       params.push(status);
     }
 
-    // Count total
-    const countResult = await prisma.$queryRawUnsafe<{ count: number }[]>(
-      `SELECT COUNT(*) as count FROM "CowOsMember" m ${whereClause}`,
+    // Count total (cast to int to avoid BigInt serialization issue)
+    const countResult = await prisma.$queryRawUnsafe<{ count: string }[]>(
+      `SELECT COUNT(*)::int as count FROM "CowOsMember" m ${whereClause}`,
       ...params
     );
-    const total = countResult.length > 0 ? (countResult[0].count as number) : 0;
+    const total = countResult.length > 0 ? Number(countResult[0].count) : 0;
 
     // Fetch members with pagination and join plan info
     const offset = (page - 1) * limit;
@@ -40,6 +40,7 @@ export async function GET(req: NextRequest) {
 
     const members = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
       `SELECT m.*,
+              m."startDate" as "membershipStart",
               p."name" as "planName",
               p."basePrice" as "planPrice"
        FROM "CowOsMember" m
@@ -102,14 +103,14 @@ export async function POST(req: NextRequest) {
 
     const maxMembers = subscription[0].maxMembers as number;
 
-    // Count current members
-    const memberCount = await prisma.$queryRawUnsafe<{ count: number }[]>(
-      `SELECT COUNT(*) as count FROM "CowOsMember"
+    // Count current members (cast to int to avoid BigInt serialization)
+    const memberCount = await prisma.$queryRawUnsafe<{ count: string }[]>(
+      `SELECT COUNT(*)::int as count FROM "CowOsMember"
        WHERE "coworkingSlug" = $1 AND "status" != 'cancelled'`,
       auth.coworkingSlug
     );
 
-    const currentCount = memberCount.length > 0 ? (memberCount[0].count as number) : 0;
+    const currentCount = memberCount.length > 0 ? Number(memberCount[0].count) : 0;
     if (currentCount >= maxMembers) {
       return NextResponse.json(
         { error: `Dosáhli jste limitu ${maxMembers} členů. Upgradujte plán.` },

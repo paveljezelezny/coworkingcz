@@ -33,13 +33,13 @@ export async function GET(req: NextRequest) {
       }
 
       // Count total
-      const countResult = await prisma.$queryRawUnsafe<{ count: number }[]>(
-        `SELECT COUNT(*) as count FROM "CowOsInvoice" i
+      const countResult = await prisma.$queryRawUnsafe<{ count: string }[]>(
+        `SELECT COUNT(*)::int as count FROM "CowOsInvoice" i
          JOIN "CowOsMember" m ON i."memberId" = m."id"
          ${whereClause}`,
         ...params
       );
-      const total = countResult.length > 0 ? (countResult[0].count as number) : 0;
+      const total = countResult.length > 0 ? Number(countResult[0].count) : 0;
 
       // Fetch invoices with pagination
       const offset = (page - 1) * limit;
@@ -81,11 +81,11 @@ export async function GET(req: NextRequest) {
       }
 
       // Count total
-      const countResult = await prisma.$queryRawUnsafe<{ count: number }[]>(
+      const countResult = await prisma.$queryRawUnsafe<{ count: string }[]>(
         `SELECT COUNT(*) as count FROM "CowOsInvoice" i ${whereClause}`,
         ...params
       );
-      const total = countResult.length > 0 ? (countResult[0].count as number) : 0;
+      const total = countResult.length > 0 ? Number(countResult[0].count) : 0;
 
       // Fetch invoices with pagination
       const offset = (page - 1) * limit;

@@ -81,6 +81,17 @@ export default function CowOsInvoicePage() {
         if (d.error) {
           setError(d.error);
         } else {
+          // Parse items if they come as a JSON string from the DB
+          if (typeof d.items === 'string') {
+            try { d.items = JSON.parse(d.items); } catch { d.items = []; }
+          }
+          // Ensure each item has a computed total
+          if (Array.isArray(d.items)) {
+            d.items = d.items.map((item: any) => ({
+              ...item,
+              total: item.total ?? (item.quantity * item.unitPrice),
+            }));
+          }
           setInvoice(d);
         }
       })

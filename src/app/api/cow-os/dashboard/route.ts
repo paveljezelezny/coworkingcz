@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       // 1. Count members by status
       (async () => {
         const stats = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
-          `SELECT "status", COUNT(*) as count
+          `SELECT "status", COUNT(*)::int as count
            FROM "CowOsMember"
            WHERE "coworkingSlug" = $1
            GROUP BY "status"`,
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
         const result = { active: 0, trial: 0, expired: 0, cancelled: 0, total: 0 };
         stats.forEach((row) => {
           const status = row.status as string;
-          const count = row.count as number;
+          const count = Number(row.count);
           if (status === 'active') result.active = count;
           else if (status === 'trial') result.trial = count;
           else if (status === 'expired') result.expired = count;
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
       // 2. Count invoices by status
       (async () => {
         const stats = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
-          `SELECT "status", COUNT(*) as count
+          `SELECT "status", COUNT(*)::int as count
            FROM "CowOsInvoice"
            WHERE "coworkingSlug" = $1
            GROUP BY "status"`,
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
         const result = { issued: 0, paid: 0, overdue: 0, total: 0 };
         stats.forEach((row) => {
           const status = row.status as string;
-          const count = row.count as number;
+          const count = Number(row.count);
           if (status === 'issued') result.issued = count;
           else if (status === 'paid') result.paid = count;
           else if (status === 'overdue') result.overdue = count;
@@ -68,15 +68,15 @@ export async function GET(req: NextRequest) {
         const thisYearStart = new Date(now.getFullYear(), 0, 1);
 
         const [monthResult, yearResult] = await Promise.all([
-          prisma.$queryRawUnsafe<{ sum: number | null }[]>(
-            `SELECT SUM("total") as sum
+          prisma.$queryRawUnsafe<{ sum: string | null }[]>(
+            `SELECT COALESCE(SUM("total"), 0)::float as sum
              FROM "CowOsInvoice"
              WHERE "coworkingSlug" = $1 AND "status" = 'paid' AND "paidDate" >= $2`,
             auth.coworkingSlug,
             thisMonthStart
           ),
-          prisma.$queryRawUnsafe<{ sum: number | null }[]>(
-            `SELECT SUM("total") as sum
+          prisma.$queryRawUnsafe<{ sum: string | null }[]>(
+            `SELECT COALESCE(SUM("total"), 0)::float as sum
              FROM "CowOsInvoice"
              WHERE "coworkingSlug" = $1 AND "status" = 'paid' AND "paidDate" >= $2`,
             auth.coworkingSlug,
@@ -85,20 +85,20 @@ export async function GET(req: NextRequest) {
         ]);
 
         return {
-          thisMonth: monthResult[0]?.sum || 0,
-          thisYear: yearResult[0]?.sum || 0,
+          thisMonth: Number(monthResult[0]?.sum || 0),
+          thisYear: Number(yearResult[0]?.sum || 0),
         };
       })(),
 
       // 4. Count active plans
       (async () => {
-        const result = await prisma.$queryRawUnsafe<{ count: number }[]>(
-          `SELECT COUNT(*) as count
+        const result = await prisma.$queryRawUnsafe<{ count: string }[]>(
+          `SELECT COUNT(*)::int as count
            FROM "CowOsMembershipPlan"
            WHERE "coworkingSlug" = $1 AND "isActive" = true`,
           auth.coworkingSlug
         );
-        return result[0]?.count || 0;
+        return Number(result[0]?.count || 0);
       })(),
 
       // 5. Get subscription info
@@ -113,13 +113,20 @@ export async function GET(req: NextRequest) {
         const sub = result[0];
         return {
           tier: sub.tier as string,
-          maxMembers: sub.maxMembers as number,
+          maxMembers: Number(sub.maxMembers),
           status: sub.status as string,
         };
       })(),
     ]);
 
+    // Return BOTH flat format (for dashboard page) and nested format (for settings page)
     return NextResponse.json({
+      // Flat format used by dashboard and settings pages
+      activeMembers: memberStats.active + memberStats.trial,
+      issuedInvoices: invoiceStats.total,
+      monthlyRevenue: revenue.thisMonth,
+      subscriptionTier: subscriptionInfo.tier,
+      // Nested detail for pages that want more info
       members: memberStats,
       invoices: invoiceStats,
       revenue,
