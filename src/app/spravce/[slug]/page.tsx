@@ -7,7 +7,7 @@ import Link from 'next/link';
 import {
   ArrowLeft, Save, ExternalLink, CheckCircle, AlertCircle,
   Info, Clock, Wifi, DollarSign, Image, Phone, Globe, Mail,
-  MapPin, Users, Building2, Tag
+  MapPin, Users, Building2, Tag, DoorOpen, Plus, Trash2, X
 } from 'lucide-react';
 import { coworkingsData } from '@/lib/data/coworkings';
 import { AMENITY_LABELS } from '@/lib/types';
@@ -24,7 +24,24 @@ const DAYS = [
 
 const ALL_AMENITIES = Object.keys(AMENITY_LABELS);
 
-type Tab = 'info' | 'contact' | 'hours' | 'amenities' | 'pricing' | 'photos' | 'deal';
+type Tab = 'info' | 'contact' | 'hours' | 'amenities' | 'pricing' | 'photos' | 'rooms' | 'deal';
+
+interface RoomData {
+  id: string;
+  name: string;
+  type: 'meeting_room' | 'phone_booth' | 'private_office' | 'event_space';
+  capacity: number | null;
+  pricePerHour: number | null;
+  description: string;
+  photoUrl: string;
+}
+
+const ROOM_TYPES: { id: RoomData['type']; label: string }[] = [
+  { id: 'meeting_room', label: 'Zasedací místnost' },
+  { id: 'phone_booth', label: 'Telefonní budka' },
+  { id: 'private_office', label: 'Soukromá kancelář' },
+  { id: 'event_space', label: 'Eventový prostor' },
+];
 
 interface EditData {
   name?: string;
@@ -48,6 +65,7 @@ interface EditData {
   capacity?: number | null;
   areaM2?: number | null;
   photos?: { url: string; caption?: string }[];
+  rooms?: RoomData[];
   specialDeal?: {
     enabled: boolean;
     badgeText: string;
@@ -98,6 +116,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
     capacity: formData.capacity ?? baseCoworking?.capacity ?? null,
     areaM2: formData.areaM2 ?? baseCoworking?.areaM2 ?? null,
     photos: formData.photos ?? (baseCoworking?.photos?.map((p) => ({ url: p.url, caption: p.caption })) ?? []),
+    rooms: formData.rooms ?? [],
     specialDeal: formData.specialDeal ?? (baseCoworking?.specialDeal as any) ?? {
       enabled: false,
       badgeText: '',
@@ -168,6 +187,30 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
     update('photos', merged.photos.filter((_, i) => i !== idx));
   };
 
+  // Room helpers
+  const addRoom = () => {
+    const newRoom: RoomData = {
+      id: `room_${Date.now()}`,
+      name: '',
+      type: 'meeting_room',
+      capacity: null,
+      pricePerHour: null,
+      description: '',
+      photoUrl: '',
+    };
+    update('rooms', [...merged.rooms, newRoom]);
+  };
+
+  const updateRoom = (idx: number, field: keyof RoomData, value: unknown) => {
+    const rooms = [...merged.rooms];
+    rooms[idx] = { ...rooms[idx], [field]: value };
+    update('rooms', rooms);
+  };
+
+  const removeRoom = (idx: number) => {
+    update('rooms', merged.rooms.filter((_, i) => i !== idx));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     setError('');
@@ -227,6 +270,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
     { id: 'amenities', label: 'Vybavení', icon: <Wifi className="w-4 h-4" /> },
     { id: 'pricing', label: 'Ceny', icon: <DollarSign className="w-4 h-4" /> },
     { id: 'photos', label: 'Fotografie', icon: <Image className="w-4 h-4" /> },
+    { id: 'rooms', label: 'Místnosti', icon: <DoorOpen className="w-4 h-4" /> },
     { id: 'deal', label: 'Special Deal', icon: <Tag className="w-4 h-4" /> },
   ];
 
@@ -700,6 +744,144 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
                   )}
                 </div>
               )}
+
+            {/* TAB: Místnosti / Zasedací místnosti */}
+            {activeTab === 'rooms' && (
+              <div className="space-y-6">
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-800">
+                  <strong>Zasedací místnosti a prostory</strong> — přidejte místnosti, které mohou vaši členové a návštěvníci rezervovat.
+                  {merged.rooms.length > 0 && (
+                    <span className="block mt-1 text-blue-600">{merged.rooms.length} {merged.rooms.length === 1 ? 'místnost' : merged.rooms.length < 5 ? 'místnosti' : 'místností'}</span>
+                  )}
+                </div>
+
+                {/* Room list */}
+                {merged.rooms.map((room, idx) => (
+                  <div key={room.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                    {/* Room header */}
+                    <div className="flex items-center justify-between px-5 py-3 bg-gray-50 border-b border-gray-200">
+                      <div className="flex items-center gap-3">
+                        <DoorOpen className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm font-semibold text-gray-900">
+                          {room.name || `Místnost ${idx + 1}`}
+                        </span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                          {ROOM_TYPES.find(t => t.id === room.type)?.label ?? room.type}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => removeRoom(idx)}
+                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Odstranit místnost"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Room form */}
+                    <div className="p-5 space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Name */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Název *</label>
+                          <input
+                            type="text"
+                            value={room.name}
+                            onChange={e => updateRoom(idx, 'name', e.target.value)}
+                            placeholder="např. Zasedačka A1"
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                          />
+                        </div>
+
+                        {/* Type */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Typ</label>
+                          <select
+                            value={room.type}
+                            onChange={e => updateRoom(idx, 'type', e.target.value)}
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                          >
+                            {ROOM_TYPES.map(t => (
+                              <option key={t.id} value={t.id}>{t.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        {/* Capacity */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Kapacita (osob)</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="500"
+                            value={room.capacity ?? ''}
+                            onChange={e => updateRoom(idx, 'capacity', e.target.value ? parseInt(e.target.value) : null)}
+                            placeholder="8"
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                          />
+                        </div>
+
+                        {/* Price per hour */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Cena/hod (Kč)</label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="50"
+                            value={room.pricePerHour ?? ''}
+                            onChange={e => updateRoom(idx, 'pricePerHour', e.target.value ? parseInt(e.target.value) : null)}
+                            placeholder="300"
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                          />
+                        </div>
+
+                        {/* Photo URL */}
+                        <div className="col-span-2 sm:col-span-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Foto URL</label>
+                          <input
+                            type="url"
+                            value={room.photoUrl}
+                            onChange={e => updateRoom(idx, 'photoUrl', e.target.value)}
+                            placeholder="https://..."
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Popis</label>
+                        <textarea
+                          rows={2}
+                          value={room.description}
+                          onChange={e => updateRoom(idx, 'description', e.target.value)}
+                          placeholder="Klimatizovaná místnost s TV a whiteboardem..."
+                          className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Add room button */}
+                <button
+                  onClick={addRoom}
+                  className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm font-medium text-gray-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Přidat místnost
+                </button>
+
+                {merged.rooms.length === 0 && (
+                  <div className="text-center py-8 text-gray-400">
+                    <DoorOpen className="w-10 h-10 mx-auto mb-3 text-gray-300" />
+                    <p className="text-sm">Zatím žádné místnosti. Klikněte na tlačítko výše pro přidání.</p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* TAB: Special Deal */}
             {activeTab === 'deal' && (
