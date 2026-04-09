@@ -64,6 +64,8 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       'photos',
       'rooms',
       'specialDeal',
+      'youtubeUrl', 'matterportUrl',
+      'hasEventSpace', 'venueTypes',
     ];
 
     const sanitized: Record<string, any> = {};

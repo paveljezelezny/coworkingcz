@@ -221,6 +221,59 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
               <AmenityGrid amenities={coworking.amenities || []} />
             </section>
 
+            {/* Rooms / Meeting rooms */}
+            {Array.isArray(coworking.rooms) && coworking.rooms.length > 0 && (
+              <section id="sekce-mistnosti" className="mb-12 scroll-mt-24">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Místnosti a prostory</h2>
+                <p className="text-gray-500 text-sm mb-6">Rezervovatelné prostory v tomto coworkingu.</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {(coworking.rooms as any[]).map((room: any, idx: number) => {
+                    const typeLabels: Record<string, string> = {
+                      meeting_room: 'Zasedací místnost',
+                      phone_booth: 'Telefonní budka',
+                      private_office: 'Soukromá kancelář',
+                      event_space: 'Eventový prostor',
+                    };
+                    const typeEmojis: Record<string, string> = {
+                      meeting_room: '🤝',
+                      phone_booth: '📞',
+                      private_office: '🚪',
+                      event_space: '🎪',
+                    };
+                    return (
+                      <div key={room.id || idx} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-white">
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xl">{typeEmojis[room.type] || '🏠'}</span>
+                              <h3 className="font-bold text-gray-900">{room.name}</h3>
+                            </div>
+                            <span className="text-xs font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">
+                              {typeLabels[room.type] || room.type}
+                            </span>
+                          </div>
+                          {room.capacity && (
+                            <span className="flex-shrink-0 flex items-center gap-1 text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
+                              <Users className="w-3.5 h-3.5" />
+                              {room.capacity} os.
+                            </span>
+                          )}
+                        </div>
+                        {room.description && (
+                          <p className="text-sm text-gray-600 mb-3">{room.description}</p>
+                        )}
+                        {room.pricePerHour > 0 && (
+                          <p className="text-sm font-semibold text-blue-600">
+                            od {room.pricePerHour} Kč / hodina
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
             {/* Venue types */}
             {venueTypes.length > 0 && (
               <section className="mb-12">

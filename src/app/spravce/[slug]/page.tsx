@@ -24,7 +24,7 @@ const DAYS = [
 
 const ALL_AMENITIES = Object.keys(AMENITY_LABELS);
 
-type Tab = 'info' | 'contact' | 'hours' | 'amenities' | 'pricing' | 'photos' | 'rooms' | 'deal';
+type Tab = 'info' | 'contact' | 'hours' | 'amenities' | 'pricing' | 'photos' | 'rooms' | 'media' | 'deal';
 
 interface RoomData {
   id: string;
@@ -73,6 +73,10 @@ interface EditData {
     validFrom: string | null;
     validTo: string | null;
   };
+  youtubeUrl?: string;
+  matterportUrl?: string;
+  hasEventSpace?: boolean;
+  venueTypes?: string[];
 }
 
 interface EditPageProps {
@@ -117,6 +121,10 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
     areaM2: formData.areaM2 ?? baseCoworking?.areaM2 ?? null,
     photos: formData.photos ?? (baseCoworking?.photos?.map((p) => ({ url: p.url, caption: p.caption })) ?? []),
     rooms: formData.rooms ?? [],
+    youtubeUrl: formData.youtubeUrl ?? (baseCoworking as any)?.youtubeUrl ?? '',
+    matterportUrl: formData.matterportUrl ?? (baseCoworking as any)?.matterportUrl ?? '',
+    hasEventSpace: formData.hasEventSpace ?? (baseCoworking as any)?.hasEventSpace ?? false,
+    venueTypes: formData.venueTypes ?? (baseCoworking as any)?.venueTypes ?? [],
     specialDeal: formData.specialDeal ?? (baseCoworking?.specialDeal as any) ?? {
       enabled: false,
       badgeText: '',
@@ -271,6 +279,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
     { id: 'pricing', label: 'Ceny', icon: <DollarSign className="w-4 h-4" /> },
     { id: 'photos', label: 'Fotografie', icon: <Image className="w-4 h-4" /> },
     { id: 'rooms', label: 'Místnosti', icon: <DoorOpen className="w-4 h-4" /> },
+    { id: 'media', label: 'Video & 3D', icon: <Globe className="w-4 h-4" /> },
     { id: 'deal', label: 'Special Deal', icon: <Tag className="w-4 h-4" /> },
   ];
 
@@ -880,6 +889,96 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
                     <p className="text-sm">Zatím žádné místnosti. Klikněte na tlačítko výše pro přidání.</p>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* TAB: Video & 3D tour & Event space */}
+            {activeTab === 'media' && (
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
+                    <span className="text-red-500">▶</span> YouTube video prohlídka
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-3">
+                    Vlož URL YouTube videa (formát youtube.com/watch?v=... nebo youtu.be/...). Video se zobrazí na profilu coworkingu.
+                  </p>
+                  <input
+                    type="url"
+                    value={merged.youtubeUrl}
+                    onChange={(e) => update('youtubeUrl', e.target.value)}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <h3 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
+                    <span className="text-purple-500">📦</span> 3D virtuální prohlídka
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-3">
+                    Vlož embed URL 3D prohlídky (Matterport, Kuula, nebo jiná platforma). URL musí být přímo embed odkaz (iframe src).
+                  </p>
+                  <input
+                    type="url"
+                    value={merged.matterportUrl}
+                    onChange={(e) => update('matterportUrl', e.target.value)}
+                    placeholder="https://my.matterport.com/show/?m=..."
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <h3 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
+                    <span className="text-purple-600">🎪</span> Eventový prostor k pronájmu
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-3">
+                    Pokud nabízíte prostory k pronájmu pro akce třetích stran, zapněte tuto možnost. Na profilu se zobrazí odkaz na Prostorna.cz.
+                  </p>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <div
+                      onClick={() => update('hasEventSpace', !merged.hasEventSpace)}
+                      className={`relative w-12 h-6 rounded-full transition-colors ${merged.hasEventSpace ? 'bg-blue-600' : 'bg-gray-300'}`}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${merged.hasEventSpace ? 'translate-x-6' : ''}`} />
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">
+                      {merged.hasEventSpace ? 'Ano, nabízím eventový prostor' : 'Ne, eventový prostor nenabízím'}
+                    </span>
+                  </label>
+                </div>
+
+                <div>
+                  <h3 className="text-base font-bold text-gray-900 mb-1">Typy prostoru</h3>
+                  <p className="text-sm text-gray-500 mb-3">
+                    Zaškrtněte, pro jaké typy aktivit a akcí se váš prostor hodí.
+                  </p>
+                  {[
+                    { id: 'coworking', label: '💼 Coworking' },
+                    { id: 'event', label: '🎉 Eventy a konference' },
+                    { id: 'workshop', label: '🛠️ Workshopy' },
+                    { id: 'meeting', label: '🤝 Schůzky a meetingy' },
+                    { id: 'photography', label: '📷 Fotografování' },
+                    { id: 'filming', label: '🎬 Filmování' },
+                    { id: 'yoga', label: '🧘 Yoga a sportovní aktivity' },
+                    { id: 'exhibition', label: '🖼️ Výstavy' },
+                  ].map((vt) => {
+                    const checked = merged.venueTypes.includes(vt.id);
+                    return (
+                      <label key={vt.id} className="flex items-center gap-3 py-2 cursor-pointer hover:bg-gray-50 rounded-lg px-2">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => {
+                            const current = merged.venueTypes;
+                            update('venueTypes', checked ? current.filter((v) => v !== vt.id) : [...current, vt.id]);
+                          }}
+                          className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-900">{vt.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
