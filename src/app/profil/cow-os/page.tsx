@@ -76,19 +76,20 @@ export default function CowOsMembershipsPage() {
   const router = useRouter();
   const [invoices, setInvoices] = useState<CowOsInvoice[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/cow-os/invoices?member=true')
-      .then((r) => r.json())
-      .then((d: PaginatedResponse) => {
-        if (d.invoices) {
-          setInvoices(d.invoices);
-        } else {
-          setError('Chyba při načítání faktur');
-        }
+      .then((r) => {
+        if (!r.ok) return { invoices: [] };
+        return r.json();
       })
-      .catch(() => setError('Chyba při připojení k serveru'))
+      .then((d: PaginatedResponse) => {
+        setInvoices(d.invoices ?? []);
+      })
+      .catch(() => {
+        // API not ready or no data — just show empty state, not an error
+        setInvoices([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -127,15 +128,30 @@ export default function CowOsMembershipsPage() {
 
       {/* Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-700">{error}</p>
-          </div>
-        )}
-
         {!hasInvoices ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">Zatím nejste členem žádného coworkingu přes COW.OS.</p>
+          <div className="text-center py-16 max-w-lg mx-auto">
+            <div className="text-6xl mb-6">🐄</div>
+            <h2 className="text-xl font-bold text-gray-900 mb-3">
+              Váš coworking zatím COW.OS nepoužívá
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Až váš coworking nasadí COW.OS, uvidíte tu přehled svého členství, faktury a platební QR kódy — všechno na jednom místě.
+            </p>
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 text-left">
+              <p className="text-amber-900 font-medium mb-1">
+                💡 S kým se máme spojit, aby i váš coworking používal náš systém, co je dobrej jako kráva?
+              </p>
+              <p className="text-sm text-amber-700">
+                Napište nám na{' '}
+                <a href="mailto:info@coworkings.cz" className="font-semibold underline hover:text-amber-900">
+                  info@coworkings.cz
+                </a>{' '}
+                název vašeho coworkingu a my se postaráme o zbytek. Nebo rovnou pošlete tip svému provozovateli — ať se podívá na{' '}
+                <a href="/cow-os" className="font-semibold underline hover:text-amber-900">
+                  coworkings.cz/cow-os
+                </a>.
+              </p>
+            </div>
           </div>
         ) : (
           <div className="space-y-8">
