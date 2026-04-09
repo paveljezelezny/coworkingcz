@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
@@ -16,130 +16,92 @@ function parseSkills(raw: unknown): string[] {
   }
 }
 
-function str(v: unknown): string {
-  return v ? String(v) : '';
-}
-
-function bool(v: unknown, defaultVal = false): boolean {
-  if (v === null || v === undefined) return defaultVal;
-  return Boolean(v);
-}
-
-// ─── Ensure new columns exist ─────────────────────────────────────────────────
-
-async function ensureColumns() {
-  const ddl = [
-    `ALTER TABLE "CoworkerProfile" ADD COLUMN IF NOT EXISTS "homeCoworkingSlug" TEXT`,
-    `ALTER TABLE "CoworkerProfile" ADD COLUMN IF NOT EXISTS "phone" TEXT`,
-    `ALTER TABLE "CoworkerProfile" ADD COLUMN IF NOT EXISTS "company" TEXT`,
-    `ALTER TABLE "CoworkerProfile" ADD COLUMN IF NOT EXISTS "isPhonePublic" BOOLEAN NOT NULL DEFAULT false`,
-    `ALTER TABLE "CoworkerProfile" ADD COLUMN IF NOT EXISTS "isEmailPublic" BOOLEAN NOT NULL DEFAULT false`,
-    `ALTER TABLE "CoworkerProfile" ADD COLUMN IF NOT EXISTS "isPhotoPublic" BOOLEAN NOT NULL DEFAULT true`,
-    `ALTER TABLE "CoworkerProfile" ADD COLUMN IF NOT EXISTS "allowContact" BOOLEAN NOT NULL DEFAULT false`,
-  ];
-  for (const sql of ddl) {
-    try { await prisma.$executeRawUnsafe(sql); } catch { /* already exists */ }
-  }
+function str(v: unknown): string { return v ? String(v) : ''; }
+function bool(v: unknown, d = false): boolean {
+  return (v === null || v === undefined) ? d : Boolean(v);
 }
 
 // ─── GET /api/coworkers ───────────────────────────────────────────────────────
+// Supports: ?page=1&limit=50&coworking=slug&search=name
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    // Step 1: ensure new columns
-    await ensureColumns();
+    const { searchParams } = new URL(req.url);
+    const page  = Math.max(1, parseInt(searchParams.get('page') ?? '1'));
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') ?? '50')));
+    const offset = (page - 1) * limit;
+    const cwFilter = searchParams.get('coworking') ?? null;
 
-    // Step 2: try full query (all new columns)
-    let rows: Record<string, unknown>[] = [];
+    const whereExtra = cwFilter
+      ? `AND cp."homeCoworkingSlug" = '${cwFilter.replace(/'/g, "''")}'`
+      : '';
 
-    try {
-      rows = (await prisma.$queryRawUnsafe(`
+    const [rows, countResult] = await Promise.all([
+      prisma.$queryRawUnsafe<Record<string, unknown>[]>(`
         SELECT
           cp.id,
-          u.name                               AS name,
+          u.name                                    AS name,
           cp.profession,
           cp.bio,
           cp.skills,
           cp."linkedinUrl",
           cp."websiteUrl",
           cp."membershipTier",
-          COALESCE(cp."isPublic", true)        AS "isPublic",
+          COALESCE(cp."isPublic", true)             AS "isPublic",
           cp."homeCoworkingSlug",
           cp.phone,
           cp.company,
-          COALESCE(cp."isPhonePublic", false)  AS "isPhonePublic",
-          COALESCE(cp."isEmailPublic", false)  AS "isEmailPublic",
-          COALESCE(cp."isPhotoPublic", true)   AS "isPhotoPublic",
-          COALESCE(cp."allowContact", false)   AS "allowContact",
+          COALESCE(cp."isPhonePublic", false)       AS "isPhonePublic",
+          COALESCE(cp."isEmailPublic", false)       AS "isEmailPublic",
+          COALESCE(cp."isPhotoPublic", true)        AS "isPhotoPublic",
+          COALESCE(cp."allowContact", false)        AS "allowContact",
           cp."avatarUrl",
-          u.email                              AS "userEmail",
-          u.image                              AS "userImage"
+          u.email                                   AS "userEmail",
+          u.image                                   AS "userImage"
         FROM "CoworkerProfile" cp
         INNER JOIN "User" u ON u.id = cp."userId"
         WHERE COALESCE(cp."isPublic", true) = true
           AND cp."membershipTier" IS NOT NULL
           AND cp."membershipTier" NOT IN ('free')
+          ${whereExtra}
         ORDER BY u.name ASC NULLS LAST
-      `)) as Record<string, unknown>[];
-    } catch {
-      // Step 3: fallback — new columns missing, use only guaranteed columns
-      try {
-        rows = (await prisma.$queryRawUnsafe(`
-          SELECT
-            cp.id,
-            u.name                        AS name,
-            cp.profession,
-            cp.bio,
-            cp.skills,
-            cp."linkedinUrl",
-            cp."websiteUrl",
-            cp."membershipTier",
-            COALESCE(cp."isPublic", true) AS "isPublic",
-            cp."avatarUrl",
-            u.email                       AS "userEmail",
-            u.image                       AS "userImage"
-          FROM "CoworkerProfile" cp
-          INNER JOIN "User" u ON u.id = cp."userId"
-          WHERE COALESCE(cp."isPublic", true) = true
-            AND cp."membershipTier" IS NOT NULL
-            AND cp."membershipTier" NOT IN ('free')
-          ORDER BY u.name ASC NULLS LAST
-        `)) as Record<string, unknown>[];
-      } catch (inner) {
-        console.error('[/api/coworkers] fallback query failed:', inner);
-        return NextResponse.json({ coworkers: [] });
-      }
-    }
+        LIMIT ${limit} OFFSET ${offset}
+      `),
+      prisma.$queryRawUnsafe<[{ count: bigint }]>(`
+        SELECT COUNT(*) AS count
+        FROM "CoworkerProfile" cp
+        WHERE COALESCE(cp."isPublic", true) = true
+          AND cp."membershipTier" IS NOT NULL
+          AND cp."membershipTier" NOT IN ('free')
+          ${whereExtra}
+      `),
+    ]);
 
-    const result = rows.map(row => {
-      const isPhotoPublic = bool(row.isPhotoPublic, true);
-      const isPhonePublic = bool(row.isPhonePublic, false);
-      const isEmailPublic = bool(row.isEmailPublic, false);
+    const total = Number(countResult[0]?.count ?? 0);
 
-      return {
-        id:                str(row.id),
-        name:              str(row.name),
-        profession:        str(row.profession),
-        bio:               str(row.bio),
-        skills:            parseSkills(row.skills),
-        avatarUrl:         isPhotoPublic ? (str(row.avatarUrl) || str(row.userImage) || null) : null,
-        linkedinUrl:       str(row.linkedinUrl),
-        websiteUrl:        str(row.websiteUrl),
-        homeCoworkingSlug: row.homeCoworkingSlug ? str(row.homeCoworkingSlug) : null,
-        phone:             isPhonePublic ? (str(row.phone) || null) : null,
-        email:             isEmailPublic ? (str(row.userEmail) || null) : null,
-        company:           str(row.company) || null,
-        allowContact:      bool(row.allowContact, false),
-        membershipTier:    str(row.membershipTier) || null,
-      };
-    });
+    const coworkers = rows.map(row => ({
+      id:                str(row.id),
+      name:              str(row.name),
+      profession:        str(row.profession),
+      bio:               str(row.bio),
+      skills:            parseSkills(row.skills),
+      avatarUrl:         bool(row.isPhotoPublic, true) ? (str(row.avatarUrl) || str(row.userImage) || null) : null,
+      linkedinUrl:       str(row.linkedinUrl),
+      websiteUrl:        str(row.websiteUrl),
+      homeCoworkingSlug: row.homeCoworkingSlug ? str(row.homeCoworkingSlug) : null,
+      phone:             bool(row.isPhonePublic, false) ? (str(row.phone) || null) : null,
+      email:             bool(row.isEmailPublic, false) ? (str(row.userEmail) || null) : null,
+      company:           str(row.company) || null,
+      allowContact:      bool(row.allowContact, false),
+      membershipTier:    str(row.membershipTier) || null,
+    }));
 
     return NextResponse.json(
-      { coworkers: result },
-      { headers: { 'Cache-Control': 'no-store' } }
+      { coworkers, total, page, limit, pages: Math.ceil(total / limit) },
+      { headers: { 'Cache-Control': 'public, max-age=120, stale-while-revalidate=300' } }
     );
   } catch (err) {
-    console.error('[/api/coworkers] unexpected error:', err);
-    return NextResponse.json({ coworkers: [] });
+    console.error('[/api/coworkers]', err);
+    return NextResponse.json({ coworkers: [], total: 0, page: 1, limit: 50, pages: 0 });
   }
 }

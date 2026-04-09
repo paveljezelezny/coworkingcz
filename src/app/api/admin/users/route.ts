@@ -9,41 +9,57 @@ function isSuperAdmin(session: AnySession) {
   return (session?.user as any)?.role === 'super_admin';
 }
 
-// GET /api/admin/users
-export async function GET() {
+// GET /api/admin/users?page=1&limit=100
+export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!isSuperAdmin(session)) return NextResponse.json({ error: 'Přístup odmítnut' }, { status: 403 });
 
-  const users = await prisma.user.findMany({
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      image: true,
-      role: true,
-      createdAt: true,
-      coworkerProfile: {
-        select: {
-          membershipTier: true,
-          membershipStart: true,
-          membershipEnd: true,
+  const { searchParams } = new URL(req.url);
+  const page  = Math.max(1, parseInt(searchParams.get('page') ?? '1'));
+  const limit = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') ?? '100')));
+  const offset = (page - 1) * limit;
+
+  const [users, total] = await Promise.all([
+    prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
+        role: true,
+        createdAt: true,
+        coworkerProfile: {
+          select: {
+            membershipTier: true,
+            membershipStart: true,
+            membershipEnd: true,
+          },
         },
       },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      skip: offset,
+    }),
+    prisma.user.count(),
+  ]);
 
-  return NextResponse.json(users.map((u: typeof users[0]) => ({
-    id: u.id,
-    email: u.email,
-    name: u.name,
-    image: u.image,
-    role: u.role,
-    createdAt: u.createdAt,
-    membershipTier: u.coworkerProfile?.membershipTier ?? null,
-    membershipStart: u.coworkerProfile?.membershipStart ?? null,
-    membershipEnd: u.coworkerProfile?.membershipEnd ?? null,
-  })));
+  return NextResponse.json({
+    users: users.map((u) => ({
+      id: u.id,
+      email: u.email,
+      name: u.name,
+      image: u.image,
+      role: u.role,
+      createdAt: u.createdAt,
+      membershipTier: u.coworkerProfile?.membershipTier ?? null,
+      membershipStart: u.coworkerProfile?.membershipStart ?? null,
+      membershipEnd: u.coworkerProfile?.membershipEnd ?? null,
+    })),
+    total,
+    page,
+    limit,
+    pages: Math.ceil(total / limit),
+  });
 }
 
 // PATCH /api/admin/users — change role OR membership

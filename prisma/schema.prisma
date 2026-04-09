@@ -28,6 +28,7 @@ model Account {
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -36,6 +37,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model VerificationToken {
@@ -54,27 +57,26 @@ model User {
   id            String    @id @default(cuid())
   email         String    @unique
   emailVerified DateTime?
-  password      String?   // Optional - OAuth users don't have password
+  password      String?
   name          String?
   image         String?
   role          String    @default("coworker") // coworker | coworking_admin | super_admin
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // NextAuth relations
   accounts      Account[]
   sessions      Session[]
 
-  // Platform relations
   coworkerProfile     CoworkerProfile?
   listings            MarketplaceListing[]
   events              Event[]
   bookings            Booking[]
   eventRegistrations  EventRegistration[]
-
-  // Owner relations
   claims              CoworkingClaim[]
   ownedCoworkings     CoworkingEdit[]
+
+  @@index([role])
+  @@index([createdAt])
 }
 
 // ==========================================
@@ -99,10 +101,9 @@ model CoworkerProfile {
   membershipStart DateTime?
   membershipEnd   DateTime?
 
-  // Stripe identifiers for subscription management
   stripeCustomerId     String?
   stripeSubscriptionId String?
-  stripePlanInterval   String?  // 'month' | 'year' | 'trial'
+  stripePlanInterval   String?
 
   homeCoworkingId   String?
   homeCoworkingSlug String?
@@ -116,6 +117,12 @@ model CoworkerProfile {
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@index([isPublic])
+  @@index([membershipTier])
+  @@index([membershipEnd])
+  @@index([stripeCustomerId])
+  @@index([homeCoworkingSlug])
 }
 
 model FreeVisit {
@@ -127,38 +134,44 @@ model FreeVisit {
   month           Int
   year            Int
   createdAt       DateTime @default(now())
+
+  @@index([profileId])
+  @@index([coworkingSlug])
 }
 
 // ==========================================
 // COWORKING OWNERSHIP & EDITS
 // ==========================================
 
-// Claim request from owner
 model CoworkingClaim {
   id            String   @id @default(cuid())
   userId        String
   user          User     @relation(fields: [userId], references: [id])
   coworkingSlug String
   coworkingName String
-  status        String   @default("approved") // pending | approved | rejected
+  status        String   @default("approved")
   businessEmail String?
   message       String?  @db.Text
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@unique([userId, coworkingSlug])
+  @@index([userId])
+  @@index([status])
+  @@index([coworkingSlug])
 }
 
-// Editable content for each coworking (JSON overrides on top of static data)
 model CoworkingEdit {
   id            String   @id @default(cuid())
   coworkingSlug String   @unique
   userId        String
   user          User     @relation(fields: [userId], references: [id])
-  data          Json     // All editable fields as JSON
+  data          Json
   publishedAt   DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@index([userId])
 }
 
 // ==========================================
@@ -185,6 +198,11 @@ model Event {
   registrations   EventRegistration[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([coworkingSlug])
+  @@index([startDate])
+  @@index([isFree])
 }
 
 model EventRegistration {
@@ -196,6 +214,8 @@ model EventRegistration {
   createdAt DateTime @default(now())
 
   @@unique([eventId, userId])
+  @@index([userId])
+  @@index([eventId])
 }
 
 // ==========================================
@@ -217,6 +237,11 @@ model Booking {
   notes         String?  @db.Text
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([coworkingSlug])
+  @@index([status])
+  @@index([date])
 }
 
 // ==========================================
@@ -239,4 +264,9 @@ model MarketplaceListing {
   contactPhone  String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isActive])
+  @@index([isActive, createdAt])
+  @@index([category])
 }
