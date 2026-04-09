@@ -3,40 +3,133 @@
 import Link from 'next/link';
 import { Check } from 'lucide-react';
 
+/* ─── Hand-drawn style SVG icons in blue ──────────────────────────────────── */
+
+function IconMembers({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+      <circle cx="19" cy="16" r="6.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M7 38c0-7 5.5-12 12-12s12 5 12 12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="34" cy="14" r="5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeDasharray="0.5 0" opacity="0.5" />
+      <path d="M36 24c4.5 1.5 7 5 7 10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
+    </svg>
+  );
+}
+
+function IconInvoice({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 6h18l8 8v28a2 2 0 01-2 2H12a2 2 0 01-2-2V8a2 2 0 012-2z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M30 6v8h8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="16" y1="22" x2="32" y2="22" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
+      <line x1="16" y1="28" x2="28" y2="28" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
+      <line x1="16" y1="34" x2="24" y2="34" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
+      <circle cx="30" cy="34" r="2" fill="currentColor" opacity="0.3" />
+    </svg>
+  );
+}
+
+function IconRenewal({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M38 24c0 7.7-6.3 14-14 14-5 0-9.4-2.6-11.9-6.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M10 24c0-7.7 6.3-14 14-14 5 0 9.4 2.6 11.9 6.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M36 11l0 6-6 0" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 37l0-6 6 0" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="24" cy="24" r="3" fill="currentColor" opacity="0.15" />
+    </svg>
+  );
+}
+
+function IconQR({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+      {/* Phone outline */}
+      <rect x="12" y="4" width="24" height="40" rx="4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <line x1="12" y1="10" x2="36" y2="10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
+      <line x1="12" y1="38" x2="36" y2="38" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
+      {/* QR pattern inside */}
+      <rect x="17" y="15" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <rect x="25" y="15" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <rect x="17" y="23" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <rect x="25" y="25" width="2" height="2" fill="currentColor" opacity="0.5" />
+      <rect x="29" y="25" width="2" height="2" fill="currentColor" opacity="0.5" />
+      <rect x="27" y="29" width="2" height="2" fill="currentColor" opacity="0.5" />
+      {/* Home button dot */}
+      <circle cx="24" cy="41" r="1.2" fill="currentColor" opacity="0.3" />
+    </svg>
+  );
+}
+
+function IconTariff({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M24 4L42 14v8c0 12-7.5 19-18 22C13.5 41 6 34 6 22v-8L24 4z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <text x="24" y="29" textAnchor="middle" fill="currentColor" fontSize="16" fontWeight="bold" fontFamily="system-ui" opacity="0.7">Kč</text>
+    </svg>
+  );
+}
+
+function IconDashboard({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+      {/* Bars */}
+      <rect x="6" y="28" width="8" height="14" rx="2" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <rect x="20" y="18" width="8" height="24" rx="2" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <rect x="34" y="8" width="8" height="34" rx="2" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      {/* Trend line */}
+      <path d="M8 24l14-10 14-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="3 2" opacity="0.4" />
+      <circle cx="38" cy="8" r="2.5" fill="currentColor" opacity="0.2" />
+    </svg>
+  );
+}
+
+/* ─── Feature icon wrapper with hover effect ──────────────────────────────── */
+
+function FeatureIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="w-14 h-14 mb-5 text-blue-600 group-hover:text-blue-700 transition-colors duration-200">
+      {children}
+    </div>
+  );
+}
+
+/* ─── Page ─────────────────────────────────────────────────────────────────── */
+
 export default function CowOsPage() {
   const features = [
     {
-      icon: '👥',
+      icon: <IconMembers className="w-full h-full" />,
       title: 'Správa členů',
       description:
         'Přehledná evidence všech vašich coworkerů. Přidávejte členy, přidělujte jim tarify, sledujte stav jejich členství.',
     },
     {
-      icon: '📄',
+      icon: <IconInvoice className="w-full h-full" />,
       title: 'Automatická fakturace',
       description:
         'Systém automaticky generuje faktury při prolongaci členství. Každá faktura obsahuje QR platební kód pro české a slovenské banky.',
     },
     {
-      icon: '🔄',
+      icon: <IconRenewal className="w-full h-full" />,
       title: 'Prolongační engine',
       description:
         'Členství se automaticky prodlužuje. Žádné ruční obnovování — systém hlídá expirace a sám vytváří nové fakturační období.',
     },
     {
-      icon: '📱',
+      icon: <IconQR className="w-full h-full" />,
       title: 'QR platby (SPAYD)',
       description:
         'Každá faktura obsahuje QR kód kompatibilní se všemi českými a slovenskými bankami. Stačí naskenovat a zaplatit.',
     },
     {
-      icon: '🏷️',
+      icon: <IconTariff className="w-full h-full" />,
       title: 'Tarify na míru',
       description:
         'Vytvořte si vlastní tarify: Hot Desk, Fix Desk, Privátní kancelář... Každý s vlastní cenou a fakturačním intervalem.',
     },
     {
-      icon: '📊',
+      icon: <IconDashboard className="w-full h-full" />,
       title: 'Přehledný dashboard',
       description:
         'Aktivní členové, vydané faktury, měsíční příjmy — vše na jednom místě v reálném čase.',
@@ -70,11 +163,37 @@ export default function CowOsPage() {
   return (
     <div className="w-full bg-white">
       {/* Hero Section */}
-      <section className="py-20 sm:py-32 bg-gradient-to-br from-indigo-50 via-white to-blue-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="mb-6 text-6xl sm:text-7xl">🐄</div>
-          <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 mb-4">
-            COW.OS
+      <section className="py-20 sm:py-32 bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-hidden">
+        {/* Subtle decorative circles */}
+        <div className="absolute top-10 left-10 w-64 h-64 bg-blue-100 rounded-full opacity-20 blur-3xl" />
+        <div className="absolute bottom-10 right-10 w-80 h-80 bg-indigo-100 rounded-full opacity-20 blur-3xl" />
+
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          {/* Cow icon — hand-drawn style */}
+          <div className="inline-flex items-center justify-center w-24 h-24 mb-8 rounded-2xl bg-white shadow-lg border border-blue-100">
+            <svg viewBox="0 0 64 64" className="w-16 h-16 text-blue-600" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Cow face outline */}
+              <ellipse cx="32" cy="34" rx="16" ry="18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              {/* Ears */}
+              <path d="M16 20c-4-6-10-6-10-2s3 8 6 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <path d="M48 20c4-6 10-6 10-2s-3 8-6 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              {/* Horns */}
+              <path d="M18 16c-2-6 0-10 3-10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <path d="M46 16c2-6 0-10-3-10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              {/* Eyes */}
+              <circle cx="25" cy="30" r="2.5" fill="currentColor" />
+              <circle cx="39" cy="30" r="2.5" fill="currentColor" />
+              {/* Nose/muzzle */}
+              <ellipse cx="32" cy="40" rx="8" ry="6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
+              <circle cx="29" cy="40" r="1.5" fill="currentColor" opacity="0.4" />
+              <circle cx="35" cy="40" r="1.5" fill="currentColor" opacity="0.4" />
+              {/* Spot on head */}
+              <path d="M26 18c2-3 8-3 10 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.2" />
+            </svg>
+          </div>
+
+          <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
+            COW<span className="text-blue-600">.OS</span>
           </h1>
           <p className="text-2xl font-semibold text-gray-700 mb-6">
             Operační systém pro váš coworking
@@ -86,7 +205,7 @@ export default function CowOsPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Link
               href="/spravce"
-              className="px-8 py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
+              className="px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
             >
               Aktivovat COW.OS zdarma
             </Link>
@@ -94,7 +213,7 @@ export default function CowOsPage() {
               onClick={() => {
                 document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors"
+              className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-all"
             >
               Zjistit více
             </button>
@@ -118,9 +237,9 @@ export default function CowOsPage() {
             {features.map((feature, idx) => (
               <div
                 key={idx}
-                className="bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg hover:border-blue-300 transition-all p-8"
+                className="group bg-white border border-gray-200 rounded-2xl p-8 hover:border-blue-200 hover:shadow-xl transition-all duration-300"
               >
-                <div className="text-5xl mb-4">{feature.icon}</div>
+                <FeatureIcon>{feature.icon}</FeatureIcon>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">
                   {feature.title}
                 </h3>
@@ -145,58 +264,48 @@ export default function CowOsPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
             {/* Free Plan */}
-            <div className="bg-white border border-gray-200 rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+            <div className="bg-white border border-gray-200 rounded-2xl shadow-md p-8 hover:shadow-lg transition-shadow">
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">
                   Zdarma
                 </h3>
-                <p className="text-gray-600 text-sm">
+                <p className="text-gray-500 text-sm">
                   Součást vašeho stávajícího balíčku
                 </p>
               </div>
 
               <div className="mb-8">
-                <div className="text-4xl font-bold text-gray-900 mb-2">
+                <div className="text-4xl font-bold text-gray-900">
                   0 Kč
                 </div>
               </div>
 
               <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">Až 5 členů coworkingu</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">Správa členství</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">Automatická fakturace</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">QR platby</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">Přehledný dashboard</span>
-                </li>
+                {['Až 5 členů coworkingu', 'Správa členství', 'Automatická fakturace', 'QR platby', 'Přehledný dashboard'].map(
+                  (item) => (
+                    <li key={item} className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <Check className="w-3 h-3 text-blue-600" />
+                      </div>
+                      <span className="text-gray-700">{item}</span>
+                    </li>
+                  )
+                )}
               </ul>
 
               <Link
                 href="/spravce"
-                className="w-full block text-center px-6 py-3 bg-gray-100 text-gray-900 font-semibold rounded-lg hover:bg-gray-200 transition-colors"
+                className="w-full block text-center px-6 py-3 bg-gray-100 text-gray-900 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
               >
                 Začít zdarma
               </Link>
             </div>
 
             {/* Standard Plan */}
-            <div className="bg-white border-2 border-blue-600 rounded-xl shadow-xl p-8 relative md:scale-105 origin-center hover:shadow-2xl transition-shadow">
-              <div className="absolute -top-4 left-6 px-4 py-1 bg-blue-600 text-white text-sm font-bold rounded-full">
+            <div className="bg-white border-2 border-blue-500 rounded-2xl shadow-xl p-8 relative hover:shadow-2xl transition-shadow">
+              <div className="absolute -top-3.5 left-6 px-4 py-1 bg-blue-600 text-white text-xs font-bold rounded-full tracking-wide">
                 NEJPOPULÁRNĚJŠÍ
               </div>
 
@@ -204,40 +313,34 @@ export default function CowOsPage() {
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">
                   Standard
                 </h3>
-                <p className="text-gray-600 text-sm">
+                <p className="text-gray-500 text-sm">
                   Pro rostoucí coworkingy
                 </p>
               </div>
 
               <div className="mb-8">
-                <div className="text-4xl font-bold text-blue-600 mb-2">
+                <div className="text-4xl font-bold text-blue-600">
                   750 Kč
                 </div>
-                <p className="text-gray-600 text-sm">/ měsíc</p>
+                <p className="text-gray-500 text-sm">/ měsíc</p>
               </div>
 
               <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">Až 100 členů coworkingu</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">Vše z bezplatného plánu</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">Prioritní podpora</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">Pokročilé reporty</span>
-                </li>
+                {['Až 100 členů coworkingu', 'Vše z bezplatného plánu', 'Prioritní podpora', 'Pokročilé reporty'].map(
+                  (item) => (
+                    <li key={item} className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <Check className="w-3 h-3 text-blue-600" />
+                      </div>
+                      <span className="text-gray-700">{item}</span>
+                    </li>
+                  )
+                )}
               </ul>
 
               <Link
                 href="/spravce"
-                className="w-full block text-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                className="w-full block text-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors"
               >
                 Aktivovat Standard
               </Link>
@@ -245,7 +348,7 @@ export default function CowOsPage() {
           </div>
 
           {/* Enterprise Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center max-w-4xl mx-auto">
             <p className="text-gray-700 font-medium">
               Nad 100 členů? Kontaktujte nás pro individuální nabídku na{' '}
               <a
@@ -274,26 +377,34 @@ export default function CowOsPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {steps.map((step, idx) => (
               <div key={idx} className="relative">
-                {/* Circle with number */}
+                {/* Circle with number — sketch style */}
                 <div className="flex justify-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                    {step.number}
+                  <div className="relative">
+                    <svg viewBox="0 0 64 64" className="w-16 h-16 text-blue-600">
+                      <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round"
+                        strokeDasharray={idx % 2 === 0 ? '0' : '0'}
+                      />
+                      <circle cx="32" cy="32" r="28" fill="currentColor" opacity="0.08" />
+                    </svg>
+                    <span className="absolute inset-0 flex items-center justify-center text-blue-600 text-2xl font-bold">
+                      {step.number}
+                    </span>
                   </div>
                 </div>
 
                 {/* Content */}
                 <div className="text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  <h3 className="text-lg font-bold text-gray-900 mb-3">
                     {step.title}
                   </h3>
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-gray-600 leading-relaxed text-sm">
                     {step.description}
                   </p>
                 </div>
 
                 {/* Connector line (hidden on last item and mobile) */}
                 {idx < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-8 left-[60%] w-[40%] h-1 bg-gradient-to-r from-blue-300 to-transparent" />
+                  <div className="hidden md:block absolute top-8 left-[60%] w-[40%] h-px bg-blue-200" />
                 )}
               </div>
             ))}
@@ -302,8 +413,14 @@ export default function CowOsPage() {
       </section>
 
       {/* Footer CTA Section */}
-      <section className="py-16 sm:py-24 bg-gradient-to-br from-blue-600 to-indigo-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="py-16 sm:py-24 bg-gradient-to-br from-blue-600 to-blue-800 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <svg viewBox="0 0 400 200" className="w-full h-full" preserveAspectRatio="none">
+            <circle cx="50" cy="100" r="120" fill="white" />
+            <circle cx="350" cy="60" r="80" fill="white" />
+          </svg>
+        </div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
             Připraveni na budoucnost vašeho coworkingu?
           </h2>
@@ -312,7 +429,7 @@ export default function CowOsPage() {
           </p>
           <Link
             href="/spravce"
-            className="inline-block px-10 py-4 bg-white text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition-colors shadow-xl hover:shadow-2xl text-lg"
+            className="inline-block px-10 py-4 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5 text-lg"
           >
             Začít s COW.OS
           </Link>

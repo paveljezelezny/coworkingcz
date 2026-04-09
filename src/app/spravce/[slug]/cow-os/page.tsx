@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Users, FileText, BarChart3, Settings, AlertCircle, Loader } from 'lucide-react';
+import { Users, FileText, BarChart3, Settings, AlertCircle, Loader, Tag } from 'lucide-react';
 
 interface DashboardStats {
   activeMembers: number;
@@ -241,36 +241,38 @@ export default function COWOSPage() {
           {[
             {
               href: './cow-os/clenove',
-              icon: Users,
+              Icon: Users,
               title: 'Členové',
               desc: 'Spravujte členy a jejich předplatná',
-              emoji: '👥',
+              color: 'text-blue-600 bg-blue-50 group-hover:bg-blue-100',
             },
             {
               href: './cow-os/fakturace',
-              icon: FileText,
+              Icon: FileText,
               title: 'Fakturace',
               desc: 'Vytvářejte a spravujte faktury',
-              emoji: '📄',
+              color: 'text-blue-600 bg-blue-50 group-hover:bg-blue-100',
             },
             {
               href: './cow-os/tarify',
-              icon: BarChart3,
+              Icon: Tag,
               title: 'Tarify',
               desc: 'Nastavte a spravujte tarifní plány',
-              emoji: '🏷️',
+              color: 'text-blue-600 bg-blue-50 group-hover:bg-blue-100',
             },
             {
               href: './cow-os/nastaveni',
-              icon: Settings,
+              Icon: Settings,
               title: 'Nastavení',
               desc: 'Fakturační údaje a nastavení',
-              emoji: '⚙️',
+              color: 'text-blue-600 bg-blue-50 group-hover:bg-blue-100',
             },
           ].map((item, i) => (
             <Link key={i} href={item.href}>
-              <div className="group bg-white rounded-lg border border-gray-200 p-6 hover:border-gray-300 hover:shadow-md transition-all cursor-pointer h-full">
-                <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">{item.emoji}</div>
+              <div className="group bg-white rounded-xl border border-gray-200 p-6 hover:border-blue-200 hover:shadow-lg transition-all cursor-pointer h-full">
+                <div className={`w-11 h-11 rounded-lg flex items-center justify-center mb-4 transition-colors ${item.color}`}>
+                  <item.Icon className="w-5 h-5" />
+                </div>
                 <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
                 <p className="text-sm text-gray-600">{item.desc}</p>
               </div>
