@@ -7,7 +7,8 @@ import Link from 'next/link';
 import {
   ArrowLeft, Save, ExternalLink, CheckCircle, AlertCircle,
   Info, Clock, Wifi, DollarSign, Image, Phone, Globe, Mail,
-  MapPin, Users, Building2, Tag, DoorOpen, Plus, Trash2, X
+  MapPin, Users, Building2, Tag, DoorOpen, Plus, Trash2, X,
+  AlertTriangle, Send, Loader2
 } from 'lucide-react';
 import { coworkingsData } from '@/lib/data/coworkings';
 import { AMENITY_LABELS } from '@/lib/types';
@@ -97,6 +98,18 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
   const [error, setError] = useState('');
   const [accessDenied, setAccessDenied] = useState(false);
 
+  // Transfer / "Vzdát se administrace" state
+  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [transferMode, setTransferMode] = useState<'transfer' | 'terminate' | null>(null);
+  const [transferEmail, setTransferEmail] = useState('');
+  const [transferMessage, setTransferMessage] = useState('');
+  const [transferLoading, setTransferLoading] = useState(false);
+  const [transferError, setTransferError] = useState('');
+  const [pendingTransfer, setPendingTransfer] = useState<{
+    id: string; toEmail: string; createdAt: string;
+  } | null>(null);
+  const [cancellingTransfer, setCancellingTransfer] = useState(false);
+
   // Merge static data with DB overrides
   const merged = {
     name: formData.name ?? baseCoworking?.name ?? '',
@@ -141,6 +154,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
     }
     if (status === 'authenticated') {
       loadEditData();
+      loadPendingTransfer();
     }
   }, [status]);
 
@@ -159,6 +173,79 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadPendingTransfer = async () => {
+    try {
+      const res = await fetch(`/api/coworkings/${params.slug}/transfer`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.transfer) {
+          setPendingTransfer(data.transfer);
+        }
+      }
+    } catch {}
+  };
+
+  const handleTransferSubmit = async () => {
+    if (transferMode === 'transfer' && (!transferEmail || !transferEmail.includes('@'))) {
+      setTransferError('Zadejte platný email');
+      return;
+    }
+
+    setTransferLoading(true);
+    setTransferError('');
+
+    try {
+      if (transferMode === 'terminate') {
+        // "Terminate" = send email to us (info@coworkings.cz)
+        // We just show confirmation — the user sees "napište nám na info@coworkings.cz"
+        setShowTransferModal(false);
+        setTransferMode(null);
+        window.location.href = `mailto:info@coworkings.cz?subject=Ukončení správy coworkingu: ${params.slug}&body=${encodeURIComponent(transferMessage || `Chci ukončit správu coworkingu ${params.slug}.`)}`;
+        return;
+      }
+
+      const res = await fetch(`/api/coworkings/${params.slug}/transfer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ toEmail: transferEmail, message: transferMessage }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setTransferError(data.error || 'Chyba při odesílání žádosti');
+        return;
+      }
+
+      setPendingTransfer(data.transfer);
+      setShowTransferModal(false);
+      setTransferMode(null);
+      setTransferEmail('');
+      setTransferMessage('');
+    } catch {
+      setTransferError('Chyba při odesílání žádosti');
+    } finally {
+      setTransferLoading(false);
+    }
+  };
+
+  const handleCancelTransfer = async () => {
+    if (!confirm('Opravdu chcete zrušit žádost o převod?')) return;
+
+    setCancellingTransfer(true);
+    try {
+      const res = await fetch(`/api/coworkings/${params.slug}/transfer`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        setPendingTransfer(null);
+      }
+    } catch {} finally {
+      setCancellingTransfer(false);
     }
   };
 
@@ -1137,7 +1224,188 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
             </div>
           </div>
         </div>
+
+        {/* ===== Vzdát se administrace ===== */}
+        <div className="mt-12 border-t border-red-200 pt-8">
+          <h3 className="text-lg font-bold text-red-800 mb-2 flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5" />
+            Vzdát se administrace
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Pokud již nechcete tento coworking spravovat, můžete správu převést na někoho jiného
+            nebo ukončit administraci úplně. Data coworkingu a členů v COW.OS zůstanou zachována.
+          </p>
+
+          {pendingTransfer ? (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-3">
+                  <Loader2 className="w-5 h-5 text-amber-600 animate-spin" />
+                  <div>
+                    <p className="font-semibold text-amber-800">Čeká se na převzetí...</p>
+                    <p className="text-sm text-amber-700">
+                      Výzva odeslána na <span className="font-semibold">{pendingTransfer.toEmail}</span>
+                      {' · '}
+                      {new Date(pendingTransfer.createdAt).toLocaleDateString('cs-CZ')}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCancelTransfer}
+                  disabled={cancellingTransfer}
+                  className="px-4 py-2 text-sm font-semibold text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-60"
+                >
+                  {cancellingTransfer ? 'Ruším...' : 'Zrušit žádost'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowTransferModal(true)}
+              className="px-5 py-2.5 text-sm font-semibold text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+            >
+              Vzdát se administrace
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* ===== Transfer Modal ===== */}
+      {showTransferModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-lg font-bold text-gray-900">Vzdát se administrace</h3>
+              <button
+                onClick={() => { setShowTransferModal(false); setTransferMode(null); setTransferError(''); }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {!transferMode ? (
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600 mb-4">
+                  Co chcete s administrací tohoto coworkingu udělat?
+                </p>
+                <button
+                  onClick={() => setTransferMode('transfer')}
+                  className="w-full p-4 text-left border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                >
+                  <p className="font-semibold text-gray-900">Převést na někoho jiného</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Zadáte email nového správce, který dostane výzvu k převzetí.
+                  </p>
+                </button>
+                <button
+                  onClick={() => setTransferMode('terminate')}
+                  className="w-full p-4 text-left border border-gray-200 rounded-xl hover:border-red-300 hover:bg-red-50 transition-colors"
+                >
+                  <p className="font-semibold text-gray-900">Ukončit administraci úplně</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Napíšete nám email, že chcete ukončit správu. Data zůstanou zachována.
+                  </p>
+                </button>
+              </div>
+            ) : transferMode === 'transfer' ? (
+              <div className="space-y-4">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <p className="text-sm text-amber-800">
+                    <strong>Pozor:</strong> Po převzetí novým správcem ztratíte přístup k editaci tohoto coworkingu
+                    a jeho COW.OS.
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email nového správce *
+                  </label>
+                  <input
+                    type="email"
+                    value={transferEmail}
+                    onChange={(e) => setTransferEmail(e.target.value)}
+                    placeholder="novyspravce@email.cz"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Zpráva (volitelné)
+                  </label>
+                  <textarea
+                    value={transferMessage}
+                    onChange={(e) => setTransferMessage(e.target.value)}
+                    placeholder="Zpráva pro nového správce..."
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                  />
+                </div>
+                {transferError && (
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" /> {transferError}
+                  </p>
+                )}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => { setTransferMode(null); setTransferError(''); }}
+                    className="flex-1 py-3 text-sm font-semibold text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                  >
+                    Zpět
+                  </button>
+                  <button
+                    onClick={handleTransferSubmit}
+                    disabled={transferLoading || !transferEmail}
+                    className="flex-1 py-3 text-sm font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                  >
+                    {transferLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                    Odeslat výzvu
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-sm text-red-800">
+                    <strong>Ukončení administrace</strong> — napíšete nám email na info@coworkings.cz
+                    s žádostí o ukončení správy. Data coworkingu a členů zůstanou v systému.
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Důvod / zpráva (volitelné)
+                  </label>
+                  <textarea
+                    value={transferMessage}
+                    onChange={(e) => setTransferMessage(e.target.value)}
+                    placeholder="Chci ukončit správu coworkingu, protože..."
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => { setTransferMode(null); setTransferError(''); }}
+                    className="flex-1 py-3 text-sm font-semibold text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                  >
+                    Zpět
+                  </button>
+                  <button
+                    onClick={handleTransferSubmit}
+                    className="flex-1 py-3 text-sm font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Mail className="w-4 h-4" />
+                    Napsat email
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

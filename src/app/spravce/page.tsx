@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Building2, Settings, LogOut, Plus, ExternalLink, Clock, User } from 'lucide-react';
+import { Building2, Settings, LogOut, Plus, ExternalLink, Clock, User, CheckCircle } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 
 interface Claim {
   coworkingSlug: string;
@@ -16,6 +17,7 @@ interface Claim {
 export default function SprvcePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [claims, setClaims] = useState<Claim[]>([]);
   const [loading, setLoading] = useState(true);
   const [cowOsActive, setCowOsActive] = useState<Record<string, boolean>>({});
@@ -98,6 +100,14 @@ export default function SprvcePage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Transfer accepted banner */}
+        {searchParams.get('transfer') === 'accepted' && (
+          <div className="mb-6 bg-green-50 border border-green-200 rounded-xl px-5 py-4 flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <p className="text-green-800 font-medium">Převod administrace úspěšně přijat! Coworking najdete v seznamu níže.</p>
+          </div>
+        )}
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Správce coworkingů</h1>
