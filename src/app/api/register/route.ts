@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
@@ -27,7 +28,30 @@ export async function POST(req: NextRequest) {
       select: { id: true, email: true, name: true, role: true },
     });
 
-    return NextResponse.json({ success: true, user });
+    // Generate email verification token (valid 24 hours)
+    const token = randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    // Store in VerificationToken table (NextAuth standard)
+    await prisma.verificationToken.create({
+      data: { identifier: email, token, expires },
+    });
+
+    // Build verification URL for when email sending is configured
+    const baseUrl = process.env.NEXTAUTH_URL ?? 'https://coworkingcz.vercel.app';
+    const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`;
+
+    // TODO: Send verification email here once email provider is configured
+    // await sendVerificationEmail({ to: email, name, verifyUrl });
+    console.log(`[VERIFY] Email verification link for ${email}: ${verifyUrl}`);
+
+    return NextResponse.json({
+      success: true,
+      user,
+      pendingVerification: true,
+      // Return URL only in dev for testing; in prod the link goes via email
+      ...(process.env.NODE_ENV === 'development' ? { verifyUrl } : {}),
+    });
   } catch (err: any) {
     if (err.name === 'ZodError') {
       return NextResponse.json({ error: 'Neplatná data', details: err.errors }, { status: 400 });

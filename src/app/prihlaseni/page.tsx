@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 
 function PrihlaseniForm() {
   const router = useRouter();
@@ -18,6 +18,8 @@ function PrihlaseniForm() {
   const [error, setError] = useState('');
 
   const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const verified = searchParams.get('verified') === '1';
+  const verifyError = searchParams.get('error');
 
   // Redirect if already logged in
   useEffect(() => {
@@ -45,7 +47,11 @@ function PrihlaseniForm() {
     setLoading(false);
 
     if (result?.error) {
-      setError('Nesprávný email nebo heslo.');
+      if (result.error === 'EMAIL_NOT_VERIFIED') {
+        setError('Nejprve ověř svůj email. Zkontroluj doručenou poštu a klikni na ověřovací odkaz.');
+      } else {
+        setError('Nesprávný email nebo heslo.');
+      }
     } else {
       router.push(callbackUrl);
     }
@@ -76,6 +82,28 @@ function PrihlaseniForm() {
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Přihlášení</h1>
             <p className="text-gray-600">Přihlaš se do svého účtu</p>
           </div>
+
+          {/* Email verified success */}
+          {verified && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-700 text-sm">
+              <CheckCircle className="w-4 h-4 flex-shrink-0" />
+              Email úspěšně ověřen! Teď se můžeš přihlásit.
+            </div>
+          )}
+
+          {/* Verification link error */}
+          {verifyError === 'token-expired' && (
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center gap-2 text-yellow-700 text-sm">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              Ověřovací odkaz vypršel. Registruj se znovu nebo kontaktuj podporu.
+            </div>
+          )}
+          {(verifyError === 'invalid-token' || verifyError === 'server-error') && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700 text-sm">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              Neplatný ověřovací odkaz. Zkus se zaregistrovat znovu.
+            </div>
+          )}
 
           {/* Error */}
           {error && (

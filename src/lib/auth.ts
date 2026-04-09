@@ -33,6 +33,18 @@ export const authOptions: NextAuthOptions = {
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) return null;
 
+        // Block unverified users — but only if a pending verification token exists.
+        // Legacy accounts (registered before email verification was introduced) have
+        // no VerificationToken and pass through automatically.
+        if (!user.emailVerified) {
+          const pendingToken = await prisma.verificationToken.findFirst({
+            where: { identifier: user.email ?? '', expires: { gt: new Date() } },
+          });
+          if (pendingToken) {
+            throw new Error('EMAIL_NOT_VERIFIED');
+          }
+        }
+
         return {
           id: user.id,
           email: user.email,

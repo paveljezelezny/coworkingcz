@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 type Tab  = 'coworker' | 'coworking';
-type Step = 'form' | 'trial' | 'done';
+type Step = 'form' | 'trial' | 'done' | 'verify';
 type Plan = 'monthly' | 'yearly' | 'team';
 
 const COWORKER_MONTHLY  = 79;
@@ -93,15 +93,8 @@ function RegistraceInner() {
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Registrace se nezdařila'); return; }
 
-      await signIn('credentials', { email, password, redirect: false });
-
-      if (isFreeOnly) {
-        // Free basic — skip trial, go directly
-        setStep('done');
-        setTimeout(() => router.push(tab === 'coworking' ? '/spravce' : '/'), 1500);
-      } else {
-        setStep('trial');
-      }
+      // Registration successful — user must verify email before logging in
+      setStep('verify');
     } catch {
       setError('Chyba serveru. Zkus to znovu.');
     } finally {
@@ -130,6 +123,36 @@ function RegistraceInner() {
   const handleSkipTrial = () => {
     router.push(tab === 'coworking' ? '/spravce' : '/');
   };
+
+  // ── VERIFY EMAIL ─────────────────────────────────────────────────────────
+  if (step === 'verify') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-sm mx-4">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Mail className="w-8 h-8 text-blue-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Ověř svůj email</h2>
+          <p className="text-gray-600 text-sm mb-2">
+            Poslali jsme ti ověřovací odkaz na
+          </p>
+          <p className="font-semibold text-gray-900 mb-4 break-all">{email}</p>
+          <p className="text-gray-500 text-sm mb-6">
+            Klikni na odkaz v emailu a poté se přihlaš. Odkaz je platný 24 hodin.
+          </p>
+          <Link
+            href="/prihlaseni"
+            className="block w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-sm"
+          >
+            Přejít na přihlášení
+          </Link>
+          <p className="text-xs text-gray-400 mt-4">
+            Email nedorazil? Zkontroluj složku spam.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // ── DONE ─────────────────────────────────────────────────────────────────
   if (step === 'done') {
