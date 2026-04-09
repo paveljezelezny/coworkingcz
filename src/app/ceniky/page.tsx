@@ -76,6 +76,9 @@ export default function CenikyPage() {
     { name: 'Email podpora',                                  small: true,  medium: true,  large: true  },
     { name: 'Prioritní podpora',                              small: false, medium: true,  large: true  },
     { name: 'Dedikovaný account manager',                     small: false, medium: false, large: true  },
+    { name: 'COW.OS — správa členů (do 5 zdarma)',            small: true,  medium: true,  large: true  },
+    { name: 'COW.OS — plná verze (20/100+ členů)',            small: false, medium: true,  large: true  },
+    { name: 'COW.OS — automatická fakturace a QR',            small: false, medium: true,  large: true  },
   ];
 
   const faqs = [
@@ -166,101 +169,210 @@ export default function CenikyPage() {
             {PLATFORM_PRICING.map((tier, idx) => {
               const yearlyPrice = Math.round(tier.monthlyPrice * 12 * (1 - tier.yearlyDiscount));
               const isLarge = tier.tier === 'large';
+              const isMedium = tier.tier === 'medium';
+              const isSmall = tier.tier === 'small';
               const isLoading = activating === tier.tier;
-              return (
-                <div
-                  key={tier.tier}
-                  className={`rounded-2xl overflow-hidden transition-all duration-300 ${
-                    idx === 1
-                      ? 'border-2 border-blue-600 shadow-2xl md:scale-105'
-                      : 'border border-gray-200 shadow-sm hover:shadow-md'
-                  }`}
-                >
-                  <div className={`px-8 py-10 ${idx === 1 ? 'gradient-primary text-white' : 'bg-gray-50'}`}>
-                    {idx === 1 && (
-                      <div className="inline-block px-3 py-1 bg-white/20 text-white rounded-full text-xs font-bold mb-3">
-                        NEJPOPULÁRNĚJŠÍ
-                      </div>
-                    )}
-                    <h3 className={`text-2xl font-bold mb-2 ${idx === 1 ? 'text-white' : 'text-gray-900'}`}>
-                      {tier.name}
-                    </h3>
-                    <p className={`text-sm ${idx === 1 ? 'text-blue-100' : 'text-gray-600'}`}>
-                      {isLarge ? 'Více než 100 míst' : `Pro coworkingy do ${tier.maxSeats} míst`}
-                    </p>
-                  </div>
 
-                  <div className="p-8">
-                    <div className="mb-8">
-                      <div className={`text-4xl font-bold mb-2 ${idx === 1 ? 'text-blue-600' : 'text-gray-900'}`}>
-                        {tier.monthlyPrice} Kč
-                      </div>
-                      <p className="text-sm text-gray-600 mb-3">za měsíc</p>
-                      <p className="text-sm text-green-600 font-medium">
-                        nebo {yearlyPrice} Kč/rok
-                        <span className="text-xs text-green-600 block">(20 % sleva)</span>
+              // COW.OS pricing per tier
+              const cowOsPrice = isSmall ? 450 : isMedium ? 750 : null;
+              const cowOsMembers = isSmall ? 20 : isMedium ? 100 : null;
+              const comboPrice = cowOsPrice ? tier.monthlyPrice + cowOsPrice : null;
+              const comboYearlyPrice = comboPrice ? Math.round(comboPrice * 12 * (1 - tier.yearlyDiscount)) : null;
+
+              const isLoadingCombo = activating === `${tier.tier}_cowos`;
+
+              return (
+                <div key={tier.tier} className="flex flex-col gap-4">
+                  {/* ─── Hlavní sloupec ─── */}
+                  <div
+                    className={`rounded-2xl overflow-hidden transition-all duration-300 ${
+                      idx === 1
+                        ? 'border-2 border-blue-600 shadow-2xl md:scale-105'
+                        : 'border border-gray-200 shadow-sm hover:shadow-md'
+                    }`}
+                  >
+                    <div className={`px-8 py-10 ${idx === 1 ? 'gradient-primary text-white' : 'bg-gray-50'}`}>
+                      {idx === 1 && (
+                        <div className="inline-block px-3 py-1 bg-white/20 text-white rounded-full text-xs font-bold mb-3">
+                          NEJPOPULÁRNĚJŠÍ
+                        </div>
+                      )}
+                      <h3 className={`text-2xl font-bold mb-2 ${idx === 1 ? 'text-white' : 'text-gray-900'}`}>
+                        {tier.name}
+                      </h3>
+                      <p className={`text-sm ${idx === 1 ? 'text-blue-100' : 'text-gray-600'}`}>
+                        {isLarge ? 'Více než 100 míst' : `Pro coworkingy do ${tier.maxSeats} míst`}
                       </p>
                     </div>
 
-                    <ul className="space-y-4 mb-6">
-                      <li className="flex items-center gap-3">
-                        <Globe className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900">{tier.includedAddresses} adresa/y</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <BadgeCheck className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900">Štítek „ověřeno" u profilu</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <CalendarPlus className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900">5 eventů měsíčně</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <ShoppingBag className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900">5 inzerátů na marketplace měsíčně</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Award className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900">Standardní podpora</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Plus className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900 text-sm">Extra adresa: {tier.extraAddressPrice} Kč/měsíc</span>
-                      </li>
-                    </ul>
+                    <div className="p-8">
+                      <div className="mb-8">
+                        <div className={`text-4xl font-bold mb-2 ${idx === 1 ? 'text-blue-600' : 'text-gray-900'}`}>
+                          {tier.monthlyPrice} Kč
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">za měsíc</p>
+                        <p className="text-sm text-green-600 font-medium">
+                          nebo {yearlyPrice} Kč/rok
+                          <span className="text-xs text-green-600 block">(20 % sleva)</span>
+                        </p>
+                      </div>
 
-                    {/* Add-on upsell block — skryto, zatím neaktivní */}
+                      <ul className="space-y-4 mb-6">
+                        <li className="flex items-center gap-3">
+                          <Globe className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
+                          <span className="text-gray-900">{tier.includedAddresses} adresa/y</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                          <BadgeCheck className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
+                          <span className="text-gray-900">Štítek „ověřeno" u profilu</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                          <CalendarPlus className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
+                          <span className="text-gray-900">5 eventů měsíčně</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                          <ShoppingBag className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
+                          <span className="text-gray-900">5 inzerátů na marketplace měsíčně</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                          <Award className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
+                          <span className="text-gray-900">Standardní podpora</span>
+                        </li>
+                        {!isSmall && (
+                          <li className="flex items-center gap-3">
+                            <Plus className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
+                            <span className="text-gray-900 text-sm">Extra adresa: {tier.extraAddressPrice} Kč/měsíc</span>
+                          </li>
+                        )}
+                        <li className="flex items-center gap-3">
+                          <span className="w-5 h-5 flex-shrink-0 text-center text-sm">🐄</span>
+                          <span className="text-gray-900 text-sm">COW.OS zdarma — do 5 členů</span>
+                        </li>
+                      </ul>
 
-                    {/* Primary CTA */}
-                    <button
-                      onClick={() => handleCoworkingPlan(tier.tier)}
-                      disabled={isLoading}
-                      className={`w-full py-3.5 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
-                        idx === 1
-                          ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-100'
-                          : 'bg-gray-900 text-white hover:bg-gray-800'
-                      } disabled:opacity-60`}
-                    >
-                      {isLoading ? (
-                        <span className="flex items-center gap-2">
-                          <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                          Aktivuji…
-                        </span>
-                      ) : (
-                        <>
-                          Začít zdarma
-                          <ArrowRight className="w-4 h-4" />
-                        </>
+                      {/* Primary CTA */}
+                      <button
+                        onClick={() => handleCoworkingPlan(tier.tier)}
+                        disabled={isLoading}
+                        className={`w-full py-3.5 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
+                          idx === 1
+                            ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-100'
+                            : 'bg-gray-900 text-white hover:bg-gray-800'
+                        } disabled:opacity-60`}
+                      >
+                        {isLoading ? (
+                          <span className="flex items-center gap-2">
+                            <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                            Aktivuji…
+                          </span>
+                        ) : (
+                          <>
+                            Začít zdarma
+                            <ArrowRight className="w-4 h-4" />
+                          </>
+                        )}
+                      </button>
+
+                      {/* Trial note */}
+                      <p className="text-center text-xs text-green-700 font-semibold mt-2 flex items-center justify-center gap-1">
+                        <Gift className="w-3.5 h-3.5" />
+                        30 dní zdarma — pak {tier.monthlyPrice} Kč/měs
+                      </p>
+
+                      <FreeLink role="coworking" />
+                    </div>
+                  </div>
+
+                  {/* ─── PRO + COW.OS blok pod sloupcem ─── */}
+                  <div className={`rounded-2xl border-2 overflow-hidden transition-all duration-300 ${
+                    isLarge
+                      ? 'border-amber-300 bg-gradient-to-b from-amber-50 to-white'
+                      : 'border-emerald-300 bg-gradient-to-b from-emerald-50 to-white'
+                  }`}>
+                    <div className={`px-6 py-5 text-center ${
+                      isLarge ? 'bg-amber-100/60' : 'bg-emerald-100/60'
+                    }`}>
+                      <span className="text-lg font-bold text-gray-900">🐄 Plná verze + COW.OS</span>
+                      {!isLarge && (
+                        <div className="mt-1">
+                          <span className="text-2xl font-bold text-emerald-700">{comboPrice} Kč</span>
+                          <span className="text-sm text-gray-500 ml-1">/ měsíc</span>
+                        </div>
                       )}
-                    </button>
+                      {isLarge && (
+                        <div className="mt-1">
+                          <span className="text-lg font-bold text-amber-700">Individuální nabídka</span>
+                        </div>
+                      )}
+                    </div>
 
-                    {/* Trial note */}
-                    <p className="text-center text-xs text-green-700 font-semibold mt-2 flex items-center justify-center gap-1">
-                      <Gift className="w-3.5 h-3.5" />
-                      30 dní zdarma — pak {tier.monthlyPrice} Kč/měs
-                    </p>
+                    <div className="px-6 py-5">
+                      <ul className="space-y-3 mb-5">
+                        <li className="flex items-start gap-2.5 text-sm text-gray-700">
+                          <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                          Vše z plánu {tier.name} výše
+                        </li>
+                        <li className="flex items-start gap-2.5 text-sm text-gray-700">
+                          <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                          Neomezeně inzerátů a eventů
+                        </li>
+                        <li className="flex items-start gap-2.5 text-sm font-semibold text-gray-900">
+                          <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                          {isLarge
+                            ? 'COW.OS — 100+ členů, individuální nastavení'
+                            : `COW.OS — správa do ${cowOsMembers} členů`}
+                        </li>
+                        <li className="flex items-start gap-2.5 text-sm text-gray-700">
+                          <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                          Automatická fakturace a QR platby
+                        </li>
+                        <li className="flex items-start gap-2.5 text-sm text-gray-700">
+                          <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                          Prolongační engine — auto obnova členství
+                        </li>
+                      </ul>
 
-                    <FreeLink role="coworking" />
+                      {!isLarge && comboYearlyPrice && (
+                        <p className="text-xs text-emerald-700 font-medium text-center mb-4">
+                          nebo {comboYearlyPrice} Kč/rok (sleva 20 %)
+                        </p>
+                      )}
+
+                      {isLarge ? (
+                        <a
+                          href="mailto:info@coworkings.cz?subject=Zájem o Velký cowork + COW.OS"
+                          className="w-full py-3.5 px-4 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-colors flex items-center justify-center gap-2 shadow-md"
+                        >
+                          Kontaktovat nás
+                          <ArrowRight className="w-4 h-4" />
+                        </a>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setActivating(`${tier.tier}_cowos`);
+                            handleCoworkingPlan(`${tier.tier}_cowos`);
+                          }}
+                          disabled={isLoadingCombo}
+                          className="w-full py-3.5 px-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2 shadow-md shadow-emerald-100"
+                        >
+                          {isLoadingCombo ? (
+                            <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Aktivuji…</>
+                          ) : (
+                            <>
+                              Začít s plnou verzí a COW.OS
+                              <ArrowRight className="w-4 h-4" />
+                            </>
+                          )}
+                        </button>
+                      )}
+
+                      {!isLarge && (
+                        <p className="text-center text-xs text-emerald-700 font-semibold mt-2 flex items-center justify-center gap-1">
+                          <Gift className="w-3.5 h-3.5" />
+                          30 dní zdarma — pak {comboPrice} Kč/měs
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
