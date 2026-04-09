@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -1503,7 +1503,7 @@ function MyEventsSection() {
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
-export default function ProfilPage() {
+function ProfilPageInner() {
   const { data: session, status: authStatus } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -2287,5 +2287,13 @@ export default function ProfilPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function ProfilPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" /></div>}>
+      <ProfilPageInner />
+    </Suspense>
   );
 }
