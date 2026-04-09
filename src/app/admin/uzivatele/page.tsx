@@ -152,10 +152,12 @@ export default function AdminUsersPage() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('/api/admin/users');
+      const res = await fetch('/api/admin/users?limit=500');
       if (!res.ok) throw new Error();
       const data = await res.json();
-      setUsers(data); setFiltered(data);
+      // API returns { users, total, page, limit, pages } — extract the array
+      const list: AdminUser[] = Array.isArray(data) ? data : (data.users ?? []);
+      setUsers(list); setFiltered(list);
     } catch { setError('Chyba při načítání uživatelů'); }
     finally { setLoading(false); }
   };
