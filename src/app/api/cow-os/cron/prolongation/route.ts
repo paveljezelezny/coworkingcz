@@ -86,13 +86,13 @@ export async function POST(req: NextRequest) {
         const newNextRenewalDate = new Date(newEndDate);
 
         // Update member dates
-        const now = new Date().toISOString();
+        const now = new Date();
         await prisma.$executeRawUnsafe(
           `UPDATE "CowOsMember"
            SET "endDate" = $1, "nextRenewalDate" = $2, "updatedAt" = $3
            WHERE "id" = $4`,
-          newEndDate.toISOString(),
-          newNextRenewalDate.toISOString(),
+          newEndDate,
+          newNextRenewalDate,
           now,
           memberId
         );
@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
 
         // Insert invoice
         const invoiceId = randomUUID();
-        const issueDate = new Date().toISOString();
+        const issueDate = new Date();
 
         await prisma.$executeRawUnsafe(
           `INSERT INTO "CowOsInvoice"
@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
           memberId,
           invoiceNumber,
           issueDate,
-          dueDate.toISOString(),
+          dueDate,
           'issued',
           subtotal,
           taxRate,

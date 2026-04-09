@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
 
     // Create new free subscription
     const id = randomUUID();
-    const now = new Date().toISOString();
+    const now = new Date();
 
     await prisma.$executeRawUnsafe(
       `INSERT INTO "CowOsSubscription"

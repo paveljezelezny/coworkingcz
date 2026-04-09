@@ -58,7 +58,7 @@ export async function PUT(req: NextRequest) {
     } = body;
 
     const id = randomUUID();
-    const now = new Date().toISOString();
+    const now = new Date();
 
     // UPSERT: insert or update on conflict
     await prisma.$executeRawUnsafe(

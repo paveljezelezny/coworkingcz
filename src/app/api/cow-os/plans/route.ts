@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     }
 
     const id = randomUUID();
-    const now = new Date().toISOString();
+    const now = new Date();
 
     await prisma.$executeRawUnsafe(
       `INSERT INTO "CowOsMembershipPlan"
@@ -126,7 +126,7 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Plán nenalezen' }, { status: 404 });
     }
 
-    const now = new Date().toISOString();
+    const now = new Date();
 
     // Build dynamic update query
     const updates: string[] = [];
@@ -230,7 +230,7 @@ export async function DELETE(req: NextRequest) {
 
     const count = memberCount.length > 0 ? (memberCount[0].count as number) : 0;
 
-    const now = new Date().toISOString();
+    const now = new Date();
 
     // Soft delete: set isActive = false
     await prisma.$executeRawUnsafe(

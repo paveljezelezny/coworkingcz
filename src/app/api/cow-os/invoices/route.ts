@@ -227,8 +227,8 @@ export async function POST(req: NextRequest) {
 
     // Insert invoice
     const id = randomUUID();
-    const now = new Date().toISOString();
-    const issueDate = new Date().toISOString();
+    const now = new Date();
+    const issueDate = new Date();
 
     await prisma.$executeRawUnsafe(
       `INSERT INTO "CowOsInvoice"
@@ -243,7 +243,7 @@ export async function POST(req: NextRequest) {
       memberId,
       invoiceNumber,
       issueDate,
-      dueDate.toISOString(),
+      dueDate,
       'draft',
       subtotal,
       taxRate,
@@ -331,18 +331,21 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const now = new Date().toISOString();
-    let updateQuery = `UPDATE "CowOsInvoice" SET "status" = $1, "updatedAt" = $2`;
-    const params: unknown[] = [status, now, id, auth.coworkingSlug];
+    const now = new Date();
 
-    if (status === 'paid' && paidDate) {
-      updateQuery += `, "paidDate" = $${params.length - 1}`;
-      params.splice(2, 0, paidDate);
+    // CowOsInvoice has no updatedAt — just update status and optionally paidDate
+    if (status === 'paid') {
+      const pd = paidDate ? new Date(paidDate) : now;
+      await prisma.$executeRawUnsafe(
+        `UPDATE "CowOsInvoice" SET "status" = $1, "paidDate" = $2 WHERE "id" = $3 AND "coworkingSlug" = $4`,
+        status, pd, id, auth.coworkingSlug
+      );
+    } else {
+      await prisma.$executeRawUnsafe(
+        `UPDATE "CowOsInvoice" SET "status" = $1 WHERE "id" = $2 AND "coworkingSlug" = $3`,
+        status, id, auth.coworkingSlug
+      );
     }
-
-    updateQuery += ` WHERE "id" = $${params.length - 1} AND "coworkingSlug" = $${params.length}`;
-
-    await prisma.$executeRawUnsafe(updateQuery, ...params);
 
     // Fetch and return the updated invoice
     const result = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(

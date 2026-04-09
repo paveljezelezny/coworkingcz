@@ -73,14 +73,14 @@ export async function GET(req: NextRequest) {
              FROM "CowOsInvoice"
              WHERE "coworkingSlug" = $1 AND "status" = 'paid' AND "paidDate" >= $2`,
             auth.coworkingSlug,
-            thisMonthStart.toISOString()
+            thisMonthStart
           ),
           prisma.$queryRawUnsafe<{ sum: number | null }[]>(
             `SELECT SUM("total") as sum
              FROM "CowOsInvoice"
              WHERE "coworkingSlug" = $1 AND "status" = 'paid' AND "paidDate" >= $2`,
             auth.coworkingSlug,
-            thisYearStart.toISOString()
+            thisYearStart
           ),
         ]);
 
