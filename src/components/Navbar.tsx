@@ -181,6 +181,7 @@ export default function Navbar() {
     { href: '/udalosti', label: 'Kalendář akcí', key: 'udalosti' },
     { href: '/marketplace', label: 'Marketplace', key: 'marketplace' },
     { href: '/ceniky', label: 'Ceníky', key: 'ceniky' },
+    { href: '/cow-os', label: '🐄 COW.OS', key: 'cow-os' },
   ];
 
   const isActive = (key: string) => pathname.includes(key);

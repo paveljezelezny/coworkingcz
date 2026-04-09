@@ -2332,6 +2332,20 @@ function ProfilPageInner() {
             {/* Doklady & předplatné */}
             <DokladySection />
 
+            {/* COW.OS — členství v coworkingách */}
+            <Link
+              href="/profil/cow-os"
+              className="block bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200 p-5 hover:shadow-md transition-shadow group"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🐄</span>
+                <div>
+                  <h3 className="font-bold text-amber-900 group-hover:text-amber-700 transition-colors">COW.OS</h3>
+                  <p className="text-xs text-amber-700">Moje členství a faktury z coworkingů</p>
+                </div>
+              </div>
+            </Link>
+
             {/* Contact */}
             <div className="bg-white rounded-xl border border-gray-200 p-5">
               <h3 className="font-bold text-gray-900 mb-4">Kontakt</h3>

@@ -147,6 +147,13 @@ export default function SprvcePage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Link
+                    href={`/spravce/${claim.coworkingSlug}/cow-os`}
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 font-semibold rounded-lg hover:bg-amber-100 transition-colors"
+                  >
+                    🐄
+                    <span className="hidden sm:inline">COW.OS</span>
+                  </Link>
+                  <Link
                     href={`/coworking/${claim.coworkingSlug}`}
                     target="_blank"
                     className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
