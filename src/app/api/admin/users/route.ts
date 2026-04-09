@@ -35,8 +35,8 @@ export async function GET(req: NextRequest) {
             membershipEnd: true,
           },
         },
-        // Include all claimed coworkings
-        coworkingClaims: {
+        // Include all claimed coworkings (relation is named "claims" in schema)
+        claims: {
           where: { status: 'approved' },
           select: {
             coworkingSlug: true,
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     users: users.map((u) => {
-      const hasApprovedClaim = u.coworkingClaims.length > 0;
+      const hasApprovedClaim = u.claims.length > 0;
       return {
         id: u.id,
         email: u.email,
@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
         membershipStart: u.coworkerProfile?.membershipStart ?? null,
         membershipEnd: u.coworkerProfile?.membershipEnd ?? null,
         // Coworking ownership
-        coworkingClaims: u.coworkingClaims,
+        coworkingClaims: u.claims,
         hasCoworkingOwnership: hasApprovedClaim,
         // Effective membership: if owner, always consider as full member
         effectiveMembership: hasApprovedClaim ? 'owner' : (u.coworkerProfile?.membershipTier ?? null),
