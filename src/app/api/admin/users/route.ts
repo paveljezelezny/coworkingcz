@@ -53,6 +53,26 @@ export async function GET(req: NextRequest) {
     prisma.user.count(),
   ]);
 
+  // Enrich claim names with edited names from CoworkingEdit
+  const allClaimSlugs = users.flatMap((u) => u.claims.map((c) => c.coworkingSlug));
+  let editedNames: Record<string, string> = {};
+  if (allClaimSlugs.length > 0) {
+    try {
+      const edits = await prisma.coworkingEdit.findMany({
+        where: { coworkingSlug: { in: allClaimSlugs } },
+        select: { coworkingSlug: true, data: true },
+      });
+      for (const edit of edits) {
+        const data = edit.data as Record<string, any> | null;
+        if (data && typeof data.name === 'string' && data.name.trim()) {
+          editedNames[edit.coworkingSlug] = data.name;
+        }
+      }
+    } catch {
+      // Fallback to static claim names
+    }
+  }
+
   return NextResponse.json({
     users: users.map((u) => {
       const hasApprovedClaim = u.claims.length > 0;
@@ -66,8 +86,11 @@ export async function GET(req: NextRequest) {
         membershipTier: u.coworkerProfile?.membershipTier ?? null,
         membershipStart: u.coworkerProfile?.membershipStart ?? null,
         membershipEnd: u.coworkerProfile?.membershipEnd ?? null,
-        // Coworking ownership
-        coworkingClaims: u.claims,
+        // Coworking ownership — with edited names
+        coworkingClaims: u.claims.map((c) => ({
+          ...c,
+          coworkingName: editedNames[c.coworkingSlug] ?? c.coworkingName,
+        })),
         hasCoworkingOwnership: hasApprovedClaim,
         // Effective membership: if owner, always consider as full member
         effectiveMembership: hasApprovedClaim ? 'owner' : (u.coworkerProfile?.membershipTier ?? null),

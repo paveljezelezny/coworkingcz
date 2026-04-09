@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Users, FileText, BarChart3, Settings, AlertCircle, Loader, Tag } from 'lucide-react';
+import { Users, FileText, BarChart3, Settings, AlertCircle, Loader, Tag, ShieldAlert } from 'lucide-react';
 
 interface DashboardStats {
   activeMembers: number;
@@ -28,6 +28,7 @@ export default function COWOSPage() {
   const [loading, setLoading] = useState(true);
   const [activating, setActivating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [accessDenied, setAccessDenied] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -49,6 +50,9 @@ export default function COWOSPage() {
           setSubscription(null);
           setStats(null);
         }
+      } else if (res.status === 403) {
+        // User is not the owner of this coworking — deny access
+        setAccessDenied(true);
       } else if (res.status === 404) {
         setSubscription(null);
         setStats(null);
@@ -114,6 +118,25 @@ export default function COWOSPage() {
         <div className="flex flex-col items-center gap-3">
           <Loader className="w-8 h-8 text-blue-600 animate-spin" />
           <p className="text-gray-600">Načítám COW.OS...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Access denied — user is not the coworking owner
+  if (accessDenied) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
+          <ShieldAlert className="w-14 h-14 text-red-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Přístup zamítnut</h2>
+          <p className="text-gray-600 mb-6">
+            COW.OS je přístupný pouze vlastníkům tohoto coworkingu.
+            Pokud jste správce, nejdřív si coworking přivlastněte.
+          </p>
+          <a href="/spravce" className="block w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+            Zpět do správce
+          </a>
         </div>
       </div>
     );

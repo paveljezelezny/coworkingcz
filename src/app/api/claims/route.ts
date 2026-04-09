@@ -85,5 +85,30 @@ export async function GET(req: NextRequest) {
     select: { coworkingSlug: true, coworkingName: true, createdAt: true },
   });
 
-  return NextResponse.json({ claims });
+  // Enrich with edited names from CoworkingEdit (the owner may have renamed)
+  const slugs = claims.map((c) => c.coworkingSlug);
+  let editedNames: Record<string, string> = {};
+  if (slugs.length > 0) {
+    try {
+      const edits = await prisma.coworkingEdit.findMany({
+        where: { coworkingSlug: { in: slugs } },
+        select: { coworkingSlug: true, data: true },
+      });
+      for (const edit of edits) {
+        const data = edit.data as Record<string, any> | null;
+        if (data && typeof data.name === 'string' && data.name.trim()) {
+          editedNames[edit.coworkingSlug] = data.name;
+        }
+      }
+    } catch {
+      // DB issue — fall back to original claim names
+    }
+  }
+
+  const enriched = claims.map((c) => ({
+    ...c,
+    coworkingName: editedNames[c.coworkingSlug] ?? c.coworkingName,
+  }));
+
+  return NextResponse.json({ claims: enriched });
 }
