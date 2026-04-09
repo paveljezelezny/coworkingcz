@@ -1,11 +1,52 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { Check, Search, ShieldCheck, Settings, Zap, ArrowRight } from 'lucide-react';
+
+interface ActiveCow {
+  slug: string;
+  name: string;
+}
 
 /* ─── Page ─────────────────────────────────────────────────────────────────── */
 
 export default function CowOsPage() {
+  const { data: session, status } = useSession();
+  const [activeCows, setActiveCows] = useState<ActiveCow[]>([]);
+  const [cowsChecked, setCowsChecked] = useState(false);
+
+  useEffect(() => {
+    if (status !== 'authenticated') {
+      if (status === 'unauthenticated') setCowsChecked(true);
+      return;
+    }
+    // Load approved claims and check COW.OS status for each
+    const load = async () => {
+      try {
+        const res = await fetch('/api/claims');
+        if (!res.ok) return;
+        const data = await res.json();
+        const approved = (data.claims || []).filter((c: any) => c.status === 'approved');
+        const results = await Promise.all(
+          approved.map(async (claim: any) => {
+            try {
+              const r = await fetch(`/api/cow-os/subscription?slug=${claim.coworkingSlug}`);
+              if (r.ok) {
+                const sub = await r.json();
+                if (sub?.id) return { slug: claim.coworkingSlug, name: claim.coworkingName };
+              }
+            } catch {}
+            return null;
+          })
+        );
+        setActiveCows(results.filter(Boolean) as ActiveCow[]);
+      } catch {}
+      setCowsChecked(true);
+    };
+    load();
+  }, [status]);
   const features = [
     {
       img: '/cow-os/cow-checklist.png',
@@ -95,21 +136,49 @@ export default function CowOsPage() {
             Správa členů, automatická fakturace, QR platby a přehled o vašem podnikání — vše na jednom místě.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Link
-              href="/spravce"
-              className="px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-            >
-              Aktivovat COW.OS zdarma
-            </Link>
-            <button
-              onClick={() => {
-                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-all"
-            >
-              Zjistit více
-            </button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 flex-wrap">
+            {/* Show "Vstoupit Bůůů" for each active COW.OS coworking, or the default CTA */}
+            {cowsChecked && activeCows.length > 0 ? (
+              <>
+                {activeCows.map((cow) => (
+                  <Link
+                    key={cow.slug}
+                    href={`/spravce/${cow.slug}/cow-os`}
+                    className="px-8 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center gap-2"
+                  >
+                    🐄 Vstoupit Bůůů
+                    {activeCows.length > 1 && (
+                      <span className="text-sm font-normal opacity-80">— {cow.name}</span>
+                    )}
+                  </Link>
+                ))}
+                <button
+                  onClick={() => {
+                    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-all"
+                >
+                  Zjistit více
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/spravce"
+                  className="px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                >
+                  Aktivovat COW.OS zdarma
+                </Link>
+                <button
+                  onClick={() => {
+                    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-all"
+                >
+                  Zjistit více
+                </button>
+              </>
+            )}
           </div>
         </div>
       </section>
