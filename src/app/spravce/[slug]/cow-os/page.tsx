@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Users, FileText, BarChart3, Settings, AlertCircle, Loader, Tag, ShieldAlert } from 'lucide-react';
+import { Users, FileText, BarChart3, Settings, AlertCircle, Loader, Tag, ShieldAlert, Pencil, Building2 } from 'lucide-react';
+import { coworkingsData } from '@/lib/data/coworkings';
 
 interface DashboardStats {
   activeMembers: number;
@@ -22,6 +23,21 @@ interface Subscription {
 export default function COWOSPage() {
   const params = useParams();
   const slug = params?.slug as string;
+
+  // Resolve coworking display name — static data first, then DB override
+  const [coworkingName, setCoworkingName] = useState<string>('');
+
+  useEffect(() => {
+    if (!slug) return;
+    // Try static data first (instant)
+    const staticCw = coworkingsData.find((c) => c.slug === slug);
+    if (staticCw) setCoworkingName(staticCw.name);
+    // Fetch DB override name if available
+    fetch(`/api/coworkings/${slug}/edit`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d?.data?.name) setCoworkingName(d.data.name); })
+      .catch(() => {});
+  }, [slug]);
 
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -207,9 +223,27 @@ export default function COWOSPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">COW.OS Dashboard</h1>
-          <p className="text-gray-600 mt-1">Správa vašeho coworkingu a členů</p>
+        {/* Header row: title left, coworking name + edit button right */}
+        <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">COW.OS Dashboard</h1>
+            <p className="text-gray-600 mt-1">Správa vašeho coworkingu a členů</p>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex items-center gap-2 text-right">
+              <Building2 className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <span className="text-sm font-semibold text-gray-700 max-w-[220px] truncate">
+                {coworkingName || slug}
+              </span>
+            </div>
+            <Link
+              href={`/spravce/${slug}`}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Upravit coworking
+            </Link>
+          </div>
         </div>
 
         {error && (
