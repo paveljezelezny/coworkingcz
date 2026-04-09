@@ -11,11 +11,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Column 1: About */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">
-                C
+            <div>
+              <div className="inline-block bg-white rounded-xl px-3 py-2">
+                <img
+                  src="/logo-kings.png"
+                  alt="Coworkings.cz"
+                  className="h-9 w-auto object-contain"
+                  draggable={false}
+                />
               </div>
-              <h3 className="text-lg font-bold">COWORKINGS.cz</h3>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed">
               Propojujeme coworkery a coworkingové prostory v celé České republice. Najdi si ideální místo pro práci.

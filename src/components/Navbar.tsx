@@ -194,13 +194,13 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">
-              C
-            </div>
-            <span className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-              COWORKINGS<span className="text-blue-600">.cz</span>
-            </span>
+          <Link href="/" className="flex items-center group">
+            <img
+              src="/logo-kings.png"
+              alt="Coworkings.cz"
+              className="h-10 sm:h-12 w-auto object-contain group-hover:opacity-90 transition-opacity"
+              draggable={false}
+            />
           </Link>
 
           {/* Desktop Navigation */}
