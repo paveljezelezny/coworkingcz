@@ -58,42 +58,68 @@ const createCoworking = (
 
 export const coworkingsData: CoworkingSpace[] = [
   createCoworking('cw_locus_workspace', 'Locus Workspace', 'Praha', 'Praha', {
-    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', '24h_access'],
+    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', '24h_access', 'reception', 'events'],
     capacity: 45,
     areaM2: 800,
-  
+
     photos: [{ id: 'cw_locus_workspace_p1', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', caption: 'Locus Workspace', isPrimary: true }],
-  
+
     address: 'Slezská 857/45',
     zipCode: '130 00',
+    phone: '+420 735 773 125',
+    email: 'info@locusworkspace.com',
+    openingHours: {
+      mon: '09:00-17:00',
+      tue: '09:00-17:00',
+      wed: '09:00-17:00',
+      thu: '09:00-17:00',
+      fri: '09:00-17:00',
+      sat: '09:00-17:00',
+      sun: '09:00-17:00',
+    },
     prices: {
-      hourly:    { enabled: false,  from: null   },
-      dayPass:   { enabled: true,  from: 200  },
-      openSpace: { enabled: true,  from: 1300 },
-      fixDesk:   { enabled: false, from: null },
+      hourly:    { enabled: false, from: null },
+      dayPass:   { enabled: true,  from: 550  },
+      openSpace: { enabled: true,  from: 1500 },
+      fixDesk:   { enabled: true,  from: 1900 },
       office:    { enabled: false, from: null },
     },
-    shortDescription: 'Komunitní coworkingový prostor na Žižkově s flexibilními tarify a přátelskou atmosférou.',
+    shortDescription: 'Komunitní anglicky-mluvený coworking pro freelancery a expaty na Vinohradech, kousek od metra Jiřího z Poděbrad.',
+    description: 'Locus Workspace je komunitní coworkingový prostor v Praze 3 — Vinohradech, sídlí kousek od metra Jiřího z Poděbrad. Slouží zejména anglicky mluvícím freelancerům, digitálním nomádům a expatům. Nabízí denní vstupy (Day Pass), flexibilní členství i fix desky, pravidelné komunitní akce a dostupnost 7 dní v týdnu pro day-pass návštěvníky. Ceny jsou uváděny bez 21% DPH.',
     website: 'https://www.locusworkspace.cz',
   }),
   createCoworking('cw_opero', 'Opero', 'Praha', 'Praha', {
-    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'terrace', 'events'],
+    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'events', 'projector', 'air_conditioning'],
     capacity: 60,
     areaM2: 1000,
     website: 'https://www.opero.cz',
-  
+
     photos: [{ id: 'cw_opero_p1', url: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&w=800&q=80', caption: 'Opero', isPrimary: true }],
-  
+
     address: 'Salvátorská 931/8',
     zipCode: '110 00',
-    prices: {
-      hourly:    { enabled: false,  from: null   },
-      dayPass:   { enabled: false,  from: null  },
-      openSpace: { enabled: true,  from: 6000 },
-      fixDesk:   { enabled: false, from: null },
-      office:    { enabled: false, from: null },
+    phone: '+420 777 167 376',
+    email: 'recepce@opero.cz',
+    openingHours: {
+      mon: '08:00-20:00',
+      tue: '08:00-20:00',
+      wed: '08:00-20:00',
+      thu: '08:00-20:00',
+      fri: '08:00-20:00',
+      sat: 'Dle domluvy',
+      sun: 'Dle domluvy',
     },
-    shortDescription: 'Prémiový coworking v centru Prahy s terasou, event prostorem a inspirativní komunitou.',
+    prices: {
+      hourly:    { enabled: false, from: null },
+      dayPass:   { enabled: false, from: null },
+      openSpace: { enabled: true,  from: 2500 },
+      fixDesk:   { enabled: true,  from: 6000 },
+      office:    { enabled: true,  from: 12000 },
+    },
+    shortDescription: 'Reprezentativní byznys hub a coworking v historickém Štencově domě, pár kroků od Staroměstského náměstí.',
+    description: 'Opero je byznys hub a coworking v historickém Štencově domě v centru Prahy, jen pár kroků od Staroměstského náměstí. Nabízí 5 zasedacích místností, velký sál s galerií a inspirativní komunitu pro freelancery, startupy a etablované byznysy. Členství v Opero klubu začíná na 2 500 Kč/měsíc bez DPH. Otevřeno pondělí až pátek, víkendy dle domluvy.',
+    hasEventSpace: true,
+    venueTypes: ['meeting', 'conference', 'workshop', 'party'],
   }),
   createCoworking('cw_mo_cha_vista', 'Mo-cha Vista', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'cafe', 'printer'],
@@ -536,27 +562,58 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Moderní workspace v Zábrdovicích s flexibilními kancelářemi a kreativní atmosférou.',
   }),
   createCoworking('cw_cowo_brno', 'Cowo Brno', 'Brno', 'Jihomoravský kraj', {
-    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
+    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 45,
     areaM2: 800,
-  
+
     photos: [{ id: 'cw_cowo_brno_p1', url: 'https://images.unsplash.com/photo-1547496502-affa22d38842?auto=format&fit=crop&w=800&q=80', caption: 'Cowo Brno', isPrimary: true }],
-  
+
     address: 'Moravské nám. 3',
     zipCode: '602 00',
-    shortDescription: 'Útulný sdílený coworking přímo na Moravském náměstí v centru Brna.',
+    phone: '+420 733 437 467',
+    email: 'ahoj@cowobrno.cz',
+    openingHours: {
+      mon: '08:00-22:00',
+      tue: '08:00-22:00',
+      wed: '08:00-22:00',
+      thu: '08:00-22:00',
+      fri: '08:00-21:00',
+      sat: '08:00-21:00',
+      sun: '08:00-21:00',
+    },
+    shortDescription: 'Útulný sdílený coworking přímo na Moravském náměstí v centru Brna, otevřený 7 dní v týdnu.',
+    description: 'Cowo Brno je útulný sdílený coworking na Moravském náměstí 3 v samém centru Brna. Nabízí možnost pracovat bez členství i jednorázový pronájem místa, kuchyňku, zasedačku k pronájmu a relax zónu. Otevřeno Po–Čt 8:00–22:00 a Pá–Ne 8:00–21:00.',
     website: 'https://www.cowobrno.cz',
   }),
   createCoworking('cw_kumst', 'KUMST', 'Brno', 'Jihomoravský kraj', {
-    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'workshop_tools'],
+    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'workshop_tools', 'reception', 'events'],
     capacity: 35,
     areaM2: 650,
-  
+
     photos: [{ id: 'cw_kumst_p1', url: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80', caption: 'KUMST', isPrimary: true }],
-  
+
     address: 'Údolní 495/19',
     zipCode: '602 00',
-    shortDescription: 'Kreativní hub v historické budově na Údolní s FabLabem a coworkingem.',
+    phone: '+420 776 875 043',
+    email: 'hello@kumstbrno.cz',
+    openingHours: {
+      mon: '08:30-16:00',
+      tue: '08:30-16:00',
+      wed: '08:30-16:00',
+      thu: '08:30-16:00',
+      fri: '08:30-16:00',
+      sat: 'Zavřeno',
+      sun: 'Zavřeno',
+    },
+    prices: {
+      hourly:    { enabled: false, from: null },
+      dayPass:   { enabled: true,  from: 200  },
+      openSpace: { enabled: true,  from: 2500 },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
+    shortDescription: 'Kreativní hub v centru Brna s coworkingem ve 2. patře, FabLabem a dílnou s 3D tiskárnami a laserovými řezačkami.',
+    description: 'KUMST je kreativní hub v centru Brna provozovaný JIC. Coworkingové prostory se nachází ve 2. patře budovy A, doplněné o FabLab s 3D tiskárnami, laserovými řezačkami a programovatelnými šicími a vyšívacími stroji, plus dílnu se základním nářadím. K dispozici je i kuchyňka s kávovarem od lokální pražírny. Recepce otevřena Po–Pá 8:30–16:00.',
     website: 'https://www.kumstbrno.cz',
   }),
   createCoworking('cw_clubco_brno', 'Clubco', 'Brno', 'Jihomoravský kraj', {
@@ -625,15 +682,29 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'http://minicowork.cz',
   }),
   createCoworking('cw_impact_hub_ostrava', 'Impact Hub Ostrava', 'Ostrava', 'Moravskoslezský kraj', {
-    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'events'],
+    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'events', 'cafe', 'childcare'],
     capacity: 60,
     areaM2: 1000,
-  
+
     photos: [{ id: 'cw_impact_hub_ostrava_p1', url: 'https://images.unsplash.com/photo-1572025442646-866d16c84a54?auto=format&fit=crop&w=800&q=80', caption: 'Impact Hub Ostrava', isPrimary: true }],
-  
+
     address: 'Sokolská třída 1263/24',
     zipCode: '702 00',
-    shortDescription: 'Impact Hub Ostrava – místo pro inovátory a podnikatele v centru Ostravy.',
+    phone: '+420 774 142 014',
+    email: 'ostrava@impacthub.cz',
+    openingHours: {
+      mon: '07:30-17:30',
+      tue: '07:30-17:30',
+      wed: '07:30-17:30',
+      thu: '07:30-17:30',
+      fri: '07:30-17:30',
+      sat: 'Zavřeno',
+      sun: 'Zavřeno',
+    },
+    shortDescription: 'Impact Hub Ostrava — místo pro inovátory a podnikatele v centru města, s kavárnou a prostorem pro děti.',
+    description: 'Impact Hub Ostrava je coworking, kancelářské prostory a komunita pro podnikatele v centru Ostravy na Sokolské třídě. Součástí je rychlé wifi, tiskárna, kuchyňka, kavárna/restaurace, zasedací místnosti k pronájmu (od 250 Kč/hod), relaxační zóna a baby-friendly prostor s hračkami a knihami pro děti. Otevřeno Po–Pá 7:30–17:30.',
+    hasEventSpace: true,
+    venueTypes: ['meeting', 'workshop', 'conference', 'teambuilding'],
     website: 'https://impacthub.cz/ostrava',
   }),
   createCoworking('cw_clubco_ostrava', 'Clubco', 'Ostrava', 'Moravskoslezský kraj', {
