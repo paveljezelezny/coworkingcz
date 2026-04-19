@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 interface CoworkingWithOverride {
   [key: string]: any;
-  isDeleted?: boolean;
+  deleted?: boolean;
 }
 
 /**
@@ -40,8 +40,10 @@ export async function GET(request: NextRequest) {
       return cw;
     });
 
-    // Filter out deleted coworkings for the list view
-    const visible = merged.filter((cw: CoworkingWithOverride) => !cw.isDeleted);
+    // Filter out deleted coworkings for the list view.
+    // NOTE: the DELETE handler writes `deleted: true` into the override JSON,
+    // so this filter MUST read `deleted` (not `isDeleted`) to take effect.
+    const visible = merged.filter((cw: CoworkingWithOverride) => !cw.deleted);
 
     return NextResponse.json(visible, {
       headers: { 'Cache-Control': 'no-store' },

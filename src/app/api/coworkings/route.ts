@@ -30,7 +30,7 @@ export async function GET() {
         const override = overrides[cw.slug];
         return override ? { ...cw, ...override } : cw;
       })
-      .filter((cw) => !(cw as unknown as Record<string, unknown>).isDeleted);
+      .filter((cw) => !(cw as unknown as Record<string, unknown>).deleted);
 
     return NextResponse.json(merged, {
       headers: { 'Cache-Control': 'no-store' },

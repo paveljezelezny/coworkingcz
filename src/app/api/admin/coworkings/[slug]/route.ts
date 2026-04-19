@@ -112,10 +112,20 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Coworking not found' }, { status: 404 });
     }
 
+    // Preserve any prior override data — merge rather than overwrite, so a soft
+    // delete doesn't wipe phone/photos/etc. set by earlier edits (that way if
+    // the coworking is ever un-deleted the edits are still there).
+    const existing = await prisma.coworkingEdit.findUnique({
+      where: { coworkingSlug: params.slug },
+      select: { data: true },
+    });
+    const prior = (existing?.data as Record<string, unknown> | null) ?? {};
+    const mergedData = { ...prior, deleted: true };
+
     await prisma.coworkingEdit.upsert({
       where: { coworkingSlug: params.slug },
-      update: { data: { deleted: true }, userId },
-      create: { coworkingSlug: params.slug, data: { deleted: true }, userId },
+      update: { data: mergedData, userId },
+      create: { coworkingSlug: params.slug, data: mergedData, userId },
     });
 
     return NextResponse.json({ success: true });

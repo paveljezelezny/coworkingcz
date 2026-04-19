@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { CoworkingSpace, AMENITY_LABELS } from '@/lib/types';
 
 interface CoworkingWithOverride extends CoworkingSpace {
-  isDeleted?: boolean;
+  deleted?: boolean;
 }
 
 export default function AdminDashboard() {
@@ -41,8 +41,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     let results = coworkings;
 
-    // Filter deleted
-    results = results.filter(c => !c.isDeleted);
+    // Filter deleted (override JSON uses `deleted`, matching DELETE handler + detail page)
+    results = results.filter(c => !c.deleted);
 
     // Search
     if (searchQuery) {
@@ -98,7 +98,17 @@ export default function AdminDashboard() {
         method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error('Delete failed');
+      if (!response.ok) {
+        // Pull the real reason from the API so we're not debugging blind next time.
+        let reason = `HTTP ${response.status}`;
+        try {
+          const payload = await response.json();
+          if (payload?.error) reason = payload.error;
+        } catch {
+          // response wasn't JSON — keep the HTTP status
+        }
+        throw new Error(reason);
+      }
 
       // Refresh list
       const freshResponse = await fetch('/api/admin/coworkings');
@@ -107,7 +117,8 @@ export default function AdminDashboard() {
       setShowDeleteConfirm(null);
     } catch (error) {
       console.error('Failed to delete:', error);
-      alert('Chyba při mazání');
+      const message = error instanceof Error ? error.message : 'neznámá chyba';
+      alert(`Chyba při mazání: ${message}`);
     }
   };
 
