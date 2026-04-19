@@ -229,6 +229,18 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
               </div>
             </section>
 
+            {/* ── Služby (volný text — co coworking nabízí) ───────────── */}
+            {coworking.services && (
+              <section id="sekce-sluzby" className="mb-12 scroll-mt-24">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Služby</h2>
+                <div className="bg-white border border-gray-200 rounded-xl p-6">
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    {coworking.services}
+                  </p>
+                </div>
+              </section>
+            )}
+
             {/* ── YouTube video ───────────────────────────────────────── */}
             {youtubeEmbed && (
               <section className="mb-12">
@@ -318,11 +330,26 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
                         {room.description && (
                           <p className="text-sm text-gray-600 mb-3">{room.description}</p>
                         )}
-                        {room.pricePerHour > 0 && (
-                          <p className="text-sm font-semibold text-blue-600">
-                            od {room.pricePerHour} Kč / hodina
-                          </p>
-                        )}
+                        <div className="flex items-center justify-between gap-3 mt-3">
+                          {room.pricePerHour > 0 ? (
+                            <p className="text-sm font-semibold text-blue-600">
+                              od {room.pricePerHour} Kč / hodina
+                            </p>
+                          ) : (
+                            <p className="text-sm text-gray-500">cena na vyžádání</p>
+                          )}
+                          {room.bookingUrl && (
+                            <a
+                              href={room.bookingUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                              Rezervovat
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -434,6 +461,69 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
                 );
               })()}
             </section>
+
+            {/* Tarify / členství — flexibilní list nad rámec 5 fixních prices */}
+            {Array.isArray(coworking.tariffs) && coworking.tariffs.length > 0 && (
+              <section id="sekce-tarify" className="mb-12 scroll-mt-24">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Tarify a členství</h2>
+                <p className="text-gray-500 text-sm mb-6">Kompletní nabídka členství a tarifů coworku.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {(coworking.tariffs as any[]).map((tariff: any, idx: number) => {
+                    const periodLabels: Record<string, string> = {
+                      'hour': 'hod',
+                      'day': 'den',
+                      'week': 'týden',
+                      'month': 'měs',
+                      'year': 'rok',
+                      'one-time': 'jednorázově',
+                    };
+                    return (
+                      <div
+                        key={tariff.id || idx}
+                        className={`relative border rounded-xl p-5 bg-white transition-shadow hover:shadow-md ${
+                          tariff.isPrimary ? 'border-blue-400 ring-2 ring-blue-100' : 'border-gray-200'
+                        }`}
+                      >
+                        {tariff.isPrimary && (
+                          <span className="absolute -top-3 left-5 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                            Doporučeno
+                          </span>
+                        )}
+                        <h3 className="font-bold text-gray-900 mb-1">{tariff.name}</h3>
+                        <div className="flex items-baseline gap-1 mb-3">
+                          {tariff.price != null ? (
+                            <>
+                              <span className="text-2xl font-bold text-blue-600">
+                                {tariff.price.toLocaleString('cs-CZ')} Kč
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                / {periodLabels[tariff.period] || tariff.period}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-sm text-gray-500">cena na vyžádání</span>
+                          )}
+                        </div>
+                        {tariff.description && (
+                          <p className="text-sm text-gray-600 mb-3">{tariff.description}</p>
+                        )}
+                        {tariff.bookingUrl && (
+                          <a
+                            href={tariff.bookingUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            Více info
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
 
             {/* Events */}
             {relatedEvents.length > 0 && (

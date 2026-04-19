@@ -11,6 +11,31 @@ export interface CoworkingPrices {
   office: CoworkingPrice;    // kancelář
 }
 
+/** Flexibilní tarif/členství — coworking si může přidat libovolný počet variant nad rámec 5 fixních prices.
+ *  prices zůstávají jako "shop window" pro filtry; tariffs[] umožňují plný výčet členství s popisem. */
+export interface Tariff {
+  id: string;
+  name: string;              // "Hot Desk", "Virtual membership", "Evening + Weekend"
+  price: number | null;      // CZK; null = "na vyžádání"
+  period: 'hour' | 'day' | 'week' | 'month' | 'year' | 'one-time';
+  description?: string;      // co je v ceně, podmínky
+  isPrimary?: boolean;       // doporučený / hvězdičkovaný tarif
+  bookingUrl?: string;       // odkaz na detail / objednávku na webu coworku
+}
+
+/** Zasedací místnost / sdílený prostor k pronájmu.
+ *  V detail page jsou už renderovány (page.tsx ~280); zde formalizuji typ + přidávám bookingUrl. */
+export interface MeetingRoom {
+  id: string;
+  name: string;
+  type: 'meeting_room' | 'phone_booth' | 'private_office' | 'event_space';
+  capacity: number | null;
+  pricePerHour: number;      // 0 = "součást členství / na vyžádání"
+  description?: string;
+  amenities?: string[];      // subset of AMENITY_LABELS keys (projector, whiteboard, ...)
+  bookingUrl?: string;       // tlačítko "Rezervovat" → externí stránka coworku
+}
+
 export interface SpecialDeal {
   enabled: boolean;
   badgeText: string;       // krátký štítek, např. "1 den zdarma"
@@ -59,6 +84,12 @@ export interface CoworkingSpace {
   // Event / venue
   hasEventSpace?: boolean;
   venueTypes?: string[];
+  // Services (volný text — výčet služeb, které coworking nabízí nad rámec amenities)
+  services?: string;
+  // Flexibilní tarify (vedle fixních prices)
+  tariffs?: Tariff[];
+  // Zasedací místnosti a prostory k pronájmu (nahrazuje dřívější any[] v page.tsx)
+  rooms?: MeetingRoom[];
   createdAt: string;
   updatedAt: string;
 }
