@@ -181,7 +181,7 @@ function ListingModal({ listing, onClose }: { listing: Listing; onClose: () => v
             <div className="flex items-center gap-2 mb-1">
               <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
                 {listing.userImage ? (
-                  <img src={listing.userImage} alt="" className="w-8 h-8 rounded-full object-cover" />
+                  <img src={listing.userImage} alt={`Profilová fotka — ${listing.userName || 'uživatel'}`} className="w-8 h-8 rounded-full object-cover" />
                 ) : (
                   <User className="w-4 h-4 text-blue-600" />
                 )}

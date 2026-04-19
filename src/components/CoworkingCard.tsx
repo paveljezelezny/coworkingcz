@@ -65,6 +65,8 @@ export default function CoworkingCard({ coworking, compact = false }: CoworkingC
                 key={photo.id || idx}
                 src={photo.url}
                 alt={photo.caption || coworking.name}
+                loading="lazy"
+                decoding="async"
                 className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
                   idx === currentPhotoIdx ? 'opacity-100' : 'opacity-0'
                 }`}

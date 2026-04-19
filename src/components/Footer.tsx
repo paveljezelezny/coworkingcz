@@ -178,19 +178,19 @@ export default function Footer() {
             </p>
             <div className="flex gap-6 text-sm">
               <Link
-                href="#"
+                href="/soukromi"
                 className="text-gray-400 hover:text-white transition-colors"
               >
                 Soukromí
               </Link>
               <Link
-                href="#"
+                href="/podminky"
                 className="text-gray-400 hover:text-white transition-colors"
               >
                 Podmínky
               </Link>
               <Link
-                href="#"
+                href="/cookies"
                 className="text-gray-400 hover:text-white transition-colors"
               >
                 Cookies

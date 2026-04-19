@@ -3,8 +3,13 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SessionProvider from '@/components/SessionProvider';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+
+const SITE_URL = 'https://coworkings.cz';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: 'COWORKINGS.cz - Najdi svůj coworking v České republice',
   description:
     'Najděte ideální coworking prostor v České republice. Vyber si z 90+ coworkingů v 15+ městech. Rezervuj den, hodinu nebo měsíc.',
@@ -13,10 +18,13 @@ export const metadata: Metadata = {
   creator: 'COWORKINGS.cz',
   publisher: 'COWORKINGS.cz',
   robots: 'index, follow',
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     type: 'website',
     locale: 'cs_CZ',
-    url: 'https://coworkings.cz',
+    url: SITE_URL,
     siteName: 'COWORKINGS.cz',
     title: 'COWORKINGS.cz - Najdi svůj coworking',
     description: 'Najdi ideální coworking prostor v České republice',
@@ -36,6 +44,41 @@ export const metadata: Metadata = {
   },
 };
 
+// JSON-LD strukturovaná data – Organization + WebSite se SearchAction
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${SITE_URL}#organization`,
+      name: 'COWORKINGS.cz',
+      url: SITE_URL,
+      logo: `${SITE_URL}/logo-kings.png`,
+      sameAs: [],
+      contactPoint: {
+        '@type': 'ContactPoint',
+        email: 'info@coworkings.cz',
+        contactType: 'customer support',
+        areaServed: 'CZ',
+        availableLanguage: ['Czech'],
+      },
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE_URL}#website`,
+      url: SITE_URL,
+      name: 'COWORKINGS.cz',
+      inLanguage: 'cs-CZ',
+      publisher: { '@id': `${SITE_URL}#organization` },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: `${SITE_URL}/coworkingy?q={search_term_string}`,
+        'query-input': 'required name=search_term_string',
+      },
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -47,6 +90,11 @@ export default function RootLayout({
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
+        <script
+          type="application/ld+json"
+          // JSON-LD pro vyhledávače
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </head>
       <body className="flex flex-col min-h-screen bg-white">
         <SessionProvider>
@@ -56,6 +104,8 @@ export default function RootLayout({
           </main>
           <Footer />
         </SessionProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -165,8 +165,9 @@ export default function GoogleMap({ markers, selectedId, onSelect }: GoogleMapPr
     map: google.maps.Map
   ) {
     if (!infoWindowRef.current) return;
+    const safeName = (m.name || 'coworking').replace(/"/g, '&quot;');
     const photoHtml = m.photoUrl
-      ? `<img src="${m.photoUrl}" style="width:100%;height:90px;object-fit:cover;border-radius:6px;margin-bottom:8px;" />`
+      ? `<img src="${m.photoUrl}" alt="${safeName}" loading="lazy" decoding="async" style="width:100%;height:90px;object-fit:cover;border-radius:6px;margin-bottom:8px;" />`
       : '';
     const verifiedBadge = m.isVerified
       ? `<span style="background:#2563eb;color:#fff;font-size:10px;padding:2px 6px;border-radius:999px;margin-left:4px;">✓ Ověřeno</span>`

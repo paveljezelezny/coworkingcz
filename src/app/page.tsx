@@ -6,8 +6,9 @@ import { getFeaturedCoworkings, getCitiesWithCount } from '@/lib/data/coworkings
 import { coworkingsData } from '@/lib/data/coworkings';
 import { prisma } from '@/lib/prisma';
 
-// Always fresh — data comes from DB
-export const dynamic = 'force-dynamic';
+// ISR: cache homepage 60s (rychlejší TTFB, i tak téměř real-time).
+// Pokud potřebuješ okamžitou aktualizaci po zápisu, zavolej revalidatePath('/') v API.
+export const revalidate = 60;
 
 // ─── Category labels ──────────────────────────────────────────────────────────
 
@@ -470,7 +471,7 @@ export default async function Home() {
                       )}
                       <div className="flex items-center gap-2 mt-auto pt-2 border-t border-gray-50 text-xs text-gray-400">
                         {listing.userImage ? (
-                          <img src={listing.userImage} alt="" className="w-5 h-5 rounded-full object-cover" />
+                          <img src={listing.userImage} alt={`Profilová fotka — ${listing.userName || 'uživatel'}`} className="w-5 h-5 rounded-full object-cover" />
                         ) : (
                           <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-bold">
                             {listing.userName?.[0]?.toUpperCase() ?? '?'}

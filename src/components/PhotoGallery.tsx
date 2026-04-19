@@ -106,7 +106,9 @@ export default function PhotoGallery({ photos, name }: PhotoGalleryProps) {
               >
                 <img
                   src={photo.url}
-                  alt=""
+                  alt={photo.caption || `${name} — miniatura ${idx + 1}`}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
               </button>
