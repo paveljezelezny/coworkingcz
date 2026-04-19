@@ -122,6 +122,7 @@ export const coworkingsData: CoworkingSpace[] = [
     venueTypes: ['meeting', 'conference', 'workshop', 'party'],
   }),
   createCoworking('cw_mo_cha_vista', 'Mo-cha Vista', 'Praha', 'Praha', {
+    website: 'https://mo-cha.cz',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'cafe', 'printer'],
     capacity: 25,
     areaM2: 400,
@@ -240,6 +241,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.domumraje.cz',
   }),
   createCoworking('cw_ponk_space', 'Ponk Space', 'Praha', 'Praha', {
+    website: 'https://ponk.space',
     amenities: ['wifi', 'workshop_tools', 'kitchen', 'printer', 'events'],
     capacity: 25,
     areaM2: 500,
@@ -251,6 +253,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Ponk Space – komunitní dílna a makerspace pro tvůrce a designéry v Praze.',
   }),
   createCoworking('cw_microsoft_coworking', 'Microsoft Coworking Space', 'Praha', 'Praha', {
+    website: 'https://blogs.msdn.microsoft.com/vyvojari/2019/02/07/vitejte-v-novem-microsoft-coworking-space-v-praze/',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', '24h_access', 'reception'],
     capacity: 90,
     areaM2: 1400,
@@ -274,6 +277,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://archihub.cz',
   }),
   createCoworking('cw_komunitni_centrum_jahoda', 'Komunitní rodinné centrum Jahoda Albertov', 'Praha', 'Praha', {
+    website: 'https://jahoda.cz/krouzky/coworking/',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'childcare', 'events'],
     capacity: 30,
     areaM2: 600,
@@ -285,6 +289,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Komunitní centrum Jahoda Albertov – rodinný prostor s coworkingem pro pracující rodiče.',
   }),
   createCoworking('cw_lamparna_lidicka', 'Lampárna Lidická', 'Praha', 'Praha', {
+    website: 'https://lamparnalidicka.cz',
     amenities: ['wifi', 'kitchen', 'printer', 'events'],
     capacity: 20,
     areaM2: 400,
@@ -296,6 +301,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Lampárna Lidická – komunitní prostor s coworkingem a kreativním programem v Praze 5.',
   }),
   createCoworking('cw_meandr_revnice', 'Meandr Řevnice', 'Praha', 'Praha', {
+    website: 'https://www.meandrrevnice.cz',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 15,
     areaM2: 350,
@@ -307,6 +313,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Meandr Řevnice – coworking a kreativní prostor u řeky Berounky.',
   }),
   createCoworking('cw_coworking33', 'Coworking33', 'Praha', 'Praha', {
+    website: 'https://coworking33.cz',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
@@ -330,6 +337,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Moderní coworking Clubco u Prahy s event prostorem a plným servisem.',
   }),
   createCoworking('cw_dum_radost', 'Dům Radost', 'Praha', 'Praha', {
+    website: 'https://www.dumradost.cz/cs/pronajem/desk-lounge',
     amenities: ['wifi', 'kitchen', 'printer', 'events'],
     capacity: 20,
     areaM2: 380,
@@ -341,6 +349,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Dům Radost – multifunkční prostor s coworkingem, kavárnou a kulturním programem na Vinohradech.',
   }),
   createCoworking('cw_salounova_vila', 'Šalounova vila', 'Praha', 'Praha', {
+    website: 'https://salounova-vila.odonata.cz/salounova-vila/',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 35,
     areaM2: 650,
@@ -352,6 +361,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Šalounova vila – jedinečný historický prostor pro práci a setkávání v Praze.',
   }),
   createCoworking('cw_jednacky_hradcanska', 'Jednačky Hradčanská', 'Praha', 'Praha', {
+    website: 'https://www.jednackyhradcanska.anfas.cz',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 550,
@@ -382,6 +392,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.zenwork.cz',
   }),
   createCoworking('cw_vysehradska_49', 'Vyšehradská 49', 'Praha', 'Praha', {
+    website: 'https://www.vysehradska49.cz',
     amenities: ['wifi', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
@@ -474,6 +485,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://praha.hygge.cz',
   }),
   createCoworking('cw_effectix_hub', 'Effectix Hub', 'Praha', 'Praha', {
+    website: 'https://www.effectix.com/coworking/',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 30,
     areaM2: 550,
@@ -508,6 +520,16 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Coworkingový prostor v budově Vysoké školy ekonomické v Praze.',
     website: 'https://coworking.vse.cz',
   }),
+  createCoworking('cw_cowork28', 'CoworK28', 'Praha', 'Praha', {
+    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
+    capacity: 25,
+    areaM2: 400,
+    website: 'https://cowork28.cz/',
+    photos: [{ id: 'cw_cowork28_p1', url: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80', caption: 'CoworK28', isPrimary: true }],
+    address: '',
+    zipCode: '',
+    shortDescription: 'Komunitní coworkingový prostor v Praze s přátelskou atmosférou.',
+  }),
   createCoworking('cw_impact_hub_brno', 'Impact Hub Brno', 'Brno', 'Jihomoravský kraj', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'events'],
     capacity: 70,
@@ -540,6 +562,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.brainfarm.cz',
   }),
   createCoworking('cw_edunesto', 'EDUnesto', 'Brno', 'Jihomoravský kraj', {
+    website: 'https://www.edunesto.com',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 40,
     areaM2: 700,
@@ -551,6 +574,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'EDUnesto – vzdělávací a coworkingový prostor v centru Brna.',
   }),
   createCoworking('cw_branta_workspace', 'Branta Workspace', 'Brno', 'Jihomoravský kraj', {
+    website: 'https://www.branta.cz',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 550,
@@ -636,6 +660,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://clubco.cz/brno',
   }),
   createCoworking('cw_coworking_na_paluby', 'Coworking na Palubě', 'Brno', 'Jihomoravský kraj', {
+    website: 'https://www.linkedin.com/pulse/coworking-na-palubě-court-of-moravia/',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
@@ -659,6 +684,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.jic.cz',
   }),
   createCoworking('cw_simpl_kancl', 'Simpl Kancl', 'Brno', 'Jihomoravský kraj', {
+    website: 'https://simplkancl.cz',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
@@ -727,6 +753,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://clubco.cz/ostrava',
   }),
   createCoworking('cw_fajna_dilna', 'Fajna dilna', 'Ostrava', 'Moravskoslezský kraj', {
+    website: 'https://fajnadilna.cz',
     amenities: ['wifi', 'workshop_tools', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 600,
@@ -738,6 +765,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Fajna dilna – první otevřená dílna v Ostravě s 5 plně vybavenými workshopy.',
   }),
   createCoworking('cw_mamahub_koutek_sveta', 'Mamahub Koutek světa', 'Ostrava', 'Moravskoslezský kraj', {
+    website: 'https://www.kouteksveta.cz',
     amenities: ['wifi', 'kitchen', 'childcare', 'printer'],
     capacity: 25,
     areaM2: 450,
@@ -785,6 +813,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.cowocb.cz',
   }),
   createCoworking('cw_pracovna_r51', 'Pracovna R51', 'České Budějovice', 'Jihočeský kraj', {
+    website: 'https://www.riegrova51.cz/pracovna-r51/',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
@@ -930,6 +959,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://hubmb.cz',
   }),
   createCoworking('cw_vault_42', 'Vault 42', 'Olomouc', 'Olomoucký kraj', {
+    website: 'https://www.vault42.cz',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', '24h_access'],
     capacity: 40,
     areaM2: 750,
@@ -1027,6 +1057,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://p-pink.cz',
   }),
   createCoworking('cw_druzstvo_coworking', 'Družstvo: Coworking v Domě služeb', 'Pardubice', 'Pardubický kraj', {
+    website: 'https://www.dum-sluzeb.cz/coworking',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 550,
@@ -1050,6 +1081,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://sitport.cz',
   }),
   createCoworking('cw_techheaven_hub', 'TechHeaven HUB', 'Plzeň', 'Plzeňský kraj', {
+    website: 'https://techheaven.org',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 40,
     areaM2: 700,
@@ -1111,6 +1143,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.bic.cz',
   }),
   createCoworking('cw_hub_hax', 'hub HAX', 'Zlín', 'Zlínský kraj', {
+    website: 'https://www.facebook.com/hubhax',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 35,
     areaM2: 650,
@@ -1146,6 +1179,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://retreat.cz',
   }),
   createCoworking('cw_coworking_bobr', 'CoWorking BoBr', 'Brandýs nad Labem', 'Středočeský kraj', {
+    website: 'https://www.coworkingbobr.cz',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
@@ -1157,6 +1191,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'CoWorking BoBr – sdílená kancelář v Brandýse nad Labem-Staré Boleslavi.',
   }),
   createCoworking('cw_coworking_cesky_tesin', 'Co-working Český Těšín', 'Český Těšín', 'Moravskoslezský kraj', {
+    website: 'https://www.facebook.com/coworkvtesine/',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 380,
@@ -1168,6 +1203,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Co-working Český Těšín – sdílená kancelář v pohraničním městě na hranici s Polskem.',
   }),
   createCoworking('cw_cowo_libre', 'Cowo Libre', 'Frýdek-Místek', 'Moravskoslezský kraj', {
+    website: 'https://www.facebook.com/events/1151358466033850/1151358469367183',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
@@ -1179,6 +1215,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Cowo Libre – přátelský coworking ve Frýdku-Místku pro místní freelancery a podnikatele.',
   }),
   createCoworking('cw_centrum_podpory_podnikani', 'Centrum pro podporu podnikání', 'Havířov', 'Moravskoslezský kraj', {
+    website: 'https://www.centrumpropodnikani.cz/sluzby-centra/podnajem-prostor/',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 550,
@@ -1190,6 +1227,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Centrum pro podporu podnikání v Havířově s coworkingem a mentorskými programy.',
   }),
   createCoworking('cw_hubbr', 'Hubbr', 'Havlíčkův Brod', 'Kraj Vysočina', {
+    website: 'https://www.hubbr.cz',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
@@ -1201,6 +1239,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Hubbr – coworkingový prostor v Havlíčkově Brodě pro lokální komunitu podnikatelů.',
   }),
   createCoworking('cw_kanov_cheb', 'Kanov', 'Cheb', 'Karlovarský kraj', {
+    website: 'https://www.kanov.cz/coworking/',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
@@ -1212,6 +1251,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Kanov Cheb – podnikatelský inkubátor a coworking v Chebu.',
   }),
   createCoworking('cw_cowork_jes', 'Cowork Jes', 'Jeseník', 'Olomoucký kraj', {
+    website: 'https://coworkjes.cz',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
@@ -1333,6 +1373,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://lovecowork.cz',
   }),
   createCoworking('cw_nase_hnizdo', 'Naše hnízdo', 'Orlová', 'Moravskoslezský kraj', {
+    website: 'https://www.nasehnizdo.cz',
     amenities: ['wifi', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
@@ -1344,6 +1385,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Naše hnízdo – komunitní centrum a coworking pro rodiče v Orlové.',
   }),
   createCoworking('cw_blaho_work', 'Blaho&work', 'Ostrov', 'Karlovarský kraj', {
+    website: 'https://blaho.work',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
@@ -1391,6 +1433,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.cwrkjzd.cz',
   }),
   createCoworking('cw_cowork_svitavy', 'Cowork', 'Svitavy', 'Pardubický kraj', {
+    website: 'https://m.svitavy.cz/2_3484_cowork-svitavy/',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
@@ -1402,6 +1445,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Cowork Svitavy – sdílená kancelář a studovna v centru Svitav.',
   }),
   createCoworking('cw_cowosedlice', 'Cowosedlice', 'Teplice', 'Ústecký kraj', {
+    website: 'https://www.cowosedlice.cz',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
@@ -1413,6 +1457,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Cowosedlice – komunitní coworkingový prostor v Teplicích.',
   }),
   createCoworking('cw_sdilene_kancelar_teplice', 'Sdílené kanceláře Teplice', 'Teplice', 'Ústecký kraj', {
+    website: 'https://sdilenekancelareteplice.cz',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 30,
     areaM2: 550,
@@ -1455,6 +1500,7 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://hub123.cz',
   }),
   createCoworking('cw_hopspot_cowork', 'Hopspot Cowork', 'Žatec', 'Ústecký kraj', {
+    website: 'https://www.facebook.com/people/Hopspot-Cowork-Žatec/100095498621922/',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
