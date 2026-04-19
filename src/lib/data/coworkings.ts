@@ -259,7 +259,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 25,
     areaM2: 400,
   
-    photos: [{ id: 'cw_mo_cha_vista_p1', url: 'https://www.mo-cha.cz/#primaryimage', caption: 'Mo-cha Vista', isPrimary: true }],
+    photos: [{ id: 'cw_mo_cha_vista_p1', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', caption: 'Mo-cha Vista', isPrimary: true }],
   
     address: 'Na Pankráci 30',
     phone: '+420 771 272 387',
@@ -329,18 +329,23 @@ export const coworkingsData: CoworkingSpace[] = [
     website: 'https://www.pracovna.co',
   }),
   createCoworking('cw_co_labs', 'Co-Labs', 'Praha', 'Praha', {
-    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
+    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'shower', '24h_access'],
     capacity: 30,
     areaM2: 550,
-  
+
     photos: [{ id: 'cw_co_labs_p1', url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80', caption: 'Co-Labs', isPrimary: true }],
-  
-    address: 'Korunní 2569/108',
+
+    address: 'Tusarova 31',
     phone: '+420 725 824 554',
     email: 'info@co-labs.cz',
-    zipCode: '101 00',
-    shortDescription: 'Co-Labs – profesionální coworkingový prostor v Praze 10 pro jednotlivce a menší firmy.',
+    zipCode: '170 00',
+    shortDescription: 'Co-Labs – coworkingový prostor v Praze 7 Holešovice pro jednotlivce a menší firmy.',
+    description: 'Co-Labs je coworkingový prostor v Praze 7 Holešovice, ideální pro jednotlivce i menší firmy. V ceně pracovní stůl, kancelářská židle, internet, sprcha, přístup 24/7, možnost tisku a úklid. V nabídce je i skupinový pronájem více míst za dohodnutou cenu.',
     website: 'https://www.co-labs.cz',
+    tariffs: [
+      { id: 'cw_co_labs_t1', name: 'Jednotlivá', price: 4000, period: 'month', description: 'Konečná cena za místo. V ceně: pracovní stůl, kancelářská židle, internet, sprcha, přístup 24/7, možnost tisku, úklid.', isPrimary: true },
+      { id: 'cw_co_labs_t2', name: 'Skupinová', price: null, period: 'month', description: 'Při pronájmu více míst individuální cenová nabídka. V ceně vše co ve Standardní.' },
+    ],
   }),
   createCoworking('cw_scott_weber', 'Scott.Weber', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', 'locker'],
@@ -348,7 +353,7 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 1500,
     website: 'https://www.scottweber.cz',
   
-    photos: [{ id: 'cw_scott_weber_p1', url: 'https://scottweber.cz/#primaryimage', caption: 'Scott.Weber', isPrimary: true }],
+    photos: [{ id: 'cw_scott_weber_p1', url: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80', caption: 'Scott.Weber', isPrimary: true }],
   
     address: 'Pernerova 697/35',
     phone: '+420 723 244 537',
@@ -368,7 +373,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 35,
     areaM2: 650,
   
-    photos: [{ id: 'cw_mumraj_p1', url: 'https://www.domumraje.cz/#/schema/logo/image/', caption: 'Mumraj', isPrimary: true }],
+    photos: [{ id: 'cw_mumraj_p1', url: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&w=800&q=80', caption: 'Mumraj', isPrimary: true }],
   
     address: 'Mezilesí 2058/6',
     phone: '+420 775 720 556',
@@ -432,7 +437,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 30,
     areaM2: 600,
   
-    photos: [{ id: 'cw_komunitni_centrum_jahoda_p1', url: 'https://jahoda.cz/#logo', caption: 'Komunitní rodinné centrum Jahoda Albertov', isPrimary: true }],
+    photos: [{ id: 'cw_komunitni_centrum_jahoda_p1', url: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80', caption: 'Komunitní rodinné centrum Jahoda Albertov', isPrimary: true }],
   
     address: 'Albertov 2059/7',
     phone: '+420 737 901 098',
@@ -460,7 +465,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 15,
     areaM2: 350,
   
-    photos: [{ id: 'cw_meandr_revnice_p1', url: 'https://www.meandrrevnice.cz/#logo', caption: 'Meandr Řevnice', isPrimary: true }],
+    photos: [{ id: 'cw_meandr_revnice_p1', url: 'https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=800&q=80', caption: 'Meandr Řevnice', isPrimary: true }],
   
     address: 'Okružní 1233',
     phone: '+420 605 055 114',
@@ -524,7 +529,7 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 900,
     website: 'https://www.clubco.cz',
   
-    photos: [{ id: 'cw_clubco_praha_p1', url: 'https://clubco.cz/#primaryimage', caption: 'Clubco', isPrimary: true }],
+    photos: [{ id: 'cw_clubco_praha_p1', url: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80', caption: 'Clubco', isPrimary: true }],
   
     address: 'Nupaky 148',
     phone: '+420 607 192 659',
@@ -552,7 +557,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 35,
     areaM2: 650,
   
-    photos: [{ id: 'cw_salounova_vila_p1', url: 'https://salounova-vila.odonata.cz/salounova-vila/#primaryimage', caption: 'Šalounova vila', isPrimary: true }],
+    photos: [{ id: 'cw_salounova_vila_p1', url: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=800&q=80', caption: 'Šalounova vila', isPrimary: true }],
   
     address: 'Na Příkopě 583/15',
     phone: '+420 603 423 626',
@@ -578,7 +583,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 45,
     areaM2: 800,
   
-    photos: [{ id: 'cw_zenwork_palac_ara_p1', url: 'https://zenwork.cz/#primaryimage', caption: 'Zenwork Palác ARA', isPrimary: true }],
+    photos: [{ id: 'cw_zenwork_palac_ara_p1', url: 'https://images.unsplash.com/photo-1606836591695-4d58a73eba1e?auto=format&fit=crop&w=800&q=80', caption: 'Zenwork Palác ARA', isPrimary: true }],
   
     address: 'Perlová 371/5',
     phone: '+420 722 022 254',
@@ -760,7 +765,7 @@ export const coworkingsData: CoworkingSpace[] = [
     areaM2: 1100,
     website: 'https://www.impacthub.cz',
   
-    photos: [{ id: 'cw_impact_hub_brno_p1', url: 'https://impacthub.cz/#logo', caption: 'Impact Hub Brno', isPrimary: true }],
+    photos: [{ id: 'cw_impact_hub_brno_p1', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', caption: 'Impact Hub Brno', isPrimary: true }],
   
     address: 'Cyrilská 7',
     phone: '+420 775 201 067',
@@ -966,7 +971,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 50,
     areaM2: 900,
   
-    photos: [{ id: 'cw_clubco_brno_p1', url: 'https://clubco.cz/brno/#primaryimage', caption: 'Clubco', isPrimary: true }],
+    photos: [{ id: 'cw_clubco_brno_p1', url: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80', caption: 'Clubco', isPrimary: true }],
   
     address: 'Vlněná 5',
     phone: '+420 730 550 055',
@@ -1014,7 +1019,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 20,
     areaM2: 400,
   
-    photos: [{ id: 'cw_simpl_kancl_p1', url: 'https://simplkancl.cz/#primaryimage', caption: 'Simpl Kancl', isPrimary: true }],
+    photos: [{ id: 'cw_simpl_kancl_p1', url: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&w=800&q=80', caption: 'Simpl Kancl', isPrimary: true }],
   
     address: 'V Újezdech 569/7',
     phone: '+420 721 446 618',
@@ -1027,7 +1032,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 15,
     areaM2: 300,
   
-    photos: [{ id: 'cw_minicowork_lemur_p1', url: 'http://minicowork.cz/#primaryimage', caption: 'Minicowork Lemur', isPrimary: true }],
+    photos: [{ id: 'cw_minicowork_lemur_p1', url: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80', caption: 'Minicowork Lemur', isPrimary: true }],
   
     address: 'nám. 28. dubna 36',
     phone: '+420 666 666 666',
@@ -1134,7 +1139,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 45,
     areaM2: 800,
   
-    photos: [{ id: 'cw_clubco_ostrava_p1', url: 'https://clubco.cz/ostrava/#primaryimage', caption: 'Clubco', isPrimary: true }],
+    photos: [{ id: 'cw_clubco_ostrava_p1', url: 'https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=800&q=80', caption: 'Clubco', isPrimary: true }],
   
     address: '28. října 3346/91',
     phone: '+420 702 033 219',
@@ -1181,7 +1186,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 20,
     areaM2: 400,
   
-    photos: [{ id: 'cw_hnizdo_ostrava_p1', url: 'https://www.hnizdoostrava.cz/#/schema/logo/image/', caption: 'Hnízdo', isPrimary: true }],
+    photos: [{ id: 'cw_hnizdo_ostrava_p1', url: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80', caption: 'Hnízdo', isPrimary: true }],
   
     address: 'Střelniční 75/8',
     phone: '+420 734 143 500',
@@ -1399,7 +1404,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 30,
     areaM2: 550,
   
-    photos: [{ id: 'cw_teamwork_p1', url: 'https://coworking-liberec.cz/#primaryimage', caption: 'TeamWork', isPrimary: true }],
+    photos: [{ id: 'cw_teamwork_p1', url: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=800&q=80', caption: 'TeamWork', isPrimary: true }],
   
     address: 'náměstí Dr. E. Beneše 23',
     phone: '+420 777 771 715',
@@ -1476,7 +1481,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 25,
     areaM2: 450,
   
-    photos: [{ id: 'cw_ohub_p1', url: 'https://ohub.cz/#/schema/logo/image/', caption: 'Ohub', isPrimary: true }],
+    photos: [{ id: 'cw_ohub_p1', url: 'https://images.unsplash.com/photo-1606836591695-4d58a73eba1e?auto=format&fit=crop&w=800&q=80', caption: 'Ohub', isPrimary: true }],
   
     address: 'Wellnerova 1215/1',
     phone: '+420 773 636 361',
@@ -1847,7 +1852,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 30,
     areaM2: 550,
   
-    photos: [{ id: 'cw_coworking_kolin_p1', url: 'https://coworkingkolin.cz/#logo', caption: 'Coworking Kolín', isPrimary: true }],
+    photos: [{ id: 'cw_coworking_kolin_p1', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', caption: 'Coworking Kolín', isPrimary: true }],
   
     address: 'Kutnohorská 40',
     phone: '+420 158 954 128',
@@ -1860,7 +1865,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 20,
     areaM2: 400,
   
-    photos: [{ id: 'cw_volny_stul_p1', url: 'https://volnystul.cz/#primaryimage', caption: 'Volný stůl', isPrimary: true }],
+    photos: [{ id: 'cw_volny_stul_p1', url: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80', caption: 'Volný stůl', isPrimary: true }],
   
     address: 'Politických vězňů 10',
     phone: '+420 775 290 992',
@@ -1881,7 +1886,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 25,
     areaM2: 450,
   
-    photos: [{ id: 'cw_litohub_p1', url: 'https://litohub.cz/#primaryimage', caption: 'Litohub', isPrimary: true }],
+    photos: [{ id: 'cw_litohub_p1', url: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&w=800&q=80', caption: 'Litohub', isPrimary: true }],
   
     address: 'Mírové náměstí 167/36',
     phone: '+420 725 099 916',
@@ -2135,7 +2140,7 @@ export const coworkingsData: CoworkingSpace[] = [
     capacity: 25,
     areaM2: 450,
   
-    photos: [{ id: 'cw_in_hub_p1', url: 'https://inhubprerov.eu/#primaryimage', caption: 'IN-HUB', isPrimary: true }],
+    photos: [{ id: 'cw_in_hub_p1', url: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80', caption: 'IN-HUB', isPrimary: true }],
   
     address: 'Bratrská 2',
     phone: '+420 177 574 205',
@@ -2317,12 +2322,33 @@ export const coworkingsData: CoworkingSpace[] = [
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 25,
     areaM2: 450,
-  
+
     photos: [{ id: 'cw_hopspot_cowork_p1', url: 'https://images.unsplash.com/photo-1573167243872-43c6433b9d40?auto=format&fit=crop&w=800&q=80', caption: 'Hopspot Cowork', isPrimary: true }],
-  
+
     address: 'Chelčického nám. 6',
     zipCode: '438 01',
     shortDescription: 'Hopspot Cowork – coworking na historickém náměstí v Žatci s dílnou a 3D tiskárnami.',
+  }),
+  createCoworking('cw_fleksi_prostor', 'FLEKSI Prostor (Brumlovka)', 'Praha', 'Praha', {
+    website: 'https://www.fleksiprostor.cz',
+    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception', '24h_access', 'cafe', 'phone_booth', 'air_conditioning'],
+    capacity: 80,
+    areaM2: 1500,
+
+    photos: [{ id: 'cw_fleksi_prostor_p1', url: 'https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=800&q=80', caption: 'FLEKSI Prostor Brumlovka', isPrimary: true }],
+
+    address: 'Vyskočilova 1422/1a',
+    zipCode: '140 00',
+    phone: '+420 720 730 000',
+    email: 'info@fleksi.cz',
+    description: 'FLEKSI Prostor je moderní servisovaná kancelář a coworking v srdci Brumlovky v Praze 4. Nabízí Fix Desk i Flex Desk, plně vybavené kanceláře, zasedací místnosti a event space. V ceně Wi-Fi, káva a další nápoje. Tři pobočky: FLEKSI Budova B (Vyskočilova 1422/1a), FLEKSI Beta (Vyskočilova 1481/4), FLEKSI Filadelfie (Želetavská 1525/1).',
+    shortDescription: 'Servisované kanceláře a coworking na Brumlovce v Praze 4 (3 pobočky).',
+    services: 'Fix Desk a Flex Desk (flexibilní denní / měsíční přístup), servisované kanceláře pro týmy, zasedací místnosti k rezervaci, event space. V ceně Wi-Fi, káva, čaj a další nápoje. Recepce, tiskárna, telefonní budky, klimatizace, přístup 24/7 pro členy.',
+    locations: [
+      { id: 'cw_fleksi_prostor_l1', name: 'FLEKSI Budova B', address: 'Vyskočilova 1422/1a, 140 00 Praha 4', city: 'Praha', isPrimary: true },
+      { id: 'cw_fleksi_prostor_l2', name: 'FLEKSI Beta', address: 'Vyskočilova 1481/4, 140 00 Praha 4', city: 'Praha', isPrimary: false },
+      { id: 'cw_fleksi_prostor_l3', name: 'FLEKSI Filadelfie', address: 'Želetavská 1525/1, 140 00 Praha 4', city: 'Praha', isPrimary: false },
+    ],
   }),
 ];
 
