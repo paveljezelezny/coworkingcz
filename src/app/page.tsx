@@ -4,7 +4,8 @@ import {
   coworkingsData,
 } from '@/lib/data/coworkings';
 import { prisma } from '@/lib/prisma';
-import { PDHomePage, listingKindFromCategory, ageLabelFromDate, type PDHomeData } from '@/components/paper-diary/PDHomePage';
+import { PDHomePage, type PDHomeData } from '@/components/paper-diary/PDHomePage';
+import { listingKindFromCategory, ageLabelFromDate } from '@/components/paper-diary/helpers';
 
 // ISR: cache homepage 60s (rychlejší TTFB, i tak téměř real-time).
 export const revalidate = 60;
