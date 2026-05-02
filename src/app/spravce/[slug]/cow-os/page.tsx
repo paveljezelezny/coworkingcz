@@ -130,7 +130,7 @@ export default function COWOSPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center" style={{minHeight:320}}>
         <div className="flex flex-col items-center gap-3">
           <Loader className="w-8 h-8 text-blue-600 animate-spin" />
           <p className="text-gray-600">Načítám COW.OS...</p>
@@ -142,7 +142,7 @@ export default function COWOSPage() {
   // Access denied — user is not the coworking owner
   if (accessDenied) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="flex items-center justify-center p-4" style={{minHeight:320}}>
         <div className="bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
           <ShieldAlert className="w-14 h-14 text-red-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Přístup zamítnut</h2>
@@ -161,7 +161,7 @@ export default function COWOSPage() {
   // No subscription - show activation screen
   if (!subscription) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+      <div>
         <div className="max-w-2xl mx-auto">
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-start gap-3">
@@ -221,7 +221,7 @@ export default function COWOSPage() {
 
   // Has subscription - show dashboard
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header row: title left, coworking name + edit button right */}
         <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">

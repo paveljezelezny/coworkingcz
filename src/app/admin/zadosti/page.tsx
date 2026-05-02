@@ -95,7 +95,7 @@ export default function AdminClaimsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       {/* Toast */}
       {toast && (
         <div className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-medium transition-all ${toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>

@@ -131,14 +131,14 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center" style={{minHeight:320}}>
         <Loader className="w-6 h-6 text-gray-400 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <Link href={`/spravce/${slug}/cow-os`} className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm mb-2">

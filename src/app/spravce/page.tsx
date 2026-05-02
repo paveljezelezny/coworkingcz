@@ -76,15 +76,16 @@ export default function SprvcePage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      <div className="flex items-center justify-center" style={{ minHeight: 320, fontFamily: '"Caveat", cursive', fontSize: 22, color: '#6b6558' }}>
+        ↻ načítám…
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Topbar */}
+    <div>
+      {/* Topbar removed — PDAdminLayout poskytuje vrchní nav i sekci. */}
+      {false && (
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -109,17 +110,23 @@ export default function SprvcePage() {
           </div>
         </div>
       </div>
+      )}
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="max-w-6xl mx-auto">
         {/* Transfer accepted banner */}
         <Suspense fallback={null}>
           <TransferBanner />
         </Suspense>
 
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Správce coworkingů</h1>
-          <p className="text-gray-600">Spravuj profily svých coworkingů a udržuj informace aktuální.</p>
+        <div style={{ marginBottom: 22 }}>
+          <div style={{ fontFamily: '"Caveat", cursive', fontSize: 19, color: '#c76a54', marginBottom: 4, transform: 'rotate(-1deg)', display: 'inline-block' }}>
+            ↘ tvoje portfolio
+          </div>
+          <h2 style={{ fontFamily: '"Inter Tight", sans-serif', fontSize: 28, fontWeight: 500, letterSpacing: '-0.02em', color: '#1a1a1a', margin: 0 }}>
+            Správce coworkingů
+          </h2>
+          <p style={{ fontSize: 13, color: '#6b6558', marginTop: 4 }}>Spravuj profily svých coworkingů a udržuj informace aktuální.</p>
         </div>
 
         {/* Stats row */}

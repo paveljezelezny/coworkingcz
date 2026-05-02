@@ -385,7 +385,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center" style={{minHeight:320}}>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
       </div>
     );
@@ -393,7 +393,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
 
   if (accessDenied) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="flex items-center justify-center p-4" style={{minHeight:320}}>
         <div className="bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
           <AlertCircle className="w-14 h-14 text-red-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Přístup zamítnut</h2>
@@ -422,7 +422,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       {/* Top bar */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
@@ -1108,7 +1108,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
                           checked={checked}
                           onChange={() => {
                             const current = merged.venueTypes;
-                            update('venueTypes', checked ? current.filter((v) => v !== vt.id) : [...current, vt.id]);
+                            update('venueTypes', checked ? current.filter((v: string) => v !== vt.id) : [...current, vt.id]);
                           }}
                           className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />

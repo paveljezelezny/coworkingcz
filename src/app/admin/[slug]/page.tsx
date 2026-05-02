@@ -261,7 +261,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center" style={{minHeight:320}}>
         <Loader className="w-6 h-6 animate-spin text-blue-600 mr-2" />
         <span className="text-gray-600">Načítám...</span>
       </div>
@@ -270,7 +270,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
 
   if (!coworking) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center" style={{minHeight:320}}>
         <div className="text-gray-600">Coworking nenalezen</div>
       </div>
     );
@@ -280,7 +280,7 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
   const currentPhotos = formData.photos || [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       {/* Top Bar */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">

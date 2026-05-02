@@ -261,7 +261,7 @@ export default function InvoicingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       {showModal && (
         <InvoiceModal
           members={members}

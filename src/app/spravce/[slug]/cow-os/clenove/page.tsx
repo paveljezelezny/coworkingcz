@@ -314,7 +314,7 @@ export default function MembersPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       {showModal && (
         <MemberModal
           member={modalMember}

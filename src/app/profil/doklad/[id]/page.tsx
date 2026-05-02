@@ -72,7 +72,7 @@ export default function DokladPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center" style={{minHeight:320}}>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
       </div>
     );
@@ -80,7 +80,7 @@ export default function DokladPage() {
 
   if (error || !invoice) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+      <div className="flex flex-col items-center justify-center gap-4" style={{minHeight:320}}>
         <p className="text-red-600">{error || 'Doklad nenalezen'}</p>
         <button onClick={() => router.back()} className="text-blue-600 underline">Zpět</button>
       </div>
@@ -90,7 +90,7 @@ export default function DokladPage() {
   const docNumber = invoice.number ?? invoice.id.slice(-8).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div>
       {/* Toolbar — skrytý při tisku */}
       <div className="print:hidden bg-white border-b px-6 py-3 flex items-center gap-4">
         <button
