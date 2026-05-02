@@ -95,8 +95,8 @@ export default function CowOsMembershipsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      <div className="flex items-center justify-center" style={{ minHeight: 320, fontFamily: '"Caveat", cursive', fontSize: 22, color: '#6b6558' }}>
+        ↻ načítám…
       </div>
     );
   }
@@ -115,15 +115,16 @@ export default function CowOsMembershipsPage() {
   const hasInvoices = coworkingSlugs.length > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Moje členství v coworkingech 🏢
-          </h1>
-          <p className="text-gray-600 mt-2">Sledujte své faktury a předplatná</p>
+    <div>
+      {/* Section sub-header in PD style */}
+      <div style={{ marginBottom: 22 }}>
+        <div style={{ fontFamily: '"Caveat", cursive', fontSize: 20, color: '#c76a54', marginBottom: 4, transform: 'rotate(-1deg)', display: 'inline-block' }}>
+          ↘ tvoje členství
         </div>
+        <h2 style={{ fontFamily: '"Inter Tight", sans-serif', fontSize: 28, fontWeight: 500, letterSpacing: '-0.02em', color: '#1a1a1a', margin: 0 }}>
+          Členství COW.OS 🏢
+        </h2>
+        <p style={{ fontSize: 13, color: '#6b6558', marginTop: 4 }}>Faktury a předplatná v jednotlivých coworkingech</p>
       </div>
 
       {/* Content */}

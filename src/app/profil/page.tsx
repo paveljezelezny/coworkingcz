@@ -1857,16 +1857,16 @@ function ProfilPageInner() {
 
   if (authStatus === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+      <div className="flex items-center justify-center" style={{ minHeight: 320 }}>
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#c76a54' }} />
       </div>
     );
   }
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">Profil nenalezen.</p>
+      <div className="flex items-center justify-center" style={{ minHeight: 320, fontFamily: '"Caveat", cursive', fontSize: 22, color: '#6b6558' }}>
+        Profil nenalezen.
       </div>
     );
   }
@@ -1878,8 +1878,8 @@ function ProfilPageInner() {
   // ── Render ──
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-8 pb-16">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div>
+      <div className="max-w-4xl mx-auto">
 
         {/* Stripe payment success banner */}
         {paymentStatus === 'success' && (
@@ -2479,7 +2479,7 @@ function ProfilPageInner() {
 
 export default function ProfilPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" /></div>}>
+    <Suspense fallback={<div className="flex items-center justify-center" style={{minHeight:320}}><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" /></div>}>
       <ProfilPageInner />
     </Suspense>
   );

@@ -101,7 +101,7 @@ export default function CowOsInvoicePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center" style={{minHeight:320}}>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
       </div>
     );
@@ -109,7 +109,7 @@ export default function CowOsInvoicePage() {
 
   if (error || !invoice) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+      <div className="flex flex-col items-center justify-center gap-4" style={{minHeight:320}}>
         <p className="text-red-600">{error || 'Faktura nenalezena'}</p>
         <button
           onClick={() => router.push(`/spravce/${slug}/cow-os/fakturace`)}
@@ -124,7 +124,7 @@ export default function CowOsInvoicePage() {
   const isPaid = invoice.status === 'paid';
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div>
       {/* Toolbar — hidden on print */}
       <div className="print:hidden bg-white border-b px-6 py-3 flex items-center gap-4">
         <button

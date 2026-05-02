@@ -278,7 +278,7 @@ export default function TariffsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       {showModal && (
         <PlanModal
           plan={modalPlan}

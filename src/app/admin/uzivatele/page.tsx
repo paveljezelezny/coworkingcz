@@ -256,13 +256,13 @@ export default function AdminUsersPage() {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="flex items-center justify-center" style={{minHeight:320}}>
       <div className="text-gray-600">Načítám uživatele...</div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       {editingMembership && (
         <MembershipModal user={editingMembership} onClose={() => setEditingMembership(null)} onSave={handleMembershipSave} />
       )}
