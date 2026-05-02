@@ -1,14 +1,9 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import {
-  Calendar, Users, DollarSign, X, ChevronLeft, ChevronRight,
-  ExternalLink, Plus, Lock, MapPin, Clock,
-} from 'lucide-react';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
-
-type ViewMode = 'calendar' | 'list';
+import { PD, PD_FONT_DISPLAY, PD_FONT_BODY, PD_FONT_HAND, PD_FONT_MONO, toneColor, eventColor, eventTone, PD_EVENT_KIND_TONE } from '@/components/paper-diary/tokens';
+import { NotebookPaper, Washi } from '@/components/paper-diary/primitives';
 
 interface DbEvent {
   id: string;
@@ -33,663 +28,227 @@ interface CoworkingItem {
   city: string;
 }
 
-const EVENT_TYPE_LABELS: Record<string, string> = {
+const EVENT_TYPE_TO_TAG: Record<string, keyof typeof PD_EVENT_KIND_TONE> = {
   workshop: 'Workshop',
-  networking: 'Networking',
   meetup: 'Meetup',
-  conference: 'Konference',
-  party: 'Party',
-  other: 'Jiné',
+  networking: 'Networking',
+  conference: 'Meetup',
+  party: 'Komunita',
+  community: 'Komunita',
+  other: 'Workshop',
 };
 
-// ─── Day popup modal ─────────────────────────────────────────────────────────
+const WEEKDAY = ['NE', 'PO', 'ÚT', 'ST', 'ČT', 'PÁ', 'SO'];
+const MONTH = ['LED', 'ÚNO', 'BŘE', 'DUB', 'KVĚ', 'ČER', 'ČVC', 'SRP', 'ZÁŘ', 'ŘÍJ', 'LIS', 'PRO'];
+const MONTH_FULL = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
 
-function DayEventsModal({
-  date,
-  events,
-  slugToName,
-  onClose,
-}: {
-  date: Date;
-  events: DbEvent[];
-  slugToName: Record<string, string>;
-  onClose: () => void;
-}) {
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', h);
-    return () => document.removeEventListener('keydown', h);
-  }, [onClose]);
-
-  const dayLabel = date.toLocaleDateString('cs-CZ', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-  });
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-      onClick={onClose}
-    >
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-      <div
-        className="relative w-full sm:max-w-lg max-h-[85vh] overflow-y-auto bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-gray-900 capitalize">{dayLabel}</h2>
-            <p className="text-sm text-gray-500">
-              {events.length} {events.length === 1 ? 'event' : events.length < 5 ? 'eventy' : 'eventů'}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Events list */}
-        <div className="px-4 py-4 space-y-4">
-          {events.map((event) => (
-            <div
-              key={event.id}
-              className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
-            >
-              {/* Image */}
-              {event.imageUrl && (
-                <div className="h-36 w-full overflow-hidden">
-                  <img
-                    src={event.imageUrl}
-                    alt={event.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              {!event.imageUrl && (
-                <div className="h-16 bg-gradient-to-r from-blue-500 to-blue-700 flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-white/60" />
-                </div>
-              )}
-
-              <div className="p-4">
-                {/* Type badge */}
-                {event.eventType && (
-                  <span className="inline-block text-xs font-semibold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full mb-2">
-                    {EVENT_TYPE_LABELS[event.eventType] ?? event.eventType}
-                  </span>
-                )}
-
-                <h3 className="text-base font-bold text-gray-900 mb-1">{event.title}</h3>
-
-                {event.description && (
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-3">{event.description}</p>
-                )}
-
-                <div className="space-y-1.5 text-sm text-gray-600">
-                  {/* Date/time */}
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-                    <span>
-                      {event.isAllDay
-                        ? 'Celodenní akce'
-                        : new Date(event.startDate).toLocaleTimeString('cs-CZ', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                      {event.endDate && !event.isAllDay && (
-                        <> – {new Date(event.endDate).toLocaleTimeString('cs-CZ', {
-                          hour: '2-digit', minute: '2-digit',
-                        })}</>
-                      )}
-                    </span>
-                  </div>
-
-                  {/* Location */}
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-                    <span>
-                      {slugToName[event.coworkingSlug] ?? event.coworkingSlug}
-                      {event.location && <>, {event.location}</>}
-                    </span>
-                  </div>
-
-                  {/* Price */}
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-3.5 h-3.5 text-orange-500 flex-shrink-0" />
-                    <span>{event.isFree ? 'Vstup zdarma' : `${event.price ?? '?'} Kč`}</span>
-                  </div>
-
-                  {/* Capacity */}
-                  {event.maxAttendees && (
-                    <div className="flex items-center gap-2">
-                      <Users className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-                      <span>Max {event.maxAttendees} účastníků</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* CTA */}
-                {event.externalUrl && (
-                  <a
-                    href={event.externalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors text-sm"
-                  >
-                    Zjistit víc <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+function pluralEvents(n: number): string {
+  if (n === 1) return 'událost';
+  if (n >= 2 && n <= 4) return 'události';
+  return 'událostí';
 }
 
-// ─── Main page ───────────────────────────────────────────────────────────────
-
 export default function UdalostiPage() {
-  const { data: session } = useSession();
-  const userRole: string = (session?.user as any)?.role ?? '';
-  const canAddEvent = userRole === 'super_admin' || userRole === 'coworking_admin' || userRole === 'coworker';
-
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [selectedCity, setSelectedCity] = useState('');
-  const [selectedEventType, setSelectedEventType] = useState('');
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [allEvents, setAllEvents] = useState<DbEvent[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [events, setEvents] = useState<DbEvent[]>([]);
   const [coworkings, setCoworkings] = useState<CoworkingItem[]>([]);
-  const [slugToName, setSlugToName] = useState<Record<string, string>>({});
-
-  // Calendar day popup
-  const [popupDate, setPopupDate] = useState<Date | null>(null);
-  const [popupEvents, setPopupEvents] = useState<DbEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [monthFilter, setMonthFilter] = useState<string>('Vše');
+  const [cityFilter, setCityFilter] = useState<string>('Vše');
+  const [kindFilter, setKindFilter] = useState<string>('Vše');
 
   useEffect(() => {
-    // Fetch both in parallel
+    let mounted = true;
     Promise.all([
-      fetch('/api/events').then(r => r.json()).catch(() => ({ events: [] })),
-      fetch('/api/coworkings').then(r => r.json()).catch(() => []),
-    ]).then(([eventsData, cwData]) => {
-      setAllEvents(eventsData.events ?? []);
-      const list: CoworkingItem[] = Array.isArray(cwData) ? cwData : [];
+      fetch('/api/events').then((r) => r.json()).catch(() => ({ events: [] })),
+      fetch('/api/coworkings').then((r) => r.json()).catch(() => []),
+    ]).then(([evRes, cwRes]) => {
+      if (!mounted) return;
+      const list = Array.isArray(cwRes) ? cwRes : (cwRes?.coworkings || []);
+      setEvents((evRes?.events || []).filter((e: DbEvent) => new Date(e.startDate) >= new Date(Date.now() - 86400000)));
       setCoworkings(list);
-      const map: Record<string, string> = {};
-      for (const cw of list) map[cw.slug] = cw.name;
-      setSlugToName(map);
-    }).finally(() => setLoading(false));
+      setLoading(false);
+    });
+    return () => { mounted = false; };
   }, []);
 
-  // Build city list from fetched data
-  const cities = useMemo(() => {
-    const cityCount: Record<string, number> = {};
-    for (const cw of coworkings) {
-      cityCount[cw.city] = (cityCount[cw.city] || 0) + 1;
-    }
-    return Object.entries(cityCount)
-      .map(([city, count]) => ({ city, count }))
-      .sort((a, b) => b.count - a.count);
+  const slugToCoworking = useMemo(() => {
+    const m = new Map<string, CoworkingItem>();
+    coworkings.forEach((cw) => m.set(cw.slug, cw));
+    return m;
   }, [coworkings]);
 
-  const eventTypes = [
-    { id: 'workshop', label: 'Workshop' },
-    { id: 'networking', label: 'Networking' },
-    { id: 'meetup', label: 'Meetup' },
-    { id: 'conference', label: 'Konference' },
-    { id: 'party', label: 'Party' },
-  ];
+  // Build options
+  const availableMonths = useMemo(() => {
+    const set = new Set<number>();
+    events.forEach((e) => set.add(new Date(e.startDate).getMonth()));
+    return Array.from(set).sort((a, b) => a - b);
+  }, [events]);
 
-  const filteredEvents = useMemo(() => {
-    return allEvents
-      .filter((event) => {
-        const name = slugToName[event.coworkingSlug] ?? event.coworkingSlug;
-        const matchCity = !selectedCity || name.includes(selectedCity);
-        const matchType = !selectedEventType || event.eventType === selectedEventType;
-        return matchCity && matchType;
-      })
-      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-  }, [allEvents, selectedCity, selectedEventType, slugToName]);
-
-  // Calendar functions
-  const getDaysInMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (date: Date) => {
-    // Convert Sunday=0 to Monday=0 (Czech week starts Monday)
-    const day = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-    return day === 0 ? 6 : day - 1;
-  };
-
-  const getEventsForDate = (date: Date) => {
-    return filteredEvents.filter((e) => {
-      const eventDate = new Date(e.startDate);
-      return (
-        eventDate.getDate() === date.getDate() &&
-        eventDate.getMonth() === date.getMonth() &&
-        eventDate.getFullYear() === date.getFullYear()
-      );
+  const availableCities = useMemo(() => {
+    const set = new Set<string>();
+    events.forEach((e) => {
+      const cw = slugToCoworking.get(e.coworkingSlug);
+      if (cw?.city) set.add(cw.city);
     });
-  };
+    return Array.from(set).sort();
+  }, [events, slugToCoworking]);
 
-  const handleDayClick = (date: Date, dayEvents: DbEvent[]) => {
-    if (dayEvents.length === 0) return;
-    setPopupDate(date);
-    setPopupEvents(dayEvents);
-  };
+  const filtered = useMemo(() => {
+    return events.filter((e) => {
+      const d = new Date(e.startDate);
+      if (monthFilter !== 'Vše' && d.getMonth() !== Number(monthFilter)) return false;
+      const cw = slugToCoworking.get(e.coworkingSlug);
+      if (cityFilter !== 'Vše' && cw?.city !== cityFilter) return false;
+      if (kindFilter !== 'Vše') {
+        const tag = EVENT_TYPE_TO_TAG[(e.eventType || '').toLowerCase()] || 'Workshop';
+        if (tag !== kindFilter) return false;
+      }
+      return true;
+    }).sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+  }, [events, monthFilter, cityFilter, kindFilter, slugToCoworking]);
 
-  const handlePrevMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
-  };
-
-  const handleNextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
-  };
+  const activeFilters = (monthFilter !== 'Vše' ? 1 : 0) + (cityFilter !== 'Vše' ? 1 : 0) + (kindFilter !== 'Vše' ? 1 : 0);
+  const reset = () => { setMonthFilter('Vše'); setCityFilter('Vše'); setKindFilter('Vše'); };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-8 pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Page Header */}
-        <div className="flex items-center justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-              Akce a eventy
-            </h1>
-            <p className="text-gray-600">
-              Najdi si zajímavou akci a setkej se s komunitou
-            </p>
+    <div style={{ maxWidth: 1440, margin: '0 auto', background: PD.paper, fontFamily: PD_FONT_BODY }}>
+      <NotebookPaper style={{ padding: '32px 20px 50px' }}>
+        <div className="md:!pl-24 md:!pr-14 md:!pt-10">
+          {/* Header */}
+          <div style={{ fontFamily: PD_FONT_HAND, fontSize: 22, color: PD.amber, marginBottom: 4, transform: 'rotate(-1deg)', display: 'inline-block' }}>
+            šuplík II. ↘
           </div>
-          {session ? (
-            canAddEvent ? (
-              <Link
-                href="/udalosti/nova-udalost"
-                className="hidden sm:flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex-shrink-0"
-              >
-                <Plus className="w-5 h-5" />
-                Přidat event
-              </Link>
-            ) : (
-              <Link
-                href="/ceniky"
-                className="hidden sm:flex items-center gap-2 px-5 py-3 bg-gray-100 text-gray-500 font-semibold rounded-lg hover:bg-gray-200 transition-colors flex-shrink-0 text-sm"
-                title="Pouze pro platící členy"
-              >
-                <Lock className="w-4 h-4" />
-                Přidat event
-              </Link>
-            )
-          ) : (
-            <Link
-              href="/prihlaseni?callbackUrl=/udalosti/nova-udalost"
-              className="hidden sm:flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex-shrink-0"
-            >
-              <Plus className="w-5 h-5" />
-              Přidat event
+          <h1 className="text-[40px] md:text-[64px]" style={{ fontFamily: PD_FONT_DISPLAY, letterSpacing: '-0.025em', lineHeight: 0.95, fontWeight: 500, margin: 0, color: PD.ink }}>
+            Události
+          </h1>
+          <p style={{ fontSize: 14, color: PD.inkSoft, marginTop: 10, marginBottom: 24, maxWidth: 500 }}>
+            {events.length} nadcházejících akcí. Workshopy, meetupy, networking, komunitní akce.
+          </p>
+
+          {/* Add event CTA */}
+          <div style={{ marginBottom: 24 }}>
+            <Link href="/udalosti/nova-udalost" style={{ display: 'inline-block', padding: '10px 18px', background: PD.amber, color: '#fff', fontSize: 13, fontWeight: 600, textDecoration: 'none', boxShadow: `2px 2px 0 ${PD.ink}` }}>
+              + Přidat událost
             </Link>
-          )}
-        </div>
-
-        {/* Mobile add button */}
-        <div className="sm:hidden mb-6">
-          {session && canAddEvent ? (
-            <Link
-              href="/udalosti/nova-udalost"
-              className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              Přidat event
-            </Link>
-          ) : (
-            <Link
-              href={session ? '/ceniky' : '/prihlaseni?callbackUrl=/udalosti/nova-udalost'}
-              className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              Přidat event
-            </Link>
-          )}
-        </div>
-
-        {/* Filters */}
-        <div className="bg-white rounded-xl border border-gray-100 p-6 mb-8 space-y-4 sm:space-y-0 sm:flex gap-4">
-          <select
-            value={selectedCity}
-            onChange={(e) => setSelectedCity(e.target.value)}
-            className="input-field flex-1"
-          >
-            <option value="">Všechna města</option>
-            {cities.map((city) => (
-              <option key={city.city} value={city.city}>
-                {city.city}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedEventType}
-            onChange={(e) => setSelectedEventType(e.target.value)}
-            className="input-field flex-1"
-          >
-            <option value="">Typ eventu</option>
-            {eventTypes.map((type) => (
-              <option key={type.id} value={type.id}>
-                {type.label}
-              </option>
-            ))}
-          </select>
-
-          {(selectedCity || selectedEventType) && (
-            <button
-              onClick={() => {
-                setSelectedCity('');
-                setSelectedEventType('');
-              }}
-              className="px-4 py-3 text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-colors flex items-center gap-2"
-            >
-              <X className="w-4 h-4" />
-              Vymazat
-            </button>
-          )}
-        </div>
-
-        {/* View Toggle */}
-        <div className="flex gap-2 mb-8">
-          <button
-            onClick={() => setViewMode('calendar')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              viewMode === 'calendar'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            Kalendář
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              viewMode === 'list'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            Seznam
-          </button>
-        </div>
-
-        {/* List View */}
-        {viewMode === 'list' && (
-          <div>
-            {loading && (
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white rounded-lg border border-gray-100 p-6 animate-pulse h-40" />
-                ))}
-              </div>
-            )}
-            {!loading && filteredEvents.length > 0 ? (
-              <div className="space-y-4">
-                {filteredEvents.map((event) => (
-                  <div
-                    key={event.id}
-                    className="bg-white rounded-lg border border-gray-100 p-6 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex flex-col sm:flex-row gap-6">
-                      {/* Event Image */}
-                      <div className="w-full sm:w-40 h-40 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg overflow-hidden flex-shrink-0">
-                        {event.imageUrl && (
-                          <img
-                            src={event.imageUrl}
-                            alt={event.title}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                      </div>
-
-                      {/* Event Info */}
-                      <div className="flex-1 flex flex-col justify-between">
-                        <div>
-                          <div className="flex items-center gap-3 mb-3">
-                            <span className="text-xs font-semibold px-3 py-1 bg-blue-50 text-blue-700 rounded-full">
-                              {EVENT_TYPE_LABELS[event.eventType ?? ''] ?? event.eventType}
-                            </span>
-                            <span className="text-xs text-gray-600 font-medium">
-                              {slugToName[event.coworkingSlug] ?? event.coworkingSlug}
-                            </span>
-                          </div>
-                          <h3 className="text-lg font-bold text-gray-900 mb-3">
-                            {event.title}
-                          </h3>
-                          <p className="text-gray-600 mb-4 line-clamp-2">
-                            {event.description}
-                          </p>
-                        </div>
-
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                          <span className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-blue-600" />
-                            {new Date(event.startDate).toLocaleDateString('cs-CZ', {
-                              weekday: 'short',
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </span>
-                          {event.location && (
-                            <span className="flex items-center gap-2">
-                              <MapPin className="w-4 h-4 text-blue-600" />
-                              {event.location}
-                            </span>
-                          )}
-                          {event.maxAttendees && (
-                            <span className="flex items-center gap-2">
-                              <Users className="w-4 h-4 text-blue-600" />
-                              Max {event.maxAttendees} osob
-                            </span>
-                          )}
-                          <span className="flex items-center gap-2">
-                            <DollarSign className="w-4 h-4 text-orange-500" />
-                            {event.isFree ? 'Zdarma' : `${event.price} Kč`}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* CTA */}
-                      <div className="flex sm:flex-col gap-2 items-stretch sm:items-end justify-center">
-                        {event.externalUrl ? (
-                          <a
-                            href={event.externalUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 sm:flex-none px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
-                          >
-                            Zjistit víc…
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                        ) : (
-                          <button
-                            disabled
-                            className="flex-1 sm:flex-none px-6 py-3 bg-gray-200 text-gray-400 font-semibold rounded-lg cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap"
-                            title="Odkaz nebyl zadán"
-                          >
-                            Zjistit víc…
-                            <ExternalLink className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              !loading && (
-                <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
-                  <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Žádné eventy</h3>
-                  <p className="text-gray-600">Zkus změnit filtry nebo se vrať později</p>
-                </div>
-              )
-            )}
           </div>
-        )}
 
-        {/* Calendar View */}
-        {viewMode === 'calendar' && (
-          <div className="bg-white rounded-xl border border-gray-100 p-6">
-            {/* Month Navigation */}
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {currentMonth.toLocaleDateString('cs-CZ', {
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </h2>
-              <div className="flex gap-2">
-                <button
-                  onClick={handlePrevMonth}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  onClick={handleNextMonth}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              </div>
-            </div>
-
-            {/* Calendar Grid */}
-            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-6">
-              {/* Day headers */}
-              {['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'].map((day) => (
-                <div
-                  key={day}
-                  className="text-center font-bold text-gray-600 py-2 text-sm"
-                >
-                  {day}
-                </div>
-              ))}
-
-              {/* Empty cells before first day */}
-              {Array.from({ length: getFirstDayOfMonth(currentMonth) }).map((_, i) => (
-                <div key={`empty-${i}`} className="aspect-square" />
-              ))}
-
-              {/* Calendar days */}
-              {Array.from({ length: getDaysInMonth(currentMonth) }).map((_, i) => {
-                const date = new Date(
-                  currentMonth.getFullYear(),
-                  currentMonth.getMonth(),
-                  i + 1
-                );
-                const dayEvents = getEventsForDate(date);
-                const isToday = date.toDateString() === new Date().toDateString();
-                const hasEvents = dayEvents.length > 0;
-
-                return (
-                  <div
-                    key={i + 1}
-                    onClick={() => handleDayClick(date, dayEvents)}
-                    className={`aspect-square rounded-lg border-2 p-1.5 flex flex-col justify-start overflow-hidden transition-all ${
-                      hasEvents
-                        ? 'cursor-pointer hover:shadow-md hover:scale-[1.03]'
-                        : 'cursor-default'
-                    } ${
-                      isToday
-                        ? 'border-blue-600 bg-blue-50'
-                        : hasEvents
-                        ? 'border-blue-300 hover:border-blue-500'
-                        : 'border-gray-100'
-                    }`}
-                  >
-                    <span className={`text-xs sm:text-sm font-bold ${isToday ? 'text-blue-600' : 'text-gray-900'}`}>
-                      {i + 1}
-                    </span>
-                    <div className="flex flex-col gap-0.5 mt-0.5">
-                      {dayEvents.slice(0, 2).map((e) => (
-                        <div
-                          key={e.id}
-                          className="text-xs bg-blue-600 text-white px-1 py-0.5 rounded truncate leading-tight"
-                          title={e.title}
-                        >
-                          <span className="hidden sm:inline">{e.title.length > 10 ? e.title.slice(0, 10) + '…' : e.title}</span>
-                          <span className="sm:hidden">●</span>
-                        </div>
-                      ))}
-                      {dayEvents.length > 2 && (
-                        <div className="text-xs text-blue-600 font-bold">
-                          +{dayEvents.length - 2}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Hint */}
-            <p className="text-xs text-gray-400 mb-6 text-center">
-              Kliknutím na den s eventem zobrazíte detail
-            </p>
-
-            {/* Legend */}
-            <div className="border-t border-gray-200 pt-6">
-              <h3 className="font-bold text-gray-900 mb-4">Eventy pro vybrané období</h3>
-              {filteredEvents.length > 0 ? (
-                <div className="space-y-2">
-                  {filteredEvents.slice(0, 5).map((event) => (
-                    <button
-                      key={event.id}
-                      type="button"
-                      onClick={() => {
-                        const d = new Date(event.startDate);
-                        handleDayClick(d, getEventsForDate(d));
-                      }}
-                      className="w-full flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors text-left"
-                    >
-                      <div className="w-3 h-3 bg-blue-600 rounded-full flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">
-                          {event.title}
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          {new Date(event.startDate).toLocaleDateString('cs-CZ', {
-                            day: 'numeric', month: 'long',
-                          })}
-                          {event.location && ` · ${event.location}`}
-                        </p>
-                      </div>
-                      <ExternalLink className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+          {/* Filter panel */}
+          <div style={{ background: PD.paperWhite, border: `1.5px solid ${PD.ink}`, boxShadow: '4px 4px 0 rgba(0,0,0,0.08)', marginBottom: 28 }}>
+            <div className="grid grid-cols-1 md:grid-cols-3" style={{ borderBottom: `1.5px solid ${PD.ink}` }}>
+              {/* Month */}
+              <div style={{ padding: '12px 16px', borderBottom: `1px dashed ${PD.rule}` }} className="md:!border-b-0 md:!border-r md:!border-r-[var(--pd-rule)] md:!border-dashed">
+                <div style={{ fontFamily: PD_FONT_MONO, fontSize: 10, letterSpacing: 1.5, color: PD.inkMuted, textTransform: 'uppercase', marginBottom: 6 }}>Měsíc</div>
+                <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                  <button onClick={() => setMonthFilter('Vše')} style={{ padding: '4px 10px', fontSize: 12, border: `1.5px solid ${monthFilter === 'Vše' ? PD.amber : PD.rule}`, background: monthFilter === 'Vše' ? PD.amber : PD.paperLt, color: monthFilter === 'Vše' ? '#fff' : PD.inkSoft, fontFamily: 'inherit', cursor: 'pointer', borderRadius: 99 }}>Vše</button>
+                  {availableMonths.map((m) => (
+                    <button key={m} onClick={() => setMonthFilter(String(m))} style={{ padding: '4px 10px', fontSize: 12, border: `1.5px solid ${monthFilter === String(m) ? PD.amber : PD.rule}`, background: monthFilter === String(m) ? PD.amber : PD.paperLt, color: monthFilter === String(m) ? '#fff' : PD.inkSoft, fontFamily: 'inherit', cursor: 'pointer', borderRadius: 99 }}>
+                      {MONTH_FULL[m]}
                     </button>
                   ))}
                 </div>
-              ) : (
-                <p className="text-gray-600">
-                  V tomto měsíci nejsou žádné eventy
-                </p>
-              )}
+              </div>
+              {/* City */}
+              <div style={{ padding: '12px 16px', borderBottom: `1px dashed ${PD.rule}` }} className="md:!border-b-0 md:!border-r md:!border-r-[var(--pd-rule)] md:!border-dashed">
+                <div style={{ fontFamily: PD_FONT_MONO, fontSize: 10, letterSpacing: 1.5, color: PD.inkMuted, textTransform: 'uppercase', marginBottom: 6 }}>Město</div>
+                <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                  <button onClick={() => setCityFilter('Vše')} style={{ padding: '4px 10px', fontSize: 12, border: `1.5px solid ${cityFilter === 'Vše' ? PD.accent : PD.rule}`, background: cityFilter === 'Vše' ? PD.accent : PD.paperLt, color: cityFilter === 'Vše' ? '#fff' : PD.inkSoft, fontFamily: 'inherit', cursor: 'pointer', borderRadius: 99 }}>Vše</button>
+                  {availableCities.slice(0, 8).map((c) => (
+                    <button key={c} onClick={() => setCityFilter(c)} style={{ padding: '4px 10px', fontSize: 12, border: `1.5px solid ${cityFilter === c ? PD.accent : PD.rule}`, background: cityFilter === c ? PD.accent : PD.paperLt, color: cityFilter === c ? '#fff' : PD.inkSoft, fontFamily: 'inherit', cursor: 'pointer', borderRadius: 99 }}>{c}</button>
+                  ))}
+                </div>
+              </div>
+              {/* Kind */}
+              <div style={{ padding: '12px 16px' }}>
+                <div style={{ fontFamily: PD_FONT_MONO, fontSize: 10, letterSpacing: 1.5, color: PD.inkMuted, textTransform: 'uppercase', marginBottom: 6 }}>Typ</div>
+                <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                  <button onClick={() => setKindFilter('Vše')} style={{ padding: '4px 10px', fontSize: 12, border: `1.5px solid ${kindFilter === 'Vše' ? PD.moss : PD.rule}`, background: kindFilter === 'Vše' ? PD.moss : PD.paperLt, color: kindFilter === 'Vše' ? '#fff' : PD.inkSoft, fontFamily: 'inherit', cursor: 'pointer', borderRadius: 99 }}>Vše</button>
+                  {Object.keys(PD_EVENT_KIND_TONE).map((k) => {
+                    const c = toneColor(PD_EVENT_KIND_TONE[k]);
+                    return (
+                      <button key={k} onClick={() => setKindFilter(k)} style={{ padding: '4px 10px', fontSize: 12, border: `1.5px solid ${kindFilter === k ? c : PD.rule}`, background: kindFilter === k ? c : PD.paperLt, color: kindFilter === k ? '#fff' : PD.inkSoft, fontFamily: 'inherit', cursor: 'pointer', borderRadius: 99 }}>{k}</button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+            {/* Footer */}
+            <div className="flex flex-col md:flex-row" style={{ justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', background: PD.paperLt, gap: 8 }}>
+              <div style={{ fontSize: 13 }}>
+                <b style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 20, letterSpacing: '-0.015em' }}>{filtered.length}</b>
+                <span style={{ color: PD.inkSoft, marginLeft: 6 }}>
+                  {pluralEvents(filtered.length)}
+                  {activeFilters > 0 ? ` · ${activeFilters} filtrů aktivních` : ''}
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                {activeFilters > 0 && (
+                  <button onClick={reset} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: PD_FONT_HAND, fontSize: 18, color: PD.margin }}>
+                    vymazat filtry ✕
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Day popup */}
-      {popupDate && (
-        <DayEventsModal
-          date={popupDate}
-          events={popupEvents}
-          slugToName={slugToName}
-          onClose={() => { setPopupDate(null); setPopupEvents([]); }}
-        />
-      )}
+          {/* Grid */}
+          {loading ? (
+            <div style={{ padding: '60px 0', textAlign: 'center', fontFamily: PD_FONT_HAND, fontSize: 22, color: PD.inkMuted }}>↻ načítám…</div>
+          ) : filtered.length === 0 ? (
+            <div style={{ padding: '60px 0', textAlign: 'center' }}>
+              <div style={{ fontFamily: PD_FONT_HAND, fontSize: 36, color: PD.inkMuted, marginBottom: 8, transform: 'rotate(-2deg)', display: 'inline-block' }}>
+                žádné akce ¯\_(ツ)_/¯
+              </div>
+              <div style={{ fontSize: 16, color: PD.inkSoft }}>V této kombinaci filtrů nic nemáme.</div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: 18 }}>
+              {filtered.map((e, i) => {
+                const tag = EVENT_TYPE_TO_TAG[(e.eventType || '').toLowerCase()] || 'Workshop';
+                const c = eventColor({ tag });
+                const cw = slugToCoworking.get(e.coworkingSlug);
+                const d = new Date(e.startDate);
+                const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                const linkTarget = e.externalUrl || (cw ? `/coworking/${cw.slug}` : `/coworking/${e.coworkingSlug}`);
+                return (
+                  <a
+                    key={e.id}
+                    href={linkTarget}
+                    target={e.externalUrl ? '_blank' : undefined}
+                    rel={e.externalUrl ? 'noreferrer' : undefined}
+                    style={{
+                      display: 'grid', gridTemplateColumns: '80px 1fr', gap: 16, padding: 16,
+                      background: PD.paperWhite, border: `1.5px solid ${c}`,
+                      transform: `rotate(${(i % 2 ? 0.4 : -0.4)}deg)`,
+                      boxShadow: '3px 3px 0 rgba(0,0,0,0.06)', position: 'relative',
+                      textDecoration: 'none', color: 'inherit',
+                    }}
+                  >
+                    <Washi color={c} seed={100 + i * 7} />
+                    <div style={{ textAlign: 'center', background: PD.paperLt, border: `1.5px solid ${c}`, padding: '8px 0', alignSelf: 'start' }}>
+                      <div style={{ fontFamily: PD_FONT_MONO, fontSize: 10, letterSpacing: 1, color: c, fontWeight: 700 }}>{WEEKDAY[d.getDay()]}</div>
+                      <div style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 30, fontWeight: 600, lineHeight: 1, color: PD.ink }}>{d.getDate()}</div>
+                      <div style={{ fontFamily: PD_FONT_MONO, fontSize: 10, letterSpacing: 1, color: PD.inkMuted }}>{MONTH[d.getMonth()]}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontFamily: PD_FONT_MONO, fontSize: 10, letterSpacing: 1.2, color: c, textTransform: 'uppercase', fontWeight: 700, marginBottom: 4 }}>{tag}</div>
+                      <div style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 18, fontWeight: 500, letterSpacing: '-0.015em', marginBottom: 4, color: c }}>{e.title}</div>
+                      <div style={{ fontSize: 12, color: PD.inkMuted, marginBottom: 8 }}>
+                        {cw?.name || e.coworkingSlug}{cw?.city ? ` · ${cw.city}` : ''} · {time}
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, borderTop: `1px dashed ${PD.ruleSoft}` }}>
+                        <span style={{ fontFamily: PD_FONT_HAND, fontSize: 16, color: PD.inkSoft }}>
+                          {e.isFree ? 'zdarma ✦' : (e.price ? `${e.price} Kč` : 'cena na dotaz')}
+                        </span>
+                        <span style={{ fontSize: 12, color: PD.ink, fontWeight: 600 }}>Detail →</span>
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </NotebookPaper>
     </div>
   );
 }

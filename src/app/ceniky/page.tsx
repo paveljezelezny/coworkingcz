@@ -1,773 +1,298 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import Link from 'next/link';
-import {
-  Check, X, Globe, Users, Award, HelpCircle, Plus,
-  Building2, User, ChevronDown, Gift, ArrowRight, Zap,
-  BadgeCheck, CalendarPlus, ShoppingBag, ChevronLeft, ChevronRight,
-} from 'lucide-react';
 import { PLATFORM_PRICING, COWORKER_MEMBERSHIP, COWORKER_MEMBERSHIP_BENEFITS } from '@/lib/types';
+import { PD, PD_FONT_DISPLAY, PD_FONT_BODY, PD_FONT_HAND, PD_FONT_MONO } from '@/components/paper-diary/tokens';
+import { NotebookPaper, Washi, Stamp } from '@/components/paper-diary/primitives';
+
+type Audience = 'majitele' | 'coworkery';
+
+const FAQ: Array<{ q: string; a: string }> = [
+  {
+    q: 'Mám už zápis na coworkings.cz, je placený?',
+    a: 'Základní zápis je zdarma. Profil zviditelníš a zavedeš si COW.OS přes placený plán pro provozovatele.',
+  },
+  {
+    q: 'Jak funguje 1 návštěva měsíčně zdarma pro coworkery?',
+    a: 'S placeným členstvím dostaneš každý měsíc 1 návštěvu (day pass) v libovolném coworkingu, který je v síti. Stačí ukázat QR kód u recepce.',
+  },
+  {
+    q: 'Můžu zrušit členství kdykoliv?',
+    a: 'Ano, oba plány (provozovatelé i coworkeři) můžeš zrušit kdykoliv. Roční předplatné běží do konce zaplaceného období.',
+  },
+  {
+    q: 'Co je COW.OS?',
+    a: 'COW.OS je nástroj pro provozovatele coworkingů — správa členů, fakturace, plány, QR vstupy. Součástí každého plánu provozovatele.',
+  },
+];
 
 export default function CenikyPage() {
-  const { data: session } = useSession();
-  const router = useRouter();
-  const [activating, setActivating] = useState<string | null>(null);
-  const [activeCol, setActiveCol] = useState(0);
-  const [activeCoworkerCol, setActiveCoworkerCol] = useState(0);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const scrollCoworkerRef  = useRef<HTMLDivElement>(null);
-
-  const scrollToColumn = (idx: number) => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-    const cols = container.querySelectorAll('[data-col]');
-    const target = cols[idx] as HTMLElement;
-    if (target) {
-      container.scrollTo({ left: target.offsetLeft - 16, behavior: 'smooth' });
-      setActiveCol(idx);
-    }
-  };
-
-  const scrollToCoworkerColumn = (idx: number) => {
-    const container = scrollCoworkerRef.current;
-    if (!container) return;
-    const cols = container.querySelectorAll('[data-ccol]');
-    const target = cols[idx] as HTMLElement;
-    if (target) {
-      container.scrollTo({ left: target.offsetLeft - 16, behavior: 'smooth' });
-      setActiveCoworkerCol(idx);
-    }
-  };
-
-  // ── Button handlers ──────────────────────────────────────────────────────
-
-  const goToRegistrace = (role: 'coworking' | 'coworker', plan: string) => {
-    router.push(`/registrace?role=${role}&plan=${plan}`);
-  };
-
-  // Spustí Stripe Checkout Session a přesměruje uživatele
-  const startStripeCheckout = async (stripePlan: string) => {
-    setActivating(stripePlan);
-    try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: stripePlan }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url; // přesměruj na Stripe Checkout
-      } else {
-        console.error('[stripe/checkout] No URL returned:', data);
-        alert('Chyba při spouštění platby. Zkus to prosím znovu.');
-      }
-    } catch (err) {
-      console.error('[stripe/checkout] Error:', err);
-      alert('Chyba při spouštění platby. Zkus to prosím znovu.');
-    } finally {
-      setActivating(null);
-    }
-  };
-
-  const handleCoworkingPlan = (tier: string) => {
-    if (session) {
-      startStripeCheckout(`coworking_${tier}`);
-    } else {
-      goToRegistrace('coworking', tier);
-    }
-  };
-
-  const handleCoworkerPlan = (plan: string) => {
-    if (session) {
-      // plan = 'monthly' | 'yearly'
-      startStripeCheckout(`coworker_${plan}`);
-    } else {
-      goToRegistrace('coworker', plan);
-    }
-  };
-
-  // ── Data ─────────────────────────────────────────────────────────────────
-
-  const features = [
-    { name: 'Profil coworkingu',                              small: true,  medium: true,  large: true  },
-    { name: 'Fotogalerie',                                    small: true,  medium: true,  large: true  },
-    { name: 'Vybavení & ceny',                                small: true,  medium: true,  large: true  },
-    { name: 'Rezervační systém',                              small: false, medium: true,  large: true  },
-    { name: 'Event management',                               small: false, medium: true,  large: true  },
-    { name: 'Special Deal — zvýhodněná nabídka na kartě',     small: false, medium: true,  large: true  },
-    { name: 'Analytics',                                      small: false, medium: false, large: true  },
-    { name: 'Email podpora',                                  small: true,  medium: true,  large: true  },
-    { name: 'Prioritní podpora',                              small: false, medium: true,  large: true  },
-    { name: 'Dedikovaný account manager',                     small: false, medium: false, large: true  },
-    { name: 'COW.OS — správa členů (do 5 zdarma)',            small: true,  medium: true,  large: true  },
-    { name: 'COW.OS — plná verze (25/100+ členů)',            small: false, medium: true,  large: true  },
-    { name: 'COW.OS — automatická fakturace a QR',            small: false, medium: true,  large: true  },
-  ];
-
-  const faqs = [
-    { question: 'Jak dlouho trvá aktivace profilu?',           answer: 'Profil je aktivován ihned po registraci. Ověření údajů trvá 1–2 pracovní dny.' },
-    { question: 'Mohu během smlouvy změnit plán?',             answer: 'Ano, plán můžete změnit kdykoli. Nový plán se projeví v příští fakturaci.' },
-    { question: 'Jaký je minimální závazek?',                  answer: 'Minimální závazek je 1 měsíc. Kdykoli můžete plán změnit nebo zrušit.' },
-    { question: 'Je možné platit ročně se slevou?',            answer: 'Ano, při roční smlouvě získáte slevu 20 % na cenu měsíčního plánu.' },
-    { question: 'Jak fungují dodatečné adresy?',               answer: 'Každá extra adresa se fakturuje zvlášť. Cena je uvedena v plánu.' },
-    { question: 'Poskytujete bezplatnou migraci?',             answer: 'Ano, naši specialisté Vám s migrací dat pomohou zdarma. Kontaktujte support.' },
-    { question: 'Mohu to nejdřív vyzkoušet zdarma?',          answer: 'Ano! Každý nový účet získá 30 dní zdarma bez nutnosti platební karty. Teprve poté začne placení.' },
-  ];
-
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const monthlySaving       = COWORKER_MEMBERSHIP.yearlyMonthlySaving;
-  const yearlyMonthlyPrice  = COWORKER_MEMBERSHIP.yearlyMonthlyPrice; // 49 Kč/měs
-  const yearlyDiscount      = Math.round((1 - yearlyMonthlyPrice / COWORKER_MEMBERSHIP.monthlyPrice) * 100); // ~50 %
-  const pricePerPersonMonth = Math.round(COWORKER_MEMBERSHIP.teamYearlyPrice / COWORKER_MEMBERSHIP.teamMaxMembers / 12);
-
-  // ── Trial badge shown on every CTA ──────────────────────────────────────
-  const TrialBadge = () => (
-    <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full ml-2">
-      <Gift className="w-3 h-3" />30 dní zdarma
-    </span>
-  );
-
-  // ── Free link shown under each CTA ──────────────────────────────────────
-  const FreeLink = ({ role }: { role: 'coworking' | 'coworker' }) => (
-    <div className="text-center mt-3">
-      <Link
-        href={`/registrace?role=${role}&plan=free`}
-        className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2 transition-colors"
-      >
-        nebo zaregistrovat zdarma (základní profil)
-      </Link>
-    </div>
-  );
+  const [audience, setAudience] = useState<Audience>('majitele');
+  const [yearly, setYearly] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <div className="w-full bg-white">
-
-      {/* ── Hero ────────────────────────────────────────────────────────── */}
-      <section className="py-16 sm:py-24 bg-gradient-to-br from-blue-50 to-orange-50">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 text-sm font-bold rounded-full mb-6">
-            <Gift className="w-4 h-4" />
-            Každý nový účet: 30 dní zdarma · bez platební karty
+    <div style={{ maxWidth: 1440, margin: '0 auto', background: PD.paper, fontFamily: PD_FONT_BODY }}>
+      <NotebookPaper style={{ padding: '32px 20px 50px' }}>
+        <div className="md:!pl-24 md:!pr-14 md:!pt-10">
+          <div style={{ fontFamily: PD_FONT_HAND, fontSize: 22, color: PD.margin, marginBottom: 4, transform: 'rotate(-1deg)', display: 'inline-block' }}>
+            šuplík V. ↘
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">Vyberte si svůj plán</h1>
-          <p className="text-xl text-gray-500 mb-10">
-            Různé plány pro majitele coworkingů i pro freelancery a týmy.
+          <h1 className="text-[40px] md:text-[64px]" style={{ fontFamily: PD_FONT_DISPLAY, letterSpacing: '-0.025em', lineHeight: 0.95, fontWeight: 500, margin: 0, color: PD.ink }}>
+            Ceníky
+          </h1>
+          <p style={{ fontSize: 14, color: PD.inkSoft, marginTop: 10, marginBottom: 28, maxWidth: 600 }}>
+            Dva pohledy: pro provozovatele coworkingů (placený zápis + COW.OS) a pro coworkery (členství s benefity).
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
-              onClick={() => scrollTo('pro-coworkingy')}
-              className="group flex items-center gap-3 px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-md text-base"
-            >
-              <Building2 className="w-5 h-5" />
-              Pro majitele coworkingů
-              <ChevronDown className="w-4 h-4 opacity-70 group-hover:translate-y-0.5 transition-transform" />
-            </button>
-            <button
-              onClick={() => scrollTo('pro-coworkery')}
-              className="group flex items-center gap-3 px-8 py-4 bg-white text-blue-600 border-2 border-blue-600 font-semibold rounded-xl hover:bg-blue-50 transition-colors shadow-md text-base"
-            >
-              <User className="w-5 h-5" />
-              Pro coworkery
-              <ChevronDown className="w-4 h-4 opacity-70 group-hover:translate-y-0.5 transition-transform" />
-            </button>
-          </div>
-        </div>
-      </section>
 
-      {/* ── Coworking plans ─────────────────────────────────────────────── */}
-      <section id="pro-coworkingy" className="py-16 sm:py-24 bg-white scroll-mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-100 text-blue-700 text-sm font-semibold rounded-full mb-4">
-              <Building2 className="w-4 h-4" />Pro majitele coworkingů
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Plány pro coworkingy</h2>
-            <p className="text-gray-500">Zvolte plán podle velikosti a potřeb Vašeho prostoru</p>
-          </div>
-
-          {(() => {
-            // Pre-compute per-tier data once
-            const tierData = PLATFORM_PRICING.map((tier, idx) => {
-              const isLarge  = tier.tier === 'large';
-              const isMedium = tier.tier === 'medium';
-              const isSmall  = tier.tier === 'small';
-              const yearlyPrice     = Math.round(tier.monthlyPrice * 12 * (1 - tier.yearlyDiscount));
-              const cowOsPrice      = isSmall ? 490 : isMedium ? 790 : null;
-              const cowOsMembers    = isSmall ? 25  : isMedium ? 100 : null;
-              const comboPrice      = cowOsPrice ? tier.monthlyPrice + cowOsPrice : null;
-              const comboYearlyPrice = comboPrice ? Math.round(comboPrice * 12 * (1 - tier.yearlyDiscount)) : null;
-              return { tier, idx, isLarge, isMedium, isSmall, yearlyPrice, cowOsPrice, cowOsMembers, comboPrice, comboYearlyPrice };
-            });
-
-            // ── Card renderers ───────────────────────────────────────────
-            const TopCard = ({ tier, idx, isLarge, isSmall, yearlyPrice }: typeof tierData[0]) => {
-              const isLoading = activating === `coworking_${tier.tier}`;
-              return (
-                <div className={`flex flex-col h-full rounded-2xl overflow-hidden transition-all duration-300 ${
-                  idx === 1
-                    ? 'border-2 border-blue-600 shadow-2xl'
-                    : 'border border-gray-200 shadow-sm hover:shadow-md'
-                }`}>
-                  {/* Header */}
-                  <div className={`px-8 py-10 ${idx === 1 ? 'gradient-primary text-white' : 'bg-gray-50'}`}>
-                    {idx === 1 && (
-                      <div className="inline-block px-3 py-1 bg-white/20 text-white rounded-full text-xs font-bold mb-3">
-                        NEJPOPULÁRNĚJŠÍ
-                      </div>
-                    )}
-                    <h3 className={`text-2xl font-bold mb-2 ${idx === 1 ? 'text-white' : 'text-gray-900'}`}>
-                      {tier.name}
-                    </h3>
-                    <p className={`text-sm ${idx === 1 ? 'text-blue-100' : 'text-gray-600'}`}>
-                      {isLarge ? 'Více než 100 míst' : `Pro coworkingy do ${tier.maxSeats} míst`}
-                    </p>
-                  </div>
-
-                  {/* Body — flex-col, list grows → button always at bottom */}
-                  <div className="flex flex-col flex-1 p-8">
-                    <div className="mb-8">
-                      <div className={`text-4xl font-bold mb-2 ${idx === 1 ? 'text-blue-600' : 'text-gray-900'}`}>
-                        {tier.monthlyPrice} Kč
-                      </div>
-                      <p className="text-sm text-gray-600 mb-3">za měsíc</p>
-                      <p className="text-sm text-green-600 font-medium">
-                        nebo {yearlyPrice} Kč/rok
-                        <span className="text-xs text-green-600 block">(20 % sleva)</span>
-                      </p>
-                    </div>
-
-                    {/* Feature list — grows to push button down */}
-                    <ul className="flex-1 space-y-4 mb-6">
-                      <li className="flex items-center gap-3">
-                        <Globe className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900">{tier.includedAddresses} adresa/y</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <BadgeCheck className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900">Štítek „ověřeno" u profilu</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <CalendarPlus className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900">5 eventů měsíčně</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <ShoppingBag className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900">5 inzerátů na marketplace měsíčně</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Award className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900">Standardní podpora</span>
-                      </li>
-                      {!isSmall && (
-                        <li className="flex items-center gap-3">
-                          <Plus className={`w-5 h-5 flex-shrink-0 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                          <span className="text-gray-900 text-sm">Extra adresa: {tier.extraAddressPrice} Kč/měsíc</span>
-                        </li>
-                      )}
-                      <li className="flex items-center gap-3">
-                        <span className="w-5 h-5 flex-shrink-0 text-center text-sm leading-5">🐄</span>
-                        <span className="text-gray-900 text-sm">COW.OS zdarma — do 5 členů</span>
-                      </li>
-                    </ul>
-
-                    {/* CTA always at bottom */}
-                    <div>
-                      <button
-                        onClick={() => handleCoworkingPlan(tier.tier)}
-                        disabled={isLoading}
-                        className={`w-full py-3.5 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
-                          idx === 1
-                            ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-100'
-                            : 'bg-gray-900 text-white hover:bg-gray-800'
-                        } disabled:opacity-60`}
-                      >
-                        {isLoading
-                          ? <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Aktivuji…</>
-                          : <>Začít zdarma <ArrowRight className="w-4 h-4" /></>}
-                      </button>
-                      <p className="text-center text-xs text-green-700 font-semibold mt-2 flex items-center justify-center gap-1">
-                        <Gift className="w-3.5 h-3.5" />30 dní zdarma — pak {tier.monthlyPrice} Kč/měs
-                      </p>
-                      <FreeLink role="coworking" />
-                    </div>
-                  </div>
-                </div>
-              );
-            };
-
-            const BottomCard = ({ tier, idx, isLarge, comboPrice, comboYearlyPrice, cowOsMembers, cowOsPrice }: typeof tierData[0]) => {
-              const isLoadingCombo = activating === `coworking_${tier.tier}_cowos`;
-              return (
-                <div className={`flex flex-col h-full rounded-2xl border-2 overflow-hidden ${
-                  isLarge
-                    ? 'border-amber-300 bg-gradient-to-b from-amber-50 to-white'
-                    : 'border-emerald-300 bg-gradient-to-b from-emerald-50 to-white'
-                }`}>
-                  {/* Header */}
-                  <div className={`px-6 py-5 text-center flex-shrink-0 ${isLarge ? 'bg-amber-100/60' : 'bg-emerald-100/60'}`}>
-                    <span className="text-lg font-bold text-gray-900">🐄 Plná verze + COW.OS</span>
-                    {cowOsPrice && (
-                      <div className="mt-1">
-                        <span className="text-2xl font-bold text-emerald-700">+{cowOsPrice} Kč</span>
-                        <span className="text-sm text-gray-500 ml-1">/ měsíc k plánu</span>
-                      </div>
-                    )}
-                    {comboPrice && (
-                      <div className="mt-0.5 text-xs text-gray-500">
-                        celkem {comboPrice} Kč / měsíc
-                      </div>
-                    )}
-                    {isLarge && (
-                      <div className="mt-1">
-                        <span className="text-lg font-bold text-amber-700">Individuální nabídka</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Body — flex-col, list grows → button always at bottom */}
-                  <div className="flex flex-col flex-1 px-6 py-5">
-                    <ul className="flex-1 space-y-3 mb-5">
-                      <li className="flex items-start gap-2.5 text-sm text-gray-700">
-                        <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                        Vše z plánu {tier.name} výše
-                      </li>
-                      <li className="flex items-start gap-2.5 text-sm text-gray-700">
-                        <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                        Neomezeně inzerátů a eventů
-                      </li>
-                      <li className="flex items-start gap-2.5 text-sm font-semibold text-gray-900">
-                        <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                        {isLarge ? 'COW.OS — 100+ členů, individuální nastavení' : `COW.OS — správa do ${cowOsMembers} členů`}
-                      </li>
-                      <li className="flex items-start gap-2.5 text-sm text-gray-700">
-                        <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                        Automatická fakturace a QR platby
-                      </li>
-                      <li className="flex items-start gap-2.5 text-sm text-gray-700">
-                        <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                        Prolongační engine — auto obnova členství
-                      </li>
-                    </ul>
-
-                    {/* CTA always at bottom */}
-                    <div>
-                      {comboYearlyPrice && (
-                        <p className="text-xs text-emerald-700 font-medium text-center mb-4">
-                          nebo {comboYearlyPrice} Kč/rok (sleva 20 %)
-                        </p>
-                      )}
-                      {isLarge ? (
-                        <a
-                          href="mailto:info@coworkings.cz?subject=Zájem o Velký cowork + COW.OS"
-                          className="w-full py-3.5 px-4 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-colors flex items-center justify-center gap-2 shadow-md"
-                        >
-                          Kontaktovat nás <ArrowRight className="w-4 h-4" />
-                        </a>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => handleCoworkingPlan(`${tier.tier}_cowos`)}
-                            disabled={isLoadingCombo}
-                            className="w-full py-3.5 px-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2 shadow-md shadow-emerald-100"
-                          >
-                            {isLoadingCombo
-                              ? <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Aktivuji…</>
-                              : <>Začít s plnou verzí a COW.OS <ArrowRight className="w-4 h-4" /></>}
-                          </button>
-                          <p className="text-center text-xs text-emerald-700 font-semibold mt-2 flex items-center justify-center gap-1">
-                            <Gift className="w-3.5 h-3.5" />30 dní zdarma — pak +{cowOsPrice} Kč/měs
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            };
-
-            return (
-              <>
-                {/* ── MOBILE: horizontal snap carousel ── */}
-                <div className="relative md:hidden mb-8">
-                  <div
-                    ref={scrollContainerRef}
-                    className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-4 px-4"
-                    style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
-                    onScroll={(e) => {
-                      const el = e.currentTarget;
-                      const cols = el.querySelectorAll('[data-col]');
-                      let nearest = 0;
-                      let minDist = Infinity;
-                      cols.forEach((col, i) => {
-                        const dist = Math.abs((col as HTMLElement).offsetLeft - el.scrollLeft - 16);
-                        if (dist < minDist) { minDist = dist; nearest = i; }
-                      });
-                      setActiveCol(nearest);
-                    }}
-                  >
-                    {tierData.map((td) => (
-                      <div key={td.tier.tier} data-col className="flex-none w-[88vw] snap-start flex flex-col gap-4">
-                        <TopCard {...td} />
-                        <BottomCard {...td} />
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Arrow buttons */}
-                  <button
-                    onClick={() => scrollToColumn(Math.max(0, activeCol - 1))}
-                    disabled={activeCol === 0}
-                    className="absolute left-0 top-[38%] -translate-y-1/2 -translate-x-1 w-9 h-9 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 disabled:opacity-30 z-10"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => scrollToColumn(Math.min(tierData.length - 1, activeCol + 1))}
-                    disabled={activeCol === tierData.length - 1}
-                    className="absolute right-0 top-[38%] -translate-y-1/2 translate-x-1 w-9 h-9 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 disabled:opacity-30 z-10"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-
-                  {/* Dot indicators */}
-                  <div className="flex justify-center gap-2 mt-4">
-                    {tierData.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => scrollToColumn(i)}
-                        className={`w-2 h-2 rounded-full transition-all ${i === activeCol ? 'bg-blue-600 w-5' : 'bg-gray-300'}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                {/* ── DESKTOP: 2-row grid (row 1 = top cards, row 2 = PRO blocks) ── */}
-                {/* Both rows auto-equalize height across all 3 columns */}
-                <div className="hidden md:grid md:grid-cols-3 gap-8 mb-12">
-                  {/* Row 1: top cards */}
-                  {tierData.map((td) => <TopCard key={`top-${td.tier.tier}`} {...td} />)}
-                  {/* Row 2: PRO + COW.OS blocks */}
-                  {tierData.map((td) => <BottomCard key={`bot-${td.tier.tier}`} {...td} />)}
-                </div>
-              </>
-            );
-          })()}
-
-          {/* Info bar */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-8 text-center">
-            <p className="text-gray-600 mb-3">💳 Všechny ceny jsou bez DPH. Fakturace měsíčně nebo ročně. Zrušení kdykoliv.</p>
-            <p className="text-sm text-gray-600">
-              Máte dotazy?{' '}
-              <a href="#faq" className="text-blue-600 font-semibold hover:underline">Podívejte se na FAQ</a>
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Features comparison ─────────────────────────────────────────── */}
-      <section className="py-16 sm:py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Srovnání funkcí</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b-2 border-gray-200">
-                  <th className="text-left py-4 px-6 font-bold text-gray-900 w-1/3">Funkce</th>
-                  <th className="text-center py-4 px-6 font-bold text-gray-900">Malý</th>
-                  <th className="text-center py-4 px-6 font-bold text-gray-900 bg-blue-50">Střední</th>
-                  <th className="text-center py-4 px-6 font-bold text-gray-900">Velký</th>
-                </tr>
-              </thead>
-              <tbody>
-                {features.map((feature, idx) => (
-                  <tr key={idx} className={`border-b border-gray-100 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                    <td className="py-4 px-6 text-gray-900 font-medium">{feature.name}</td>
-                    <td className="py-4 px-6 text-center">
-                      {feature.small ? <Check className="w-5 h-5 text-green-600 mx-auto" /> : <X className="w-5 h-5 text-gray-300 mx-auto" />}
-                    </td>
-                    <td className="py-4 px-6 text-center bg-blue-50/50">
-                      {feature.medium ? <Check className="w-5 h-5 text-green-600 mx-auto" /> : <X className="w-5 h-5 text-gray-300 mx-auto" />}
-                    </td>
-                    <td className="py-4 px-6 text-center">
-                      {feature.large ? <Check className="w-5 h-5 text-green-600 mx-auto" /> : <X className="w-5 h-5 text-gray-300 mx-auto" />}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-8 p-5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-4">
-            <span className="text-2xl flex-shrink-0">🏷️</span>
-            <div>
-              <p className="font-semibold text-amber-900 mb-1">Special Deal — exkluzivně pro roční plány</p>
-              <p className="text-sm text-amber-800">
-                Při roční registraci aktivujte vlastní <strong>Special Deal</strong> — zvýhodněnou nabídku
-                zobrazenou na kartě vašeho coworkingu ve výpisu i v detailu. Coworkeři mohou filtrovat
-                coworkingy se Special Dealem.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Coworker membership ─────────────────────────────────────────── */}
-      <section id="pro-coworkery" className="py-16 sm:py-24 bg-white scroll-mt-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-orange-100 text-orange-700 text-sm font-semibold rounded-full mb-4">
-              <User className="w-4 h-4" />Pro coworkery
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Členství pro coworkery</h2>
-            <p className="text-gray-500">Přidej se do komunity a využívej výhody členství</p>
-          </div>
-
-          {/* Shared card data */}
-          {(() => {
-            const coworkerCards = [
-              {
-                key: 'free',
-                label: <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 bg-gray-200 text-gray-600 rounded-full mb-2">Základní</span>,
-                title: 'Zdarma',
-                subtitle: 'Základní přístup bez závazků',
-                price: <><span className="text-5xl font-bold text-gray-700">0</span><span className="text-gray-400 mb-2 text-lg">Kč</span></>,
-                priceNote: <p className="text-sm text-gray-400">navždy zdarma</p>,
-                benefits: [
-                  '1 aktivní inzerát na marketplace',
-                  '1 event, který pořádáte/spolupořádáte',
-                  'Možnost účastnit se eventů a akcí',
-                ],
-                benefitColor: 'text-green-500',
-                cta: (
-                  <Link href="/registrace?role=coworker&plan=free"
-                    className="w-full py-3.5 px-4 bg-gray-200 text-gray-800 font-bold rounded-xl hover:bg-gray-300 transition-colors text-center block">
-                    Registrovat zdarma
-                  </Link>
-                ),
-                wrapperClass: 'border-2 border-gray-200 hover:border-gray-400 hover:shadow-lg bg-gray-50',
-              },
-              {
-                key: 'monthly',
-                label: null,
-                title: 'Měsíční',
-                subtitle: 'Flexibilní, bez závazků',
-                price: <><span className="text-5xl font-bold text-gray-900">{COWORKER_MEMBERSHIP.monthlyPrice}</span><span className="text-gray-500 mb-2 text-lg">Kč</span></>,
-                priceNote: <p className="text-sm text-gray-500">měsíčně</p>,
-                benefits: COWORKER_MEMBERSHIP_BENEFITS,
-                benefitColor: 'text-green-500',
-                cta: (
-                  <>
-                    <button onClick={() => handleCoworkerPlan('monthly')} disabled={activating === 'coworker_monthly'}
-                      className="w-full py-3.5 px-4 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
-                      {activating === 'coworker_monthly'
-                        ? <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Aktivuji…</>
-                        : <>Začít zdarma <ArrowRight className="w-4 h-4" /></>}
-                    </button>
-                    <p className="text-center text-xs text-green-700 font-semibold mt-2 flex items-center justify-center gap-1">
-                      <Gift className="w-3.5 h-3.5" />30 dní zdarma — pak {COWORKER_MEMBERSHIP.monthlyPrice} Kč/měs
-                    </p>
-                    <FreeLink role="coworker" />
-                  </>
-                ),
-                wrapperClass: 'border-2 border-gray-200 hover:border-blue-400 hover:shadow-lg',
-              },
-              {
-                key: 'yearly',
-                label: (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-full whitespace-nowrap">
-                    NEJLEPŠÍ VOLBA
-                  </div>
-                ),
-                title: 'Roční',
-                subtitle: 'Nejlepší cena, platba jednou ročně',
-                price: (
-                  <>
-                    <span className="text-5xl font-bold text-blue-600">{yearlyMonthlyPrice}</span>
-                    <span className="text-blue-400 mb-2 text-lg">Kč<span className="text-sm font-normal">/měs</span></span>
-                  </>
-                ),
-                priceNote: (
-                  <>
-                    <div className="flex items-center gap-2 mt-1.5 mb-4">
-                      <p className="text-sm text-gray-500">platba ročně {COWORKER_MEMBERSHIP.yearlyPrice} Kč</p>
-                      <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                        Sleva {yearlyDiscount}&nbsp;%
-                      </span>
-                    </div>
-                    <span className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-lg px-3 py-1.5 text-xs text-green-700 font-medium">
-                      <Check className="w-3.5 h-3.5" />Ušetříš {monthlySaving} Kč oproti měsíčnímu
-                    </span>
-                  </>
-                ),
-                benefits: COWORKER_MEMBERSHIP_BENEFITS,
-                benefitColor: 'text-blue-500',
-                cta: (
-                  <>
-                    <button onClick={() => handleCoworkerPlan('yearly')} disabled={activating === 'coworker_yearly'}
-                      className="w-full py-3.5 px-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-60 shadow-lg shadow-blue-200 flex items-center justify-center gap-2">
-                      {activating === 'coworker_yearly'
-                        ? <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Aktivuji…</>
-                        : <>Začít zdarma <ArrowRight className="w-4 h-4" /></>}
-                    </button>
-                    <p className="text-center text-xs text-green-700 font-semibold mt-2 flex items-center justify-center gap-1">
-                      <Gift className="w-3.5 h-3.5" />30 dní zdarma — pak {COWORKER_MEMBERSHIP.yearlyPrice} Kč/rok
-                    </p>
-                    <FreeLink role="coworker" />
-                  </>
-                ),
-                wrapperClass: 'border-2 border-blue-600 shadow-2xl',
-              },
-              {
-                key: 'team',
-                label: <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 bg-purple-100 text-purple-600 rounded-full mb-2">Brzy dostupné</span>,
-                title: 'Firemní',
-                subtitle: `Tým až ${COWORKER_MEMBERSHIP.teamMaxMembers} lidí`,
-                price: <span className="text-3xl font-bold text-purple-400">Připravujeme</span>,
-                priceNote: <p className="text-sm text-gray-400 mt-1">Cena bude brzy zveřejněna</p>,
-                benefits: [...COWORKER_MEMBERSHIP_BENEFITS, 'Správa celého týmu z jednoho účtu'],
-                benefitColor: 'text-purple-300',
-                cta: (
-                  <button disabled className="w-full py-3.5 px-4 bg-gray-200 text-gray-400 font-bold rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
-                    Připravujeme
-                  </button>
-                ),
-                wrapperClass: 'border-2 border-gray-200 opacity-75',
-              },
-            ];
-
-            const CoworkerCard = ({ card }: { card: typeof coworkerCards[0] }) => (
-              <div className={`rounded-2xl p-8 flex flex-col h-full relative transition-all ${card.wrapperClass}`}>
-                {card.label}
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">{card.title}</h3>
-                  <p className="text-sm text-gray-500">{card.subtitle}</p>
-                </div>
-                <div className="mb-6">
-                  <div className="flex items-end gap-1">{card.price}</div>
-                  {card.priceNote}
-                </div>
-                {/* Benefits — flex-grow so CTA is pushed to bottom */}
-                <ul className="flex-1 space-y-3 mb-6">
-                  {card.benefits.map((b, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-gray-700">
-                      <Check className={`w-4 h-4 ${card.benefitColor} flex-shrink-0 mt-0.5`} />{b}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-auto">{card.cta}</div>
-              </div>
-            );
-
-            return (
-              <>
-                {/* ── MOBILE: snap carousel ── */}
-                <div className="relative sm:hidden mb-8">
-                  <div
-                    ref={scrollCoworkerRef}
-                    className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-4 px-4"
-                    style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
-                    onScroll={(e) => {
-                      const el = e.currentTarget;
-                      const cols = el.querySelectorAll('[data-ccol]');
-                      let nearest = 0; let minDist = Infinity;
-                      cols.forEach((col, i) => {
-                        const dist = Math.abs((col as HTMLElement).offsetLeft - el.scrollLeft - 16);
-                        if (dist < minDist) { minDist = dist; nearest = i; }
-                      });
-                      setActiveCoworkerCol(nearest);
-                    }}
-                  >
-                    {coworkerCards.map((card) => (
-                      <div key={card.key} data-ccol className="flex-none w-[88vw] snap-start">
-                        <CoworkerCard card={card} />
-                      </div>
-                    ))}
-                  </div>
-                  <button onClick={() => scrollToCoworkerColumn(Math.max(0, activeCoworkerCol - 1))}
-                    disabled={activeCoworkerCol === 0}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-9 h-9 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 disabled:opacity-30 z-10">
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <button onClick={() => scrollToCoworkerColumn(Math.min(coworkerCards.length - 1, activeCoworkerCol + 1))}
-                    disabled={activeCoworkerCol === coworkerCards.length - 1}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 w-9 h-9 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 disabled:opacity-30 z-10">
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                  <div className="flex justify-center gap-2 mt-4">
-                    {coworkerCards.map((_, i) => (
-                      <button key={i} onClick={() => scrollToCoworkerColumn(i)}
-                        className={`w-2 h-2 rounded-full transition-all ${i === activeCoworkerCol ? 'bg-blue-600 w-5' : 'bg-gray-300'}`} />
-                    ))}
-                  </div>
-                </div>
-
-                {/* ── DESKTOP: equal-height 4-column grid ── */}
-                <div className="hidden sm:grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
-                  {coworkerCards.map((card) => (
-                    <CoworkerCard key={card.key} card={card} />
-                  ))}
-                </div>
-              </>
-            );
-          })()}
-        </div>
-      </section>
-
-      {/* ── FAQ ─────────────────────────────────────────────────────────── */}
-      <section className="py-16 sm:py-24 bg-gray-50" id="faq">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Často kladené otázky</h2>
-          <div className="space-y-4">
-            {faqs.map((faq, idx) => (
-              <details
-                key={idx}
-                className="group bg-white rounded-xl border border-gray-200 p-6 hover:border-blue-300 transition-colors"
+          {/* Audience toggle */}
+          <div style={{ display: 'inline-flex', gap: 0, border: `1.5px solid ${PD.ink}`, marginBottom: 22, background: PD.paperWhite, boxShadow: '3px 3px 0 rgba(0,0,0,0.08)' }}>
+            {(['majitele', 'coworkery'] as Audience[]).map((a) => (
+              <button
+                key={a}
+                onClick={() => setAudience(a)}
+                style={{
+                  padding: '10px 18px', fontSize: 14, fontFamily: 'inherit',
+                  background: audience === a ? PD.ink : 'transparent',
+                  color: audience === a ? PD.paperWhite : PD.ink,
+                  border: 'none', cursor: 'pointer', fontWeight: audience === a ? 600 : 400,
+                  borderRight: a === 'majitele' ? `1px solid ${PD.ink}` : 'none',
+                }}
               >
-                <summary className="flex items-center justify-between cursor-pointer font-semibold text-gray-900 select-none list-none">
-                  <span className="flex items-center gap-3">
-                    <HelpCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                    {faq.question}
-                  </span>
-                  <span className="text-2xl text-gray-400 group-open:text-blue-600 transition-colors ml-4 flex-shrink-0">+</span>
-                </summary>
-                <p className="mt-4 text-gray-600 ml-8">{faq.answer}</p>
-              </details>
+                {a === 'majitele' ? 'Pro provozovatele' : 'Pro coworkery'}
+              </button>
             ))}
           </div>
 
-          {/* Bottom CTA strip */}
-          <div className="mt-12 p-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl text-center text-white">
-            <Zap className="w-8 h-8 mx-auto mb-3 text-yellow-300" />
-            <h3 className="text-xl font-bold mb-2">Připraveni začít?</h3>
-            <p className="text-blue-100 mb-6 text-sm">Žádná platební karta. Prvních 30 dní zdarma.</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
-                onClick={() => scrollTo('pro-coworkingy')}
-                className="px-6 py-3 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-colors"
-              >
-                Mám coworking
-              </button>
-              <button
-                onClick={() => scrollTo('pro-coworkery')}
-                className="px-6 py-3 bg-blue-500 text-white font-bold rounded-xl hover:bg-blue-400 transition-colors border border-blue-400"
-              >
-                Jsem coworker
-              </button>
+          {/* Yearly toggle */}
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 32 }}>
+            <span style={{ fontSize: 14, color: yearly ? PD.inkMuted : PD.ink, fontWeight: yearly ? 400 : 600 }}>Měsíčně</span>
+            <button
+              onClick={() => setYearly(!yearly)}
+              style={{
+                width: 48, height: 26, background: yearly ? PD.moss : PD.rule,
+                borderRadius: 99, border: `1.5px solid ${PD.ink}`, position: 'relative', cursor: 'pointer',
+                padding: 0,
+              }}
+              aria-label="Přepnout fakturaci"
+            >
+              <span
+                style={{
+                  position: 'absolute', top: 1, left: yearly ? 23 : 1,
+                  width: 20, height: 20, background: PD.paperWhite,
+                  border: `1.5px solid ${PD.ink}`, borderRadius: '50%',
+                  transition: 'left 180ms ease',
+                }}
+              />
+            </button>
+            <span style={{ fontSize: 14, color: yearly ? PD.ink : PD.inkMuted, fontWeight: yearly ? 600 : 400 }}>
+              Ročně
+              <span style={{ fontFamily: PD_FONT_HAND, fontSize: 17, color: PD.margin, marginLeft: 6 }}>
+                {audience === 'majitele' ? '−20 %' : '−50 %'}
+              </span>
+            </span>
+          </div>
+
+          {/* Plans */}
+          {audience === 'majitele' ? (
+            <div className="grid grid-cols-1 md:grid-cols-3" style={{ gap: 22, marginBottom: 50 }}>
+              {PLATFORM_PRICING.map((p, i) => {
+                const monthly = p.monthlyPrice;
+                const yearlyMonthly = Math.round(monthly * (1 - p.yearlyDiscount));
+                const display = yearly ? yearlyMonthly : monthly;
+                const tones = [PD.accent, PD.amber, PD.coral];
+                const seeds = [13, 27, 41];
+                const isMid = i === 1;
+                return (
+                  <div
+                    key={p.tier}
+                    style={{
+                      background: PD.paperWhite, border: `1.5px solid ${tones[i]}`,
+                      padding: '24px 22px 22px', position: 'relative',
+                      transform: `rotate(${i === 0 ? -0.6 : i === 1 ? 0.4 : -0.4}deg)`,
+                      boxShadow: isMid ? `5px 5px 0 ${PD.ink}` : '3px 4px 0 rgba(0,0,0,0.08)',
+                    }}
+                  >
+                    <Washi color={tones[i]} seed={seeds[i]} />
+                    {isMid && (
+                      <div style={{ position: 'absolute', top: -14, right: 14 }}>
+                        <Stamp color={PD.margin} rotate={6}>doporučujeme</Stamp>
+                      </div>
+                    )}
+                    <div style={{ fontFamily: PD_FONT_MONO, fontSize: 11, letterSpacing: 1.5, color: tones[i], textTransform: 'uppercase', marginBottom: 10, fontWeight: 700 }}>
+                      {p.name}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
+                      <span style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 48, fontWeight: 500, letterSpacing: '-0.04em', color: PD.ink, lineHeight: 1 }}>{display}</span>
+                      <span style={{ fontSize: 14, color: PD.inkMuted }}>Kč/měs</span>
+                    </div>
+                    {yearly && (
+                      <div style={{ fontFamily: PD_FONT_HAND, fontSize: 16, color: PD.margin, marginBottom: 10 }}>
+                        ušetříš {Math.round((monthly - yearlyMonthly) * 12)} Kč/rok
+                      </div>
+                    )}
+                    <div style={{ borderTop: `1px dashed ${PD.ruleSoft}`, paddingTop: 14, marginTop: 14 }}>
+                      <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
+                        <li style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                          <span style={{ color: PD.moss }}>✓</span>
+                          <span>Až <b>{p.maxSeats === 99999 ? 'neomezeně' : p.maxSeats}</b> míst, <b>{p.maxArea === 99999 ? 'neomezeně' : `${p.maxArea} m²`}</b></span>
+                        </li>
+                        <li style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                          <span style={{ color: PD.moss }}>✓</span>
+                          <span><b>{p.includedAddresses}</b> adresa{p.includedAddresses === 1 ? '' : 'y'} v ceně, další {p.extraAddressPrice} Kč</span>
+                        </li>
+                        <li style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                          <span style={{ color: PD.moss }}>✓</span>
+                          <span>COW.OS — správa členů, fakturace, QR vstupy</span>
+                        </li>
+                        <li style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                          <span style={{ color: PD.moss }}>✓</span>
+                          <span>Profil v adresáři + zvýraznění</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <Link
+                      href="/cow-os"
+                      style={{
+                        display: 'block', textAlign: 'center', marginTop: 16,
+                        padding: '12px', background: isMid ? PD.ink : 'transparent',
+                        color: isMid ? PD.paperWhite : PD.ink,
+                        border: `1.5px solid ${PD.ink}`, fontSize: 14, fontWeight: 600,
+                        textDecoration: 'none',
+                      }}
+                    >
+                      Vyzkoušet 30 dní zdarma →
+                    </Link>
+                  </div>
+                );
+              })}
             </div>
-            <p className="text-xs text-blue-300 mt-4">
-              Nebo{' '}
-              <Link href="/registrace?plan=free" className="underline hover:text-white">
-                základní registrace zdarma
-              </Link>
-            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 22, marginBottom: 50, maxWidth: 900 }}>
+              <div style={{ background: PD.paperWhite, border: `1.5px solid ${PD.coral}`, padding: '24px 22px 22px', position: 'relative', transform: 'rotate(-0.4deg)', boxShadow: '3px 4px 0 rgba(0,0,0,0.08)' }}>
+                <Washi color={PD.coral} seed={91} />
+                <div style={{ fontFamily: PD_FONT_MONO, fontSize: 11, letterSpacing: 1.5, color: PD.coral, textTransform: 'uppercase', marginBottom: 10, fontWeight: 700 }}>
+                  Coworker · solo
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
+                  <span style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 56, fontWeight: 500, letterSpacing: '-0.04em', color: PD.ink, lineHeight: 1 }}>
+                    {yearly ? COWORKER_MEMBERSHIP.yearlyMonthlyPrice : COWORKER_MEMBERSHIP.monthlyPrice}
+                  </span>
+                  <span style={{ fontSize: 14, color: PD.inkMuted }}>Kč/měs</span>
+                </div>
+                {yearly && (
+                  <div style={{ fontFamily: PD_FONT_HAND, fontSize: 16, color: PD.margin, marginBottom: 10 }}>
+                    ušetříš {COWORKER_MEMBERSHIP.yearlyMonthlySaving} Kč/rok
+                  </div>
+                )}
+                <div style={{ borderTop: `1px dashed ${PD.ruleSoft}`, paddingTop: 14, marginTop: 14 }}>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
+                    {COWORKER_MEMBERSHIP_BENEFITS.map((b) => (
+                      <li key={b} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                        <span style={{ color: PD.moss }}>✓</span>
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <Link
+                  href="/registrace"
+                  style={{
+                    display: 'block', textAlign: 'center', marginTop: 16,
+                    padding: '12px', background: PD.ink, color: PD.paperWhite,
+                    border: `1.5px solid ${PD.ink}`, fontSize: 14, fontWeight: 600,
+                    textDecoration: 'none',
+                  }}
+                >
+                  Stát se členem →
+                </Link>
+              </div>
+
+              <div style={{ background: PD.paperWhite, border: `1.5px solid ${PD.amber}`, padding: '24px 22px 22px', position: 'relative', transform: 'rotate(0.4deg)', boxShadow: '5px 5px 0 ' + PD.ink }}>
+                <Washi color={PD.amber} seed={73} />
+                <div style={{ position: 'absolute', top: -14, right: 14 }}>
+                  <Stamp color={PD.amber} rotate={4}>tým až 5</Stamp>
+                </div>
+                <div style={{ fontFamily: PD_FONT_MONO, fontSize: 11, letterSpacing: 1.5, color: PD.amber, textTransform: 'uppercase', marginBottom: 10, fontWeight: 700 }}>
+                  Coworker · tým
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
+                  <span style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 56, fontWeight: 500, letterSpacing: '-0.04em', color: PD.ink, lineHeight: 1 }}>
+                    {Math.round(COWORKER_MEMBERSHIP.teamYearlyPrice / 12)}
+                  </span>
+                  <span style={{ fontSize: 14, color: PD.inkMuted }}>Kč/měs · ročně</span>
+                </div>
+                <div style={{ fontFamily: PD_FONT_HAND, fontSize: 16, color: PD.margin, marginBottom: 10 }}>
+                  {COWORKER_MEMBERSHIP.teamMaxMembers} lidí · {COWORKER_MEMBERSHIP.teamYearlyPrice} Kč/rok
+                </div>
+                <div style={{ borderTop: `1px dashed ${PD.ruleSoft}`, paddingTop: 14, marginTop: 14 }}>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
+                    <li style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                      <span style={{ color: PD.moss }}>✓</span>
+                      <span>Vše co solo plán pro každého z 5 členů</span>
+                    </li>
+                    <li style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                      <span style={{ color: PD.moss }}>✓</span>
+                      <span>Společný team profil</span>
+                    </li>
+                    <li style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                      <span style={{ color: PD.moss }}>✓</span>
+                      <span>1 fakturace pro celý tým</span>
+                    </li>
+                    <li style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                      <span style={{ color: PD.moss }}>✓</span>
+                      <span>5× 1 návštěva zdarma každý měsíc</span>
+                    </li>
+                  </ul>
+                </div>
+                <Link
+                  href="/registrace"
+                  style={{
+                    display: 'block', textAlign: 'center', marginTop: 16,
+                    padding: '12px', background: PD.amber, color: '#fff',
+                    border: `1.5px solid ${PD.ink}`, fontSize: 14, fontWeight: 600,
+                    textDecoration: 'none',
+                  }}
+                >
+                  Založit tým →
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* FAQ */}
+          <div style={{ marginTop: 30 }}>
+            <div style={{ fontFamily: PD_FONT_MONO, fontSize: 11, letterSpacing: 1.5, color: PD.inkMuted, textTransform: 'uppercase', marginBottom: 8 }}>
+              — Často kladené otázky
+            </div>
+            <div style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 24, fontWeight: 500, letterSpacing: '-0.02em', color: PD.ink, marginBottom: 18 }}>
+              Co se nejvíc ptáte
+            </div>
+            <div style={{ background: PD.paperWhite, border: `1.5px solid ${PD.ink}`, boxShadow: '4px 4px 0 rgba(0,0,0,0.08)' }}>
+              {FAQ.map((item, i) => {
+                const open = openFaq === i;
+                return (
+                  <div key={i} style={{ borderBottom: i < FAQ.length - 1 ? `1px dashed ${PD.rule}` : 'none' }}>
+                    <button
+                      onClick={() => setOpenFaq(open ? null : i)}
+                      style={{ width: '100%', padding: '16px 18px', background: 'transparent', border: 'none', textAlign: 'left', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, fontFamily: 'inherit' }}
+                    >
+                      <span style={{ fontSize: 15, fontWeight: 500, color: PD.ink }}>{item.q}</span>
+                      <span style={{ fontFamily: PD_FONT_HAND, fontSize: 22, color: PD.margin, transform: open ? 'rotate(45deg)' : 'rotate(0)', transition: 'transform 200ms ease', display: 'inline-block' }}>+</span>
+                    </button>
+                    {open && (
+                      <div style={{ padding: '0 18px 18px', fontFamily: PD_FONT_HAND, fontSize: 18, lineHeight: 1.5, color: PD.inkSoft }}>
+                        {item.a}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </section>
+      </NotebookPaper>
     </div>
   );
 }

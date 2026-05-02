@@ -1,349 +1,157 @@
-import { Check, X, Globe, Users, Award, HelpCircle, Plus } from 'lucide-react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { PLATFORM_PRICING, COWORKER_MEMBERSHIP } from '@/lib/types';
+import { PD, PD_FONT_DISPLAY, PD_FONT_BODY, PD_FONT_HAND, PD_FONT_MONO } from '@/components/paper-diary/tokens';
+import { NotebookPaper, Washi, Stamp } from '@/components/paper-diary/primitives';
+import { PLATFORM_PRICING } from '@/lib/types';
+
+export const metadata: Metadata = {
+  title: 'Pro coworkingy | COWORKINGS.cz',
+  description: 'Zviditelni svůj coworking, získej rezervace a spravuj členy přes COW.OS.',
+  alternates: { canonical: '/pro-coworkingy' },
+};
+
+const BENEFITS = [
+  { icon: '👀', title: 'Vidí tě 10k+ coworkerů', desc: 'Profil v adresáři + special deal badge na kartě.' },
+  { icon: '📅', title: 'Eventy a workshopy', desc: 'Přidávej vlastní akce, dostávej je do kalendáře.' },
+  { icon: '🏷️', title: 'Marketplace', desc: 'Inzeruj nabídky práce, zasedaček, sdílených stolů.' },
+  { icon: '🐄', title: 'COW.OS — admin v ceně', desc: 'Správa členů, automatická fakturace, QR vstupy.' },
+  { icon: '📊', title: 'Analytika profilu', desc: 'Statistiky návštěvnosti, MRR, top dny v měsíci.' },
+  { icon: '⭐', title: 'Email podpora', desc: 'Reagujeme do 24 h. Žádný robot, jen lidi.' },
+];
 
 export default function ProCoworkingPage() {
-  const features = [
-    { name: 'Profil coworkingu', free: true, small: true, medium: true, large: true },
-    { name: 'Fotogalerie', free: false, small: true, medium: true, large: true },
-    { name: 'Vybavení', free: false, small: true, medium: true, large: true },
-    { name: 'Ceny', free: false, small: true, medium: true, large: true },
-    { name: 'Rezervační systém', free: false, small: false, medium: true, large: true },
-    { name: 'Event management', free: false, small: false, medium: true, large: true },
-    { name: 'Analytics', free: false, small: false, medium: false, large: true },
-    { name: 'Email podpora', free: false, small: true, medium: true, large: true },
-    { name: 'Prioritní podpora', free: false, small: false, medium: true, large: true },
-    { name: 'Dedikovaný account manager', free: false, small: false, medium: false, large: true },
-  ];
-
-  const faqs = [
-    {
-      question: 'Jak dlouho trvá aktivace profilu?',
-      answer:
-        'Profil je aktivován ihned po registraci a zaplacení. Ověření údajů trvá 1-2 pracovní dny.',
-    },
-    {
-      question: 'Mohu během smlouvy změnit plán?',
-      answer:
-        'Ano, plán můžete změnit kdykoli. Nový plán se projeví v příští fakturaci.',
-    },
-    {
-      question: 'Jaký je minimální závazek?',
-      answer:
-        'Minimální závazek je 1 měsíc. Po uplynutí měsíce si můžete plán změnit nebo rušit.',
-    },
-    {
-      question: 'Je možné zálohovat za více měsíců?',
-      answer:
-        'Ano, při roční smlouvě získáte slevu 20% na cenu měsíčního plánu.',
-    },
-    {
-      question: 'Jak fungují dodatečné adresy?',
-      answer:
-        'Každá extra adresa Vašeho coworkingu se fakturuje zvlášť. Cena je uvedena v plánu.',
-    },
-    {
-      question: 'Poskytujete bezplatnou migraci z jiné platformy?',
-      answer:
-        'Ano, naši specialisté Vám s migrací dat pomohou zdarma. Kontaktujte náš support.',
-    },
-  ];
-
   return (
-    <div className="w-full bg-white">
-      {/* Hero Section */}
-      <section className="py-16 sm:py-24 bg-gradient-to-br from-blue-50 to-orange-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            Cenové plány pro coworkingy
+    <div style={{ maxWidth: 1440, margin: '0 auto', background: PD.paper, fontFamily: PD_FONT_BODY }}>
+      {/* Hero */}
+      <NotebookPaper style={{ padding: '40px 20px 50px', position: 'relative' }}>
+        <div className="md:!pl-24 md:!pr-14 md:!pt-12">
+          <div style={{ fontFamily: PD_FONT_HAND, fontSize: 24, color: PD.margin, marginBottom: 6, transform: 'rotate(-1deg)', display: 'inline-block' }}>
+            ↘ pro provozovatele
+          </div>
+          <h1 className="text-[44px] md:text-[80px]" style={{ fontFamily: PD_FONT_DISPLAY, letterSpacing: '-0.025em', lineHeight: 0.95, fontWeight: 500, margin: '0 0 14px', color: PD.ink, textWrap: 'balance', maxWidth: 1000 }}>
+            Provozuješ coworking?{' '}
+            <span style={{ fontStyle: 'italic', fontWeight: 400, color: PD.accent }}>Postav ho do reflektorů.</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            Zvolte si plán, který vyhovuje velikosti a potřebám Vašeho coworkingu
+          <p style={{ fontSize: 17, lineHeight: 1.5, color: PD.inkSoft, margin: 0, maxWidth: 680 }}>
+            Zviditelni profil, získej nové členy, spravuj fakturaci a QR vstupy přes COW.OS — to vše
+            z jednoho ceníku. {PLATFORM_PRICING[0].monthlyPrice} Kč/měs s 20 % slevou ročně.
           </p>
-        </div>
-      </section>
 
-      {/* Pricing Cards */}
-      <section className="py-16 sm:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {PLATFORM_PRICING.map((tier, idx) => {
-              const yearlyPrice = Math.round(
-                tier.monthlyPrice * 12 * (1 - tier.yearlyDiscount)
-              );
-              return (
-                <div
-                  key={tier.tier}
-                  className={`rounded-2xl overflow-hidden transition-all duration-300 ${
-                    idx === 1
-                      ? 'border-2 border-blue-600 shadow-2xl md:scale-105'
-                      : 'border border-gray-200 shadow-sm hover:shadow-md'
-                  }`}
-                >
-                  <div
-                    className={`px-8 py-10 ${
-                      idx === 1
-                        ? 'gradient-primary text-white'
-                        : 'bg-gray-50'
-                    }`}
-                  >
-                    {idx === 1 && (
-                      <div className="inline-block px-3 py-1 bg-white/20 text-white rounded-full text-xs font-bold mb-3">
-                        NEJPOPULÁRNĚJŠÍ
-                      </div>
-                    )}
-                    <h3 className={`text-2xl font-bold mb-2 ${idx === 1 ? 'text-white' : 'text-gray-900'}`}>
-                      {tier.name}
-                    </h3>
-                    <p className={`text-sm ${idx === 1 ? 'text-blue-100' : 'text-gray-600'}`}>
-                      Pro coworkingy do {tier.maxSeats} míst
-                    </p>
-                  </div>
-
-                  <div className="p-8">
-                    {/* Price */}
-                    <div className="mb-8">
-                      <div className={`text-4xl font-bold mb-2 ${idx === 1 ? 'text-blue-600' : 'text-gray-900'}`}>
-                        {tier.monthlyPrice} Kč
-                      </div>
-                      <p className="text-sm text-gray-600 mb-3">za měsíc</p>
-                      <p className="text-sm text-green-600 font-medium">
-                        nebo {yearlyPrice} Kč/rok
-                        <span className="text-xs text-green-600 block">
-                          (20% sleva)
-                        </span>
-                      </p>
-                    </div>
-
-                    {/* Features */}
-                    <ul className="space-y-4 mb-8">
-                      <li className="flex items-center gap-3">
-                        <Users className={`w-5 h-5 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900">Až {tier.maxSeats} míst</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Globe className={`w-5 h-5 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900">
-                          {tier.includedAddresses} adresa/y
-                        </span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Award className={`w-5 h-5 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900">Standardní podpora</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Plus className={`w-5 h-5 ${idx === 1 ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-gray-900 text-sm">
-                          Extra adresa: {tier.extraAddressPrice} Kč/měsíc
-                        </span>
-                      </li>
-                    </ul>
-
-                    {/* CTA Button */}
-                    <button
-                      className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors ${
-                        idx === 1
-                          ? 'bg-blue-600 text-white hover:bg-blue-700'
-                          : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                      }`}
-                    >
-                      Zaregistrovat se
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Pricing Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-8 text-center">
-            <p className="text-gray-600 mb-3">
-              💳 Všechny ceny jsou bez DPH. Fakturace měsíčně nebo ročně.
-            </p>
-            <p className="text-sm text-gray-600">
-              Máte dotazy? <Link href="#faq" className="text-blue-600 font-semibold hover:underline">Podívejte se na často kladené otázky</Link>
-            </p>
+          <div style={{ display: 'flex', gap: 12, marginTop: 28, flexWrap: 'wrap' }}>
+            <Link href="/registrace?role=coworking" style={{ padding: '14px 24px', background: PD.ink, color: PD.paperWhite, fontSize: 15, fontWeight: 600, textDecoration: 'none', boxShadow: `3px 3px 0 ${PD.margin}` }}>
+              30 dní zdarma →
+            </Link>
+            <Link href="/ceniky" style={{ padding: '14px 24px', background: PD.paperWhite, color: PD.ink, border: `1.5px solid ${PD.ink}`, fontSize: 15, fontWeight: 600, textDecoration: 'none' }}>
+              Ceník
+            </Link>
+            <Link href="/cow-os" style={{ padding: '14px 24px', background: PD.paperWhite, color: PD.ink, border: `1.5px solid ${PD.ink}`, fontSize: 15, fontWeight: 600, textDecoration: 'none' }}>
+              🐄 COW.OS
+            </Link>
           </div>
         </div>
-      </section>
+      </NotebookPaper>
 
-      {/* Features Comparison */}
-      <section className="py-16 sm:py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">
-            Srovnění funkcí
-          </h2>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b-2 border-gray-200">
-                  <th className="text-left py-4 px-6 font-bold text-gray-900 w-1/3">
-                    Funkce
-                  </th>
-                  <th className="text-center py-4 px-6 font-bold text-gray-900">
-                    Malý
-                  </th>
-                  <th className="text-center py-4 px-6 font-bold text-gray-900 bg-blue-50">
-                    Střední
-                  </th>
-                  <th className="text-center py-4 px-6 font-bold text-gray-900">
-                    Velký
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {features.map((feature, idx) => (
-                  <tr
-                    key={idx}
-                    className={`border-b border-gray-100 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
-                  >
-                    <td className="py-4 px-6 text-gray-900 font-medium">
-                      {feature.name}
-                    </td>
-                    <td className="py-4 px-6 text-center">
-                      {feature.small ? (
-                        <Check className="w-5 h-5 text-green-600 mx-auto" />
-                      ) : (
-                        <X className="w-5 h-5 text-gray-300 mx-auto" />
-                      )}
-                    </td>
-                    <td className="py-4 px-6 text-center bg-blue-50/50">
-                      {feature.medium ? (
-                        <Check className="w-5 h-5 text-green-600 mx-auto" />
-                      ) : (
-                        <X className="w-5 h-5 text-gray-300 mx-auto" />
-                      )}
-                    </td>
-                    <td className="py-4 px-6 text-center">
-                      {feature.large ? (
-                        <Check className="w-5 h-5 text-green-600 mx-auto" />
-                      ) : (
-                        <X className="w-5 h-5 text-gray-300 mx-auto" />
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      {/* Benefits grid */}
+      <div style={{ padding: '40px 24px 30px', background: PD.paperLt, borderTop: `1px solid ${PD.rule}`, position: 'relative' }} className="md:!pl-24 md:!pr-14 md:!py-12">
+        <div style={{ position: 'absolute', top: 0, bottom: 0, left: 56, width: 1, background: PD.margin, opacity: 0.6 }} className="hidden md:block" />
+        <div style={{ fontFamily: PD_FONT_MONO, fontSize: 11, letterSpacing: 1.5, color: PD.inkMuted, textTransform: 'uppercase', marginBottom: 4 }}>
+          — Co dostaneš
         </div>
-      </section>
-
-      {/* Coworker Membership Section */}
-      <section className="py-16 sm:py-24 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Členství pro coworkery
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Monthly */}
-            <div className="border-2 border-gray-200 rounded-xl p-8 hover:border-blue-600 hover:shadow-lg transition-all">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Měsíční</h3>
-              <div className="mb-6">
-                <div className="text-4xl font-bold text-blue-600 mb-2">
-                  {COWORKER_MEMBERSHIP.monthlyPrice} Kč
-                </div>
-                <p className="text-gray-600">za měsíc</p>
+        <div style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 24, fontWeight: 500, letterSpacing: '-0.02em', color: PD.ink, marginBottom: 28 }} className="md:!text-[32px]">
+          Šest věcí, co zvednou tvůj coworking
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" style={{ gap: 22 }}>
+          {BENEFITS.map((f, i) => (
+            <div
+              key={i}
+              style={{
+                background: PD.paperWhite, border: `1.5px solid ${PD.rule}`,
+                padding: '22px 20px', position: 'relative',
+                transform: `rotate(${i % 2 === 0 ? -0.5 : 0.5}deg)`,
+                boxShadow: '3px 4px 0 rgba(0,0,0,0.07)',
+              }}
+            >
+              <Washi color={i % 3 === 0 ? PD.amber : i % 3 === 1 ? PD.moss : PD.coral} seed={500 + i * 17} />
+              <div style={{ fontSize: 30, marginBottom: 10 }}>{f.icon}</div>
+              <div style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 19, fontWeight: 500, letterSpacing: '-0.015em', color: PD.ink, marginBottom: 6 }}>
+                {f.title}
               </div>
-              <ul className="space-y-3 mb-8 text-gray-600">
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  {COWORKER_MEMBERSHIP.freeVisitsPerMonth} bezplatná návštěva
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  Sleva na coworkingy
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  Přístup k evenům
-                </li>
-              </ul>
-              <button className="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-                Stát se členem
-              </button>
+              <div style={{ fontSize: 13, lineHeight: 1.5, color: PD.inkSoft }}>
+                {f.desc}
+              </div>
             </div>
-
-            {/* Yearly */}
-            <div className="border-2 border-blue-600 rounded-xl p-8 shadow-lg relative">
-              <div className="absolute -top-4 left-6 px-3 py-1 bg-blue-600 text-white text-sm font-bold rounded-full">
-                NEJLEPŠÍ VOLBA
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Roční</h3>
-              <div className="mb-6">
-                <div className="text-4xl font-bold text-blue-600 mb-2">
-                  {COWORKER_MEMBERSHIP.yearlyPrice} Kč
-                </div>
-                <p className="text-gray-600">za rok</p>
-                <p className="text-sm text-green-600 font-medium mt-2">
-                  Ušetři až 1000 Kč ročně
-                </p>
-              </div>
-              <ul className="space-y-3 mb-8 text-gray-600">
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  12 bezplatných návštěv
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  Zvýšená sleva (20%)
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  Prioritní přístup k eventům
-                </li>
-              </ul>
-              <button className="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-                Stát se členem
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
-      </section>
+      </div>
 
-      {/* FAQ Section */}
-      <section className="py-16 sm:py-24 bg-gray-50" id="faq">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">
-            Často kladené otázky
-          </h2>
-
-          <div className="space-y-6">
-            {faqs.map((faq, idx) => (
-              <details
-                key={idx}
-                className="group bg-white rounded-lg border border-gray-200 p-6 hover:border-blue-300 transition-colors"
+      {/* Pricing summary */}
+      <div style={{ padding: '40px 24px', background: PD.paper, borderTop: `1px solid ${PD.rule}`, position: 'relative' }} className="md:!pl-24 md:!pr-14 md:!py-12">
+        <div style={{ position: 'absolute', top: 0, bottom: 0, left: 56, width: 1, background: PD.margin, opacity: 0.6 }} className="hidden md:block" />
+        <div style={{ fontFamily: PD_FONT_MONO, fontSize: 11, letterSpacing: 1.5, color: PD.inkMuted, textTransform: 'uppercase', marginBottom: 4 }}>
+          — Ceník
+        </div>
+        <div style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 24, fontWeight: 500, letterSpacing: '-0.02em', color: PD.ink, marginBottom: 22 }} className="md:!text-[32px]">
+          Tři plány podle velikosti
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3" style={{ gap: 22 }}>
+          {PLATFORM_PRICING.map((p, i) => {
+            const tones = [PD.accent, PD.amber, PD.coral];
+            const isMid = i === 1;
+            return (
+              <div
+                key={p.tier}
+                style={{
+                  background: PD.paperWhite, border: `1.5px solid ${tones[i]}`,
+                  padding: '22px 20px', position: 'relative',
+                  transform: `rotate(${i === 0 ? -0.5 : i === 1 ? 0.4 : -0.3}deg)`,
+                  boxShadow: isMid ? `5px 5px 0 ${PD.ink}` : '3px 4px 0 rgba(0,0,0,0.08)',
+                }}
               >
-                <summary className="flex items-center justify-between cursor-pointer font-semibold text-gray-900 select-none">
-                  <span className="flex items-center gap-3">
-                    <HelpCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                    {faq.question}
+                {isMid && (
+                  <div style={{ position: 'absolute', top: -14, right: 14 }}>
+                    <Stamp color={PD.margin} rotate={6}>doporučujeme</Stamp>
+                  </div>
+                )}
+                <div style={{ fontFamily: PD_FONT_MONO, fontSize: 11, letterSpacing: 1.5, color: tones[i], textTransform: 'uppercase', marginBottom: 8, fontWeight: 700 }}>
+                  {p.name}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 14 }}>
+                  <span style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 44, fontWeight: 500, letterSpacing: '-0.04em', color: PD.ink, lineHeight: 1 }}>
+                    {p.monthlyPrice}
                   </span>
-                  <span className="text-2xl text-gray-400 group-open:text-blue-600 transition-colors">
-                    +
-                  </span>
-                </summary>
-                <p className="mt-4 text-gray-600 ml-8">{faq.answer}</p>
-              </details>
-            ))}
-          </div>
-
-          {/* Support CTA */}
-          <div className="mt-12 p-8 bg-blue-50 border border-blue-200 rounded-lg text-center">
-            <h3 className="text-lg font-bold text-gray-900 mb-3">
-              Potřebujete pomoc?
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Náš tým Vám rád zodpoví všechny otázky o plánech a integraci.
-            </p>
-            <button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-              Kontaktovat podporu
-            </button>
-          </div>
+                  <span style={{ fontSize: 13, color: PD.inkMuted }}>Kč/měs</span>
+                </div>
+                <div style={{ fontSize: 13, color: PD.inkSoft, lineHeight: 1.5 }}>
+                  Až {p.maxSeats === 99999 ? 'neomezeně' : p.maxSeats} míst,{' '}
+                  {p.maxArea === 99999 ? 'neomezeně' : `${p.maxArea} m²`}.{' '}
+                  {p.includedAddresses} adresa{p.includedAddresses === 1 ? '' : 'y'} v ceně.
+                </div>
+              </div>
+            );
+          })}
         </div>
-      </section>
+        <div style={{ marginTop: 20 }}>
+          <Link href="/ceniky" style={{ fontFamily: PD_FONT_HAND, fontSize: 19, color: PD.margin, textDecoration: 'none' }}>
+            → kompletní porovnání plánů
+          </Link>
+        </div>
+      </div>
+
+      {/* CTA bottom */}
+      <div style={{ padding: '40px 24px', background: PD.ink, color: PD.paperLt, textAlign: 'center' }} className="md:!py-14">
+        <div style={{ fontFamily: PD_FONT_HAND, fontSize: 24, color: PD.margin, marginBottom: 6 }}>žádná kreditka, žádný závazek</div>
+        <div style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 28, fontWeight: 500, letterSpacing: '-0.02em', marginBottom: 18 }} className="md:!text-[36px]">
+          Vyzkoušej platformu zdarma na 30 dní
+        </div>
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link href="/registrace?role=coworking" style={{ display: 'inline-block', padding: '14px 24px', background: PD.paperWhite, color: PD.ink, fontSize: 14, fontWeight: 600, textDecoration: 'none', boxShadow: `3px 3px 0 ${PD.margin}` }}>
+            Začít zdarma →
+          </Link>
+          <a href="mailto:info@coworkings.cz" style={{ display: 'inline-block', padding: '14px 24px', background: PD.margin, color: '#fff', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
+            ✉ Mám otázku
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
