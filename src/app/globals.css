@@ -2,7 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Paper Diary fonts: Inter (body), Inter Tight (display), Caveat (handwritten) */
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Inter:wght@300;400;500;600;700;800&family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+
+/* ── Paper Diary design tokens (CSS proměnné) ───────────────── */
+:root {
+  --pd-paper:       #efe9dc;
+  --pd-paper-lt:    #f6f1e5;
+  --pd-paper-white: #fdfbf4;
+  --pd-ink:         #1a1a1a;
+  --pd-ink-soft:    #3a3a3a;
+  --pd-ink-muted:   #6b6558;
+  --pd-rule:        #d9d1bf;
+  --pd-rule-soft:   #e6dfcb;
+  --pd-margin:      #c76a54;   /* coral margin line */
+  --pd-accent:      #2e5fa1;   /* muted ink blue */
+  --pd-amber:       #c59a3a;
+  --pd-moss:        #6d8862;
+  --pd-coral:       #c76a54;
+
+  --pd-font-display: 'Inter Tight', system-ui, sans-serif;
+  --pd-font-body:    'Inter', system-ui, sans-serif;
+  --pd-font-hand:    'Caveat', 'Bradley Hand', cursive;
+  --pd-font-mono:    ui-monospace, 'JetBrains Mono', Menlo, monospace;
+}
 
 * {
   margin: 0;
@@ -18,6 +41,37 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: #1e293b;
   background-color: #ffffff;
+}
+
+/* ── Paper Diary helper classes (opt-in pro stránky v novém designu) ── */
+.pd-body {
+  background: var(--pd-paper);
+  color: var(--pd-ink);
+  font-family: var(--pd-font-body);
+}
+
+.pd-paper-bg {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 27px, rgba(0,0,0,0.03) 27px 28px),
+    var(--pd-paper);
+}
+
+.pd-paper-lt-bg { background: var(--pd-paper-lt); }
+.pd-paper-white-bg { background: var(--pd-paper-white); }
+
+.pd-display { font-family: var(--pd-font-display); letter-spacing: -0.02em; }
+.pd-hand    { font-family: var(--pd-font-hand); }
+.pd-mono    { font-family: var(--pd-font-mono); }
+
+@keyframes pdPulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.3 } }
+
+/* Při použití třídy .pd-page přebíjíme starou globální CSS — pro stránky v novém designu */
+.pd-page button,
+.pd-page a {
+  transition: opacity 120ms ease;
+}
+.pd-page button:hover {
+  opacity: 0.85;
 }
 
 /* Custom scrollbar */

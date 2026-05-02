@@ -1,14 +1,9 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import {
-  Search, X, LayoutGrid, List, MapPin, Globe, Linkedin,
-  Phone, Mail, MessageSquare, Building2, ChevronDown,
-  ExternalLink, Users,
-} from 'lucide-react';
 import Link from 'next/link';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+import { PD, PD_FONT_DISPLAY, PD_FONT_BODY, PD_FONT_HAND, PD_FONT_MONO } from '@/components/paper-diary/tokens';
+import { NotebookPaper, PaperAvatar, guessGender, Stamp, Washi } from '@/components/paper-diary/primitives';
 
 interface Coworker {
   id: string;
@@ -32,485 +27,250 @@ interface CoworkingInfo {
   city: string;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-
-function CoworkerAvatar({ name, src, size = 'md' }: { name: string; src: string | null; size?: 'sm' | 'md' | 'lg' }) {
-  const sz = size === 'lg' ? 'w-20 h-20 text-2xl' : size === 'md' ? 'w-14 h-14 text-lg' : 'w-10 h-10 text-sm';
-  if (src) return <img src={src} alt={name} className={`${sz} rounded-full object-cover flex-shrink-0`} />;
-  return (
-    <div className={`${sz} rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold flex-shrink-0`}>
-      {name ? name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() : '?'}
-    </div>
-  );
+// Avatar variant from string id (deterministic)
+function variantFromId(id: string): number {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
+  return Math.abs(hash) % 12 + 1;
 }
 
-// ─── Profile Popup ────────────────────────────────────────────────────────────
-
-function CoworkerModal({
-  coworker,
-  coworkingName,
-  onClose,
-}: {
-  coworker: Coworker;
-  coworkingName: string | null;
-  onClose: () => void;
-}) {
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', h);
-    return () => document.removeEventListener('keydown', h);
-  }, [onClose]);
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-      <div
-        className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="font-bold text-gray-900 text-lg">Profil coworkera</h2>
-          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
-        </div>
-
-        <div className="p-6 space-y-5">
-          {/* Avatar + name */}
-          <div className="flex items-start gap-4">
-            <CoworkerAvatar name={coworker.name} src={coworker.avatarUrl} size="lg" />
-            <div className="flex-1 min-w-0">
-              <h3 className="text-xl font-bold text-gray-900">{coworker.name || '(bez jména)'}</h3>
-              {coworker.profession && (
-                <p className="text-gray-500 text-sm mt-0.5">{coworker.profession}</p>
-              )}
-              {coworkingName && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 flex items-center gap-1">
-                    <Building2 className="w-3 h-3" /> {coworkingName}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Bio */}
-          {coworker.bio && (
-            <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-1.5">O mně</h4>
-              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{coworker.bio}</p>
-            </div>
-          )}
-
-          {/* Skills */}
-          {coworker.skills.length > 0 && (
-            <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">Dovednosti</h4>
-              <div className="flex flex-wrap gap-2">
-                {coworker.skills.map((s, i) => (
-                  <span key={i} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">{s}</span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Contact */}
-          {(coworker.phone || coworker.email || coworker.linkedinUrl || coworker.websiteUrl || coworker.allowContact) && (
-            <div className="border-t border-gray-100 pt-4">
-              <h4 className="text-sm font-semibold text-gray-700 mb-3">Kontakt</h4>
-              <div className="space-y-2">
-                {coworker.email && (
-                  <a href={`mailto:${coworker.email}`}
-                    className="flex items-center gap-3 text-sm text-blue-600 hover:underline">
-                    <Mail className="w-4 h-4 flex-shrink-0" /> {coworker.email}
-                  </a>
-                )}
-                {coworker.phone && (
-                  <a href={`tel:${coworker.phone}`}
-                    className="flex items-center gap-3 text-sm text-blue-600 hover:underline">
-                    <Phone className="w-4 h-4 flex-shrink-0" /> {coworker.phone}
-                  </a>
-                )}
-                {coworker.linkedinUrl && (
-                  <a href={coworker.linkedinUrl} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-sm text-blue-600 hover:underline">
-                    <Linkedin className="w-4 h-4 flex-shrink-0" />
-                    LinkedIn profil <ExternalLink className="w-3 h-3 opacity-60" />
-                  </a>
-                )}
-                {coworker.websiteUrl && (
-                  <a href={coworker.websiteUrl} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-sm text-blue-600 hover:underline">
-                    <Globe className="w-4 h-4 flex-shrink-0" />
-                    {coworker.websiteUrl.replace('https://', '')} <ExternalLink className="w-3 h-3 opacity-60" />
-                  </a>
-                )}
-                {coworker.allowContact && (
-                  <div className="flex items-center gap-2 text-xs text-green-700 bg-green-50 rounded-lg px-3 py-2 mt-2">
-                    <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                    Souhlasí s kontaktováním přes portál
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Card View ────────────────────────────────────────────────────────────────
-
-function CoworkerCard({
-  coworker,
-  coworkingName,
-  onClick,
-}: {
-  coworker: Coworker;
-  coworkingName: string | null;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="bg-white rounded-xl border border-gray-200 p-5 text-left hover:shadow-md hover:border-blue-200 transition-all group w-full"
-    >
-      <div className="flex items-start gap-4 mb-3">
-        <CoworkerAvatar name={coworker.name} src={coworker.avatarUrl} size="md" />
-        <div className="flex-1 min-w-0">
-          <p className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-            {coworker.name || '(bez jména)'}
-          </p>
-          {coworker.profession && (
-            <p className="text-sm text-gray-500 line-clamp-1 mt-0.5">{coworker.profession}</p>
-          )}
-          {coworkingName && (
-            <div className="flex flex-wrap gap-1.5 mt-1.5">
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 flex items-center gap-1">
-                <MapPin className="w-2.5 h-2.5" /> {coworkingName}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {coworker.bio && (
-        <p className="text-sm text-gray-500 line-clamp-2 mb-3">{coworker.bio}</p>
-      )}
-
-      {coworker.skills.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {coworker.skills.slice(0, 4).map((s, i) => (
-            <span key={i} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">{s}</span>
-          ))}
-          {coworker.skills.length > 4 && (
-            <span className="px-2 py-0.5 bg-gray-50 text-gray-400 rounded text-xs">+{coworker.skills.length - 4}</span>
-          )}
-        </div>
-      )}
-    </button>
-  );
-}
-
-// ─── List Row ─────────────────────────────────────────────────────────────────
-
-function CoworkerRow({
-  coworker,
-  coworkingName,
-  onClick,
-}: {
-  coworker: Coworker;
-  coworkingName: string | null;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-full bg-white border-b border-gray-100 last:border-0 px-5 py-4 flex items-center gap-4 text-left hover:bg-blue-50 transition-colors group"
-    >
-      <CoworkerAvatar name={coworker.name} src={coworker.avatarUrl} size="sm" />
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-          {coworker.name || '(bez jména)'}
-        </p>
-        <div className="flex items-center gap-2 flex-wrap mt-0.5">
-          {coworker.profession && (
-            <span className="text-sm text-gray-500 line-clamp-1">{coworker.profession}</span>
-          )}
-          {coworkingName && (
-            <span className="text-xs text-gray-400 flex items-center gap-1">
-              <MapPin className="w-3 h-3" /> {coworkingName}
-            </span>
-          )}
-        </div>
-      </div>
-      <div className="flex items-center gap-2 flex-shrink-0">
-        {coworker.skills.slice(0, 2).map((s, i) => (
-          <span key={i} className="hidden md:inline px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">{s}</span>
-        ))}
-      </div>
-    </button>
-  );
-}
-
-// ─── Main Page ────────────────────────────────────────────────────────────────
-
-export default function CoworkersPage() {
+export default function CoworkeriPage() {
   const [coworkers, setCoworkers] = useState<Coworker[]>([]);
   const [coworkings, setCoworkings] = useState<CoworkingInfo[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Filters
-  const [query, setQuery] = useState('');
-  const [cityFilter, setCityFilter] = useState('');
-  const [coworkingFilter, setCoworkingFilter] = useState('');
-  const [skillFilter, setSkillFilter] = useState('');
-
-  // View
-  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
-  const [selected, setSelected] = useState<Coworker | null>(null);
+  const [search, setSearch] = useState('');
+  const [city, setCity] = useState<string>('Vše');
+  const [view, setView] = useState<'cards' | 'list'>('cards');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
+    let mounted = true;
     Promise.all([
-      fetch('/api/coworkers').then(r => r.json()),
-      fetch('/api/coworkings').then(r => r.json()),
-    ]).then(([cdata, cwdata]) => {
-      setCoworkers(cdata.coworkers ?? []);
-      const cwList = Array.isArray(cwdata) ? cwdata : [];
-      setCoworkings(cwList.map((cw: { slug: string; name: string; city: string }) => ({
-        slug: cw.slug,
-        name: cw.name,
-        city: cw.city?.startsWith('Praha') ? 'Praha' : cw.city,
-      })));
-    }).catch(() => {}).finally(() => setLoading(false));
+      fetch('/api/coworkers').then((r) => r.json()).catch(() => []),
+      fetch('/api/coworkings').then((r) => r.json()).catch(() => []),
+    ]).then(([cwr, cw]) => {
+      if (!mounted) return;
+      setCoworkers(Array.isArray(cwr) ? cwr : (cwr?.coworkers || []));
+      setCoworkings(Array.isArray(cw) ? cw : (cw?.coworkings || []));
+      setLoading(false);
+    });
+    return () => { mounted = false; };
   }, []);
 
-  // Build lookup map: slug → coworking info
-  const cwMap = useMemo(() => {
-    const m: Record<string, CoworkingInfo> = {};
-    coworkings.forEach(cw => { m[cw.slug] = cw; });
+  const slugToCw = useMemo(() => {
+    const m = new Map<string, CoworkingInfo>();
+    coworkings.forEach((x) => m.set(x.slug, x));
     return m;
   }, [coworkings]);
 
-  // All cities from coworkings that have at least one coworker
-  const availableCities = useMemo(() => {
-    const slugsWithCoworkers = new Set(coworkers.map(c => c.homeCoworkingSlug).filter(Boolean));
-    const cities = new Set<string>();
-    coworkings.forEach(cw => {
-      if (slugsWithCoworkers.has(cw.slug)) {
-        cities.add(cw.city?.startsWith('Praha') ? 'Praha' : cw.city);
-      }
-    });
-    return Array.from(cities).sort();
-  }, [coworkers, coworkings]);
-
-  // Coworkings in selected city
-  const availableCoworkings = useMemo(() => {
-    if (!cityFilter) return coworkings.filter(cw => {
-      const slugsWithCoworkers = new Set(coworkers.map(c => c.homeCoworkingSlug).filter(Boolean));
-      return slugsWithCoworkers.has(cw.slug);
-    });
-    return coworkings.filter(cw => {
-      const city = cw.city?.startsWith('Praha') ? 'Praha' : cw.city;
-      return city === cityFilter;
-    });
-  }, [cityFilter, coworkings, coworkers]);
-
-  // All unique skills
-  const allSkills = useMemo(() => {
+  const cities = useMemo(() => {
     const set = new Set<string>();
-    coworkers.forEach(c => c.skills.forEach(s => set.add(s)));
+    coworkers.forEach((c) => {
+      const cw = slugToCw.get(c.homeCoworkingSlug || '');
+      if (cw?.city) set.add(cw.city);
+    });
     return Array.from(set).sort();
-  }, [coworkers]);
+  }, [coworkers, slugToCw]);
 
-  // Filtered
   const filtered = useMemo(() => {
-    const q = query.toLowerCase();
-    return coworkers.filter(c => {
-      if (q) {
-        const text = `${c.name} ${c.profession} ${c.bio} ${c.skills.join(' ')}`.toLowerCase();
-        if (!text.includes(q)) return false;
+    return coworkers.filter((c) => {
+      if (city !== 'Vše') {
+        const cw = slugToCw.get(c.homeCoworkingSlug || '');
+        if (cw?.city !== city) return false;
       }
-      if (cityFilter && c.homeCoworkingSlug) {
-        const cw = cwMap[c.homeCoworkingSlug];
-        const city = cw?.city?.startsWith('Praha') ? 'Praha' : cw?.city;
-        if (city !== cityFilter) return false;
-      } else if (cityFilter && !c.homeCoworkingSlug) {
-        return false;
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        const hay = [c.name, c.profession, c.bio, ...(c.skills || [])].filter(Boolean).join(' ').toLowerCase();
+        if (!hay.includes(q)) return false;
       }
-      if (coworkingFilter && c.homeCoworkingSlug !== coworkingFilter) return false;
-      if (skillFilter && !c.skills.includes(skillFilter)) return false;
       return true;
     });
-  }, [coworkers, query, cityFilter, coworkingFilter, skillFilter, cwMap]);
-
-  const hasFilters = query || cityFilter || coworkingFilter || skillFilter;
-  const clearFilters = () => { setQuery(''); setCityFilter(''); setCoworkingFilter(''); setSkillFilter(''); };
+  }, [coworkers, city, search, slugToCw]);
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-8 pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Users className="w-6 h-6 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Coworkeři</h1>
+    <div style={{ maxWidth: 1440, margin: '0 auto', background: PD.paper, fontFamily: PD_FONT_BODY }}>
+      <NotebookPaper style={{ padding: '32px 20px 50px' }}>
+        <div className="md:!pl-24 md:!pr-14 md:!pt-10">
+          {/* Header */}
+          <div style={{ fontFamily: PD_FONT_HAND, fontSize: 22, color: PD.coral, marginBottom: 4, transform: 'rotate(-1deg)', display: 'inline-block' }}>
+            šuplík IV. ↘
           </div>
-          <p className="text-gray-500">
-            Aktivní členové coworkingové komunity — najdi kolegy, partnery nebo klienty
+          <h1 className="text-[40px] md:text-[64px]" style={{ fontFamily: PD_FONT_DISPLAY, letterSpacing: '-0.025em', lineHeight: 0.95, fontWeight: 500, margin: 0, color: PD.ink }}>
+            Coworkeři
+          </h1>
+          <p style={{ fontSize: 14, color: PD.inkSoft, marginTop: 10, marginBottom: 24, maxWidth: 500 }}>
+            {coworkers.length} lidí v komunitě. Designéři, vývojáři, marketéři, freelanceři.
           </p>
-        </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-          <div className="flex flex-col sm:flex-row gap-3">
-            {/* Text search */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          {/* Filter panel */}
+          <div style={{ background: PD.paperWhite, border: `1.5px solid ${PD.ink}`, boxShadow: '4px 4px 0 rgba(0,0,0,0.08)', marginBottom: 24 }}>
+            <div style={{ padding: '12px 16px', borderBottom: `1px dashed ${PD.rule}` }}>
+              <div style={{ fontFamily: PD_FONT_MONO, fontSize: 10, letterSpacing: 1.5, color: PD.inkMuted, textTransform: 'uppercase', marginBottom: 4 }}>
+                Hledat
+              </div>
               <input
-                type="text"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="Hledej jméno, profesi, dovednost…"
-                className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Jméno, povolání, dovednosti…"
+                style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'inherit', fontSize: 16, outline: 'none', color: PD.ink }}
               />
             </div>
-
-            {/* City filter */}
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              <select
-                value={cityFilter}
-                onChange={e => { setCityFilter(e.target.value); setCoworkingFilter(''); }}
-                className="pl-9 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white min-w-[140px]"
-              >
-                <option value="">Všechna města</option>
-                {availableCities.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
-            </div>
-
-            {/* Coworking filter */}
-            <div className="relative">
-              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              <select
-                value={coworkingFilter}
-                onChange={e => setCoworkingFilter(e.target.value)}
-                className="pl-9 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white min-w-[160px]"
-              >
-                <option value="">Všechny coworkingy</option>
-                {availableCoworkings.map(cw => <option key={cw.slug} value={cw.slug}>{cw.name}</option>)}
-              </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
-            </div>
-
-            {/* Skill filter */}
-            {allSkills.length > 0 && (
-              <div className="relative">
-                <select
-                  value={skillFilter}
-                  onChange={e => setSkillFilter(e.target.value)}
-                  className="pl-4 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white min-w-[140px]"
-                >
-                  <option value="">Všechny skills</option>
-                  {allSkills.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+            <div style={{ padding: '10px 16px', borderBottom: `1.5px solid ${PD.ink}` }}>
+              <div style={{ fontFamily: PD_FONT_MONO, fontSize: 10, letterSpacing: 1.5, color: PD.inkMuted, textTransform: 'uppercase', marginBottom: 6 }}>
+                Město
               </div>
-            )}
+              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                <button onClick={() => setCity('Vše')} style={{ padding: '4px 10px', fontSize: 12, border: `1.5px solid ${city === 'Vše' ? PD.coral : PD.rule}`, background: city === 'Vše' ? PD.coral : PD.paperLt, color: city === 'Vše' ? '#fff' : PD.inkSoft, fontFamily: 'inherit', cursor: 'pointer', borderRadius: 99 }}>Vše</button>
+                {cities.slice(0, 10).map((c) => (
+                  <button key={c} onClick={() => setCity(c)} style={{ padding: '4px 10px', fontSize: 12, border: `1.5px solid ${city === c ? PD.coral : PD.rule}`, background: city === c ? PD.coral : PD.paperLt, color: city === c ? '#fff' : PD.inkSoft, fontFamily: 'inherit', cursor: 'pointer', borderRadius: 99 }}>{c}</button>
+                ))}
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', background: PD.paperLt, gap: 8, flexWrap: 'wrap' }}>
+              <div style={{ fontSize: 13 }}>
+                <b style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 20, letterSpacing: '-0.015em' }}>{filtered.length}</b>
+                <span style={{ color: PD.inkSoft, marginLeft: 6 }}>
+                  {filtered.length === 1 ? 'coworker' : (filtered.length >= 2 && filtered.length <= 4 ? 'coworkeři' : 'coworkerů')}
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => setView('cards')} style={{ padding: '4px 12px', fontSize: 12, border: `1.5px solid ${view === 'cards' ? PD.ink : PD.rule}`, background: view === 'cards' ? PD.ink : PD.paperWhite, color: view === 'cards' ? PD.paperWhite : PD.inkSoft, fontFamily: 'inherit', cursor: 'pointer' }}>▦ karty</button>
+                <button onClick={() => setView('list')} style={{ padding: '4px 12px', fontSize: 12, border: `1.5px solid ${view === 'list' ? PD.ink : PD.rule}`, background: view === 'list' ? PD.ink : PD.paperWhite, color: view === 'list' ? PD.paperWhite : PD.inkSoft, fontFamily: 'inherit', cursor: 'pointer' }}>≡ list</button>
+              </div>
+            </div>
           </div>
 
-          {/* Filter summary + clear */}
-          {hasFilters && (
-            <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-              <p className="text-sm text-gray-500">
-                Nalezeno: <strong className="text-gray-900">{filtered.length}</strong> coworkerů
-              </p>
-              <button
-                onClick={clearFilters}
-                className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-              >
-                <X className="w-3.5 h-3.5" /> Zrušit filtry
-              </button>
+          {/* Results */}
+          {loading ? (
+            <div style={{ padding: '60px 0', textAlign: 'center', fontFamily: PD_FONT_HAND, fontSize: 22, color: PD.inkMuted }}>↻ načítám…</div>
+          ) : filtered.length === 0 ? (
+            <div style={{ padding: '60px 0', textAlign: 'center' }}>
+              <div style={{ fontFamily: PD_FONT_HAND, fontSize: 36, color: PD.inkMuted, marginBottom: 8, transform: 'rotate(-2deg)', display: 'inline-block' }}>
+                nikdo tu není ¯\_(ツ)_/¯
+              </div>
+              <div style={{ fontSize: 16, color: PD.inkSoft }}>Zkus zmírnit filtry.</div>
+            </div>
+          ) : view === 'cards' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" style={{ gap: 18 }}>
+              {filtered.map((c, i) => {
+                const cw = slugToCw.get(c.homeCoworkingSlug || '');
+                const gender = guessGender(c.name);
+                const variant = variantFromId(c.id);
+                const isExpanded = expandedId === c.id;
+                return (
+                  <div
+                    key={c.id}
+                    onClick={() => setExpandedId(isExpanded ? null : c.id)}
+                    style={{
+                      gridColumn: isExpanded ? '1 / -1' : 'auto',
+                      background: PD.paperWhite, border: `1.5px solid ${PD.rule}`,
+                      padding: 16, transform: isExpanded ? 'none' : `rotate(${(i % 3 - 1) * 0.4}deg)`,
+                      boxShadow: '3px 3px 0 rgba(0,0,0,0.07)', position: 'relative', cursor: 'pointer',
+                      transition: 'transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    }}
+                  >
+                    {c.membershipTier && c.membershipTier !== 'free' && (
+                      <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 2 }}>
+                        <Stamp rotate={4} color={PD.amber}>{c.membershipTier}</Stamp>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 10 }}>
+                      {c.avatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={c.avatarUrl} alt={c.name} style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: `1.5px solid ${PD.ink}` }} />
+                      ) : (
+                        <PaperAvatar gender={gender} variant={variant} size={64} />
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 17, fontWeight: 500, letterSpacing: '-0.015em', color: PD.ink, lineHeight: 1.15 }}>
+                          {c.name || '(bez jména)'}
+                        </div>
+                        {c.profession && (
+                          <div style={{ fontSize: 13, color: PD.inkMuted, marginTop: 2 }}>{c.profession}</div>
+                        )}
+                        {cw && (
+                          <div style={{ fontFamily: PD_FONT_HAND, fontSize: 16, color: PD.inkSoft, marginTop: 4 }}>
+                            → {cw.name}, {cw.city}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Skills jako inline text, NE chips */}
+                    {c.skills && c.skills.length > 0 && (
+                      <div style={{ fontSize: 13, color: PD.inkSoft, lineHeight: 1.4, marginBottom: 8 }}>
+                        <span style={{ fontFamily: PD_FONT_MONO, fontSize: 10, color: PD.inkMuted, letterSpacing: 1, textTransform: 'uppercase', marginRight: 6 }}>skills:</span>
+                        {c.skills.join(' · ')}
+                      </div>
+                    )}
+
+                    {isExpanded && c.bio && (
+                      <div style={{ fontSize: 17, color: PD.inkSoft, lineHeight: 1.5, marginTop: 10, paddingTop: 10, borderTop: `1px dashed ${PD.ruleSoft}`, fontFamily: PD_FONT_HAND }}>
+                        "{c.bio}"
+                      </div>
+                    )}
+
+                    {isExpanded && c.allowContact && (
+                      <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+                        {c.email && (
+                          <a href={`mailto:${c.email}`} onClick={(e) => e.stopPropagation()} style={{ padding: '7px 12px', background: PD.ink, color: PD.paperWhite, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
+                            ✉ napsat
+                          </a>
+                        )}
+                        {c.linkedinUrl && (
+                          <a href={c.linkedinUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} style={{ padding: '7px 12px', background: PD.paperWhite, color: PD.ink, border: `1.5px solid ${PD.ink}`, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
+                            in
+                          </a>
+                        )}
+                        {c.websiteUrl && (
+                          <a href={c.websiteUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} style={{ padding: '7px 12px', background: PD.paperWhite, color: PD.ink, border: `1.5px solid ${PD.ink}`, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
+                            web
+                          </a>
+                        )}
+                      </div>
+                    )}
+
+                    <div style={{ marginTop: 10, paddingTop: 8, borderTop: `1px dashed ${PD.ruleSoft}`, textAlign: 'right' }}>
+                      <span style={{ fontFamily: PD_FONT_HAND, fontSize: 16, color: PD.margin }}>
+                        {isExpanded ? '← zavřít' : 'profil →'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div style={{ background: PD.paperWhite, border: `1.5px solid ${PD.ink}`, boxShadow: '4px 4px 0 rgba(0,0,0,0.08)' }}>
+              {filtered.map((c) => {
+                const cw = slugToCw.get(c.homeCoworkingSlug || '');
+                const gender = guessGender(c.name);
+                const variant = variantFromId(c.id);
+                return (
+                  <div key={c.id} style={{ display: 'grid', gridTemplateColumns: '52px 1fr auto', gap: 12, padding: '10px 14px', borderBottom: `1px dashed ${PD.ruleSoft}`, alignItems: 'center' }}>
+                    {c.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={c.avatarUrl} alt={c.name} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      <PaperAvatar gender={gender} variant={variant} size={44} />
+                    )}
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 14, fontWeight: 500, color: PD.ink }}>{c.name || '(bez jména)'}</div>
+                      <div style={{ fontSize: 12, color: PD.inkMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {c.profession}{cw ? ` · ${cw.city}` : ''}
+                      </div>
+                    </div>
+                    {c.skills && c.skills.length > 0 && (
+                      <div style={{ fontSize: 12, color: PD.inkSoft, fontFamily: PD_FONT_MONO, textAlign: 'right', maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} className="hidden sm:block">
+                        {c.skills.slice(0, 3).join(' · ')}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
-
-        {/* View toggle + count */}
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-gray-500">
-            {loading ? 'Načítám…' : `${filtered.length} coworkerů`}
-          </p>
-          <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
-            <button
-              onClick={() => setViewMode('card')}
-              className={`p-2 transition-colors ${viewMode === 'card' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-50'}`}
-              title="Mřížka"
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-50'}`}
-              title="Seznam"
-            >
-              <List className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-20">
-            <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 font-medium mb-2">Žádní coworkeři nenalezeni</p>
-            {hasFilters && (
-              <button onClick={clearFilters} className="text-blue-600 text-sm hover:underline">
-                Zkusit bez filtrů
-              </button>
-            )}
-          </div>
-        ) : viewMode === 'card' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map(c => (
-              <CoworkerCard
-                key={c.id}
-                coworker={c}
-                coworkingName={c.homeCoworkingSlug ? (cwMap[c.homeCoworkingSlug]?.name ?? null) : null}
-                onClick={() => setSelected(c)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            {filtered.map(c => (
-              <CoworkerRow
-                key={c.id}
-                coworker={c}
-                coworkingName={c.homeCoworkingSlug ? (cwMap[c.homeCoworkingSlug]?.name ?? null) : null}
-                onClick={() => setSelected(c)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Profile Modal */}
-      {selected && (
-        <CoworkerModal
-          coworker={selected}
-          coworkingName={selected.homeCoworkingSlug ? (cwMap[selected.homeCoworkingSlug]?.name ?? null) : null}
-          onClose={() => setSelected(null)}
-        />
-      )}
+      </NotebookPaper>
     </div>
   );
 }

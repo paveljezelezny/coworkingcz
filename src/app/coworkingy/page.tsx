@@ -2,439 +2,277 @@
 
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search, Filter, X, MapPin, DollarSign, Building2, Calendar, Users2 } from 'lucide-react';
-import CoworkingCard from '@/components/CoworkingCard';
-import { coworkingsData, getCitiesWithCount } from '@/lib/data/coworkings';
-import { AMENITY_LABELS, VENUE_TYPE_LABELS, FilterOptions, CoworkingSpace } from '@/lib/types';
+import Link from 'next/link';
+import { coworkingsData } from '@/lib/data/coworkings';
+import { AMENITY_LABELS, type CoworkingSpace } from '@/lib/types';
+import { PD, PD_FONT_DISPLAY, PD_FONT_BODY, PD_FONT_HAND, PD_FONT_MONO, toneColor } from '@/components/paper-diary/tokens';
+import { NotebookPaper, Stamp, PhotoPlaceholder } from '@/components/paper-diary/primitives';
+
+const QUICK_CITIES = ['Vše', 'Praha', 'Brno', 'Ostrava', 'Plzeň', 'Olomouc', 'Liberec'];
+const TOP_AMENITIES = ['wifi', 'meeting_rooms', '24h_access', 'parking', 'kitchen', 'reception', 'events', 'phone_booth', 'printer', 'lounge', 'terrace', 'kids_zone'];
+const TONE_BY_CITY: Record<string, 'amber' | 'moss' | 'coral' | 'accent' | 'ink'> = {
+  Praha: 'accent', Brno: 'moss', Ostrava: 'coral', Plzeň: 'amber',
+  Olomouc: 'moss', Liberec: 'accent',
+};
+
+function pluralize(n: number, one: string, few: string, many: string): string {
+  if (n === 1) return one;
+  if (n >= 2 && n <= 4) return few;
+  return many;
+}
 
 function CoworkingyPageInner() {
   const searchParams = useSearchParams();
-
-  // Inicializuj filtry z URL params (přesměrování z homepage)
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') ?? '');
-  const [selectedCity, setSelectedCity] = useState(searchParams.get('city') ?? '');
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  const [selectedVenueTypes, setSelectedVenueTypes] = useState<string[]>([]);
-  const [maxPrice, setMaxPrice] = useState(10000);
-  const [maxMonthlyPrice, setMaxMonthlyPrice] = useState(30000);
+  const [cityText, setCityText] = useState(searchParams.get('city') ?? '');
+  const [cityChip, setCityChip] = useState('Vše');
+  const [dayMax, setDayMax] = useState(1000);
+  const [monthMax, setMonthMax] = useState(15000);
   const [minCapacity, setMinCapacity] = useState(0);
-  const [minArea, setMinArea] = useState(0);
-  const [onlyEventSpace, setOnlyEventSpace] = useState(false);
-  const [onlySpecialDeal, setOnlySpecialDeal] = useState(false);
-  const [sortBy, setSortBy] = useState('featured');
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-  // Start empty — never flash stale static photos. Fill from live API only.
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [expanded, setExpanded] = useState(false);
   const [coworkings, setCoworkings] = useState<CoworkingSpace[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch coworkings with DB overrides (photos, edits, deletions)
   useEffect(() => {
-    const fetchCoworkings = async () => {
-      try {
-        // cache: 'no-store' prevents the browser from serving a stale cached response
-        const response = await fetch('/api/admin/coworkings', { cache: 'no-store' });
-        if (!response.ok) throw new Error('API error');
-        const data = await response.json();
-        setCoworkings(Array.isArray(data) ? data : coworkingsData);
-      } catch (error) {
-        console.error('Failed to fetch coworkings:', error);
-        setCoworkings(coworkingsData); // graceful fallback
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCoworkings();
+    let mounted = true;
+    fetch('/api/admin/coworkings', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d) => mounted && setCoworkings(Array.isArray(d) ? d : coworkingsData))
+      .catch(() => mounted && setCoworkings(coworkingsData))
+      .finally(() => mounted && setLoading(false));
+    return () => { mounted = false; };
   }, []);
 
   const cities = useMemo(() => {
-    const citiesWithCount: Record<string, number> = {};
-    coworkings.forEach((cw) => {
-      citiesWithCount[cw.city] = (citiesWithCount[cw.city] || 0) + 1;
-    });
-    return Object.entries(citiesWithCount).map(([city, count]) => ({ city, count }));
+    const counts: Record<string, number> = {};
+    coworkings.forEach((cw) => { counts[cw.city] = (counts[cw.city] || 0) + 1; });
+    return Object.entries(counts).map(([city, count]) => ({ city, count })).sort((a, b) => b.count - a.count);
   }, [coworkings]);
 
-  const amenities = Object.keys(AMENITY_LABELS);
-  const venueTypeKeys = Object.keys(VENUE_TYPE_LABELS);
-
-  const filteredCoworkings = useMemo(() => {
-    let results = coworkings;
-
+  const filtered = useMemo(() => {
+    let r = coworkings;
     if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      results = results.filter(
-        (cw) =>
-          cw.name.toLowerCase().includes(query) ||
-          cw.shortDescription.toLowerCase().includes(query) ||
-          cw.city.toLowerCase().includes(query)
-      );
+      const q = searchQuery.toLowerCase();
+      r = r.filter((cw) => cw.name.toLowerCase().includes(q) || (cw.shortDescription || '').toLowerCase().includes(q) || cw.city.toLowerCase().includes(q));
     }
+    const cityFilter = cityText.trim() || (cityChip !== 'Vše' ? cityChip : '');
+    if (cityFilter) r = r.filter((cw) => cw.city.toLowerCase().includes(cityFilter.toLowerCase()));
+    if (dayMax < 1000) r = r.filter((cw) => !cw.prices?.dayPass?.from || cw.prices.dayPass.from <= dayMax);
+    if (monthMax < 15000) r = r.filter((cw) => !cw.prices?.openSpace?.from || cw.prices.openSpace.from <= monthMax);
+    if (minCapacity > 0) r = r.filter((cw) => !cw.capacity || cw.capacity >= minCapacity);
+    if (selectedAmenities.length > 0) r = r.filter((cw) => selectedAmenities.every((a) => (cw.amenities || []).includes(a)));
+    // featured first
+    return r.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
+  }, [coworkings, searchQuery, cityText, cityChip, dayMax, monthMax, minCapacity, selectedAmenities]);
 
-    // Použij substring match — "Praha" najde i "Praha 3", "Praha 1" atd.
-    if (selectedCity) results = results.filter((cw) =>
-      cw.city.toLowerCase().includes(selectedCity.toLowerCase())
-    );
-
-    if (selectedAmenities.length > 0) {
-      results = results.filter((cw) => selectedAmenities.every((a) => cw.amenities.includes(a)));
-    }
-
-    if (selectedVenueTypes.length > 0) {
-      results = results.filter((cw) =>
-        selectedVenueTypes.some((v) => ((cw as any).venueTypes || []).includes(v))
-      );
-    }
-
-    if (maxPrice < 10000) results = results.filter((cw) => !cw.prices?.dayPass?.from || cw.prices.dayPass.from <= maxPrice);
-    if (maxMonthlyPrice < 30000) results = results.filter((cw) => !cw.prices?.openSpace?.from || cw.prices.openSpace.from <= maxMonthlyPrice);
-    if (minCapacity > 0) results = results.filter((cw) => !cw.capacity || cw.capacity >= minCapacity);
-    if (minArea > 0) results = results.filter((cw) => !cw.areaM2 || cw.areaM2 >= minArea);
-    if (onlyEventSpace) results = results.filter((cw) => (cw as any).hasEventSpace === true);
-    if (onlySpecialDeal) results = results.filter((cw) => cw.specialDeal?.enabled);
-
-    // Primary sort
-    if (sortBy === 'name') results.sort((a, b) => a.name.localeCompare(b.name));
-    else if (sortBy === 'price') results.sort((a, b) => (a.prices?.dayPass?.from || 0) - (b.prices?.dayPass?.from || 0));
-    else if (sortBy === 'price_monthly') results.sort((a, b) => (a.prices?.openSpace?.from || 0) - (b.prices?.openSpace?.from || 0));
-    else if (sortBy === 'capacity') results.sort((a, b) => (b.capacity || 0) - (a.capacity || 0));
-    else if (sortBy === 'featured') results.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
-
-    // isFeatured vždy první bez ohledu na řazení
-    results.sort((a, b) => {
-      if (a.isFeatured && !b.isFeatured) return -1;
-      if (!a.isFeatured && b.isFeatured) return 1;
-      return 0;
-    });
-
-    return results;
-  }, [coworkings, searchQuery, selectedCity, selectedAmenities, selectedVenueTypes, maxPrice, maxMonthlyPrice, minCapacity, minArea, onlyEventSpace, onlySpecialDeal, sortBy]);
-
-  const toggleAmenity = (amenity: string) => {
-    setSelectedAmenities((prev) =>
-      prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
-    );
+  const toggleAmenity = (a: string) => setSelectedAmenities((prev) => prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]);
+  const reset = () => {
+    setSearchQuery(''); setCityText(''); setCityChip('Vše');
+    setDayMax(1000); setMonthMax(15000); setMinCapacity(0); setSelectedAmenities([]);
   };
-
-  const toggleVenueType = (v: string) => {
-    setSelectedVenueTypes((prev) =>
-      prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
-    );
-  };
-
-  const hasActiveFilters =
-    selectedCity || selectedAmenities.length > 0 || selectedVenueTypes.length > 0 ||
-    maxPrice < 10000 || maxMonthlyPrice < 30000 || minCapacity > 0 || minArea > 0 || onlyEventSpace || onlySpecialDeal;
-
-  const clearAllFilters = () => {
-    setSelectedCity('');
-    setSelectedAmenities([]);
-    setSelectedVenueTypes([]);
-    setMaxPrice(10000);
-    setMaxMonthlyPrice(30000);
-    setMinCapacity(0);
-    setMinArea(0);
-    setOnlyEventSpace(false);
-    setOnlySpecialDeal(false);
-  };
+  const activeFilters = (searchQuery ? 1 : 0) + (cityText ? 1 : 0) + (cityChip !== 'Vše' ? 1 : 0) +
+    (dayMax < 1000 ? 1 : 0) + (monthMax < 15000 ? 1 : 0) + (minCapacity > 0 ? 1 : 0) + selectedAmenities.length;
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-8 pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-            Všechny coworkingy
-          </h1>
-          <p className="text-gray-600">
-            Procházej a filtruj {coworkings.length} coworkingových prostorů
-          </p>
-        </div>
-
-        {/* Search Bar */}
-        <div className="mb-8">
-          <div className="relative">
-            <Search className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Hledej coworking, město, vybavení..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="input-field pl-12 w-full"
-            />
-          </div>
-        </div>
-
-        <div className="flex gap-6">
-          {/* Sidebar Filters - Desktop */}
-          <div className="hidden lg:block w-72 flex-shrink-0">
-            <div className="bg-white rounded-xl border border-gray-100 p-5 space-y-5 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto">
-              {/* City */}
-              <div>
-                <h3 className="font-bold text-gray-900 mb-3 text-sm flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-blue-600" />Město
-                </h3>
-                <select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)} className="input-field w-full">
-                  <option value="">Všechna města</option>
-                  {cities.map((city) => (
-                    <option key={city.city} value={city.city}>{city.city} ({city.count})</option>
-                  ))}
-                </select>
+    <div style={{ maxWidth: 1440, margin: '0 auto', background: PD.paper, fontFamily: PD_FONT_BODY }}>
+      <NotebookPaper style={{ padding: '32px 20px 50px' }}>
+        <div className="md:!pl-24 md:!pr-14 md:!pt-10">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row" style={{ alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 24, gap: 8 }}>
+            <div>
+              <div style={{ fontFamily: PD_FONT_HAND, fontSize: 22, color: PD.margin, marginBottom: 4, transform: 'rotate(-1deg)', display: 'inline-block' }}>
+                šuplík I. ↘
               </div>
-
-              {/* Price/day */}
-              <div>
-                <h3 className="font-bold text-gray-900 mb-2 text-sm flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-orange-500" />
-                  Max. cena/den: <span className="text-blue-600">{maxPrice === 10000 ? 'bez omezení' : `${maxPrice} Kč`}</span>
-                </h3>
-                <input type="range" min="0" max="10000" step="100" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} className="w-full accent-blue-600" />
-              </div>
-
-              {/* Price/month */}
-              <div>
-                <h3 className="font-bold text-gray-900 mb-2 text-sm flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-green-500" />
-                  Max. cena/měsíc: <span className="text-blue-600">{maxMonthlyPrice === 30000 ? 'bez omezení' : `${maxMonthlyPrice} Kč`}</span>
-                </h3>
-                <input type="range" min="0" max="30000" step="500" value={maxMonthlyPrice} onChange={(e) => setMaxMonthlyPrice(Number(e.target.value))} className="w-full accent-green-600" />
-              </div>
-
-              {/* Min capacity */}
-              <div>
-                <h3 className="font-bold text-gray-900 mb-2 text-sm flex items-center gap-2">
-                  <Users2 className="w-4 h-4 text-blue-500" />
-                  Min. kapacita: <span className="text-blue-600">{minCapacity === 0 ? 'bez omezení' : `${minCapacity} míst`}</span>
-                </h3>
-                <input type="range" min="0" max="200" step="5" value={minCapacity} onChange={(e) => setMinCapacity(Number(e.target.value))} className="w-full accent-blue-600" />
-              </div>
-
-              {/* Min area */}
-              <div>
-                <h3 className="font-bold text-gray-900 mb-2 text-sm">
-                  Min. plocha: <span className="text-blue-600">{minArea === 0 ? 'bez omezení' : `${minArea} m²`}</span>
-                </h3>
-                <input type="range" min="0" max="2000" step="50" value={minArea} onChange={(e) => setMinArea(Number(e.target.value))} className="w-full accent-blue-600" />
-              </div>
-
-              {/* Event space only */}
-              <div>
-                <label className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-purple-50 transition-colors">
-                  <input type="checkbox" checked={onlyEventSpace} onChange={(e) => setOnlyEventSpace(e.target.checked)} className="w-4 h-4 rounded accent-purple-600" />
-                  <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
-                    <Building2 className="w-4 h-4 text-purple-500" />Eventový prostor
-                  </span>
-                </label>
-              </div>
-
-              {/* Special Deal only */}
-              <div>
-                <label className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-amber-50 transition-colors">
-                  <input type="checkbox" checked={onlySpecialDeal} onChange={(e) => setOnlySpecialDeal(e.target.checked)} className="w-4 h-4 rounded accent-amber-500" />
-                  <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
-                    🏷️ <span>Jen Special Deal</span>
-                  </span>
-                </label>
-              </div>
-
-              {/* Amenities */}
-              <div>
-                <h3 className="font-bold text-gray-900 mb-3 text-sm">Vybavení</h3>
-                <div className="space-y-1.5">
-                  {amenities.map((amenity) => (
-                    <label key={amenity} className="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-gray-50">
-                      <input type="checkbox" checked={selectedAmenities.includes(amenity)} onChange={() => toggleAmenity(amenity)} className="w-4 h-4 rounded accent-blue-600" />
-                      <span className="text-xs text-gray-700">{AMENITY_LABELS[amenity] || amenity}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Venue types */}
-              <div>
-                <h3 className="font-bold text-gray-900 mb-3 text-sm">Typ akce / využití</h3>
-                <div className="space-y-1.5">
-                  {venueTypeKeys.map((v) => (
-                    <label key={v} className="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-gray-50">
-                      <input type="checkbox" checked={selectedVenueTypes.includes(v)} onChange={() => toggleVenueType(v)} className="w-4 h-4 rounded accent-purple-600" />
-                      <span className="text-xs text-gray-700">{VENUE_TYPE_LABELS[v]}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Clear */}
-              {hasActiveFilters && (
-                <button onClick={clearAllFilters} className="w-full py-2 px-4 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200">
-                  Vymazat všechny filtry
-                </button>
-              )}
+              <h1 className="text-[40px] md:text-[64px]" style={{ fontFamily: PD_FONT_DISPLAY, letterSpacing: '-0.025em', lineHeight: 0.95, fontWeight: 500, margin: 0, color: PD.ink }}>
+                Coworkingy v ČR
+              </h1>
+              <p style={{ fontSize: 14, color: PD.inkSoft, marginTop: 10, maxWidth: 500 }}>
+                {coworkings.length} prostorů ve {cities.length} městech. Seřazeno dle doporučení redakce.
+              </p>
+            </div>
+            <div className="hidden md:block" style={{ fontFamily: PD_FONT_HAND, fontSize: 17, color: PD.inkMuted }}>
+              ↘ str. 12 / Vol. VII
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="flex-1 min-w-0">
-            {/* Mobile Filter Button */}
-            <div className="lg:hidden mb-6 flex gap-3">
-              <button
-                onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg font-medium text-gray-900 hover:bg-gray-50 transition-colors"
-              >
-                <Filter className="w-5 h-5" />
-                Filtry
+          {/* Filter block */}
+          <div style={{ background: PD.paperWhite, border: `1.5px solid ${PD.ink}`, boxShadow: '4px 4px 0 rgba(0,0,0,0.08)', marginBottom: 24 }}>
+            {/* Row 1: search + city + toggle */}
+            <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr_auto]" style={{ borderBottom: `1px dashed ${PD.rule}` }}>
+              <div style={{ padding: '12px 16px', borderBottom: `1px dashed ${PD.rule}` }} className="md:!border-b-0 md:!border-r md:!border-r-[var(--pd-rule)] md:!border-dashed">
+                <div style={{ fontFamily: PD_FONT_MONO, fontSize: 10, letterSpacing: 1.5, color: PD.inkMuted, textTransform: 'uppercase', marginBottom: 4 }}>
+                  Název coworkingu
+                </div>
+                <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Locus, Impact Hub, Opero…" style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'inherit', fontSize: 16, outline: 'none', color: PD.ink }} />
+              </div>
+              <div style={{ padding: '12px 16px', borderBottom: `1px dashed ${PD.rule}` }} className="md:!border-b-0 md:!border-r md:!border-r-[var(--pd-rule)] md:!border-dashed">
+                <div style={{ fontFamily: PD_FONT_MONO, fontSize: 10, letterSpacing: 1.5, color: PD.inkMuted, textTransform: 'uppercase', marginBottom: 4 }}>
+                  Město / lokalita
+                </div>
+                <input value={cityText} onChange={(e) => { setCityText(e.target.value); setCityChip('Vše'); }} placeholder="Praha 3, Vinohrady, Brno…" style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'inherit', fontSize: 16, outline: 'none', color: PD.ink }} />
+              </div>
+              <button onClick={() => setExpanded(!expanded)} style={{ padding: '14px 22px', background: expanded ? PD.ink : 'transparent', color: expanded ? PD.paperWhite : PD.ink, border: 'none', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                {expanded ? 'Skrýt filtr' : 'Více filtrů'}
+                {activeFilters > 0 && (
+                  <span style={{ background: PD.margin, color: '#fff', borderRadius: 99, fontSize: 11, padding: '1px 7px', fontFamily: PD_FONT_MONO }}>
+                    {activeFilters}
+                  </span>
+                )}
+                <span style={{ fontSize: 11, opacity: 0.7 }}>{expanded ? '▲' : '▼'}</span>
               </button>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="flex-1 input-field">
-                <option value="featured">Doporučené</option>
-                <option value="name">Název A-Z</option>
-                <option value="price">Cena/den (nízká-vysoká)</option>
-                <option value="price_monthly">Cena/měsíc (nízká-vysoká)</option>
-                <option value="capacity">Kapacita (největší)</option>
-              </select>
             </div>
 
-            {/* Desktop Sort */}
-            <div className="hidden lg:flex mb-6 items-center gap-4">
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="input-field w-56">
-                <option value="featured">Doporučené</option>
-                <option value="name">Název A-Z</option>
-                <option value="price">Cena/den (nízká-vysoká)</option>
-                <option value="price_monthly">Cena/měsíc (nízká-vysoká)</option>
-                <option value="capacity">Kapacita (největší)</option>
-              </select>
-              {hasActiveFilters && (
-                <button onClick={clearAllFilters} className="text-sm text-red-500 hover:text-red-700 font-medium flex items-center gap-1">
-                  <X className="w-4 h-4" />Vymazat filtry
-                </button>
-              )}
-            </div>
-
-            {/* Mobile Filter Panel */}
-            {mobileFilterOpen && (
-              <div className="lg:hidden bg-white rounded-xl border border-gray-100 p-6 mb-6 space-y-6 animate-slide-up">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-bold text-gray-900">Filtry</h2>
-                  <button
-                    onClick={() => setMobileFilterOpen(false)}
-                    className="p-1 hover:bg-gray-100 rounded transition-colors"
-                  >
-                    <X className="w-5 h-5" />
+            {/* City chips */}
+            <div style={{ display: 'flex', gap: 6, padding: '10px 16px', flexWrap: 'wrap', alignItems: 'center', borderBottom: expanded ? `1px dashed ${PD.rule}` : 'none' }}>
+              <span style={{ fontFamily: PD_FONT_HAND, fontSize: 18, color: PD.inkMuted, marginRight: 4 }}>rychle:</span>
+              {QUICK_CITIES.map((c) => {
+                const active = cityChip === c && !cityText;
+                return (
+                  <button key={c} onClick={() => { setCityChip(c); setCityText(''); }} style={{ padding: '4px 10px', fontSize: 12, border: `1.5px solid ${active ? PD.ink : PD.rule}`, background: active ? PD.ink : PD.paperWhite, color: active ? PD.paperWhite : PD.inkSoft, fontFamily: 'inherit', cursor: 'pointer', borderRadius: 99 }}>
+                    {c}
                   </button>
-                </div>
+                );
+              })}
+            </div>
 
-                {/* City Filter Mobile */}
-                <div>
-                  <h3 className="font-bold text-gray-900 mb-3 text-sm">Město</h3>
-                  <select
-                    value={selectedCity}
-                    onChange={(e) => setSelectedCity(e.target.value)}
-                    className="input-field w-full"
-                  >
-                    <option value="">Všechna města</option>
-                    {cities.map((city) => (
-                      <option key={city.city} value={city.city}>
-                        {city.city} ({city.count})
-                      </option>
-                    ))}
-                  </select>
+            {/* Expanded filters */}
+            {expanded && (
+              <div style={{ padding: '18px 18px 18px' }}>
+                <div className="grid grid-cols-1 md:grid-cols-3" style={{ gap: 24, marginBottom: 18 }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+                      <span style={{ fontFamily: PD_FONT_MONO, fontSize: 11, letterSpacing: 1.2, color: PD.inkMuted, textTransform: 'uppercase' }}>Day pass</span>
+                      <span style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 16, fontWeight: 500 }}>{dayMax < 1000 ? `do ${dayMax} Kč` : 'bez limitu'}</span>
+                    </div>
+                    <input type="range" min="100" max="1000" step="50" value={dayMax} onChange={(e) => setDayMax(+e.target.value)} style={{ width: '100%', accentColor: PD.margin }} />
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+                      <span style={{ fontFamily: PD_FONT_MONO, fontSize: 11, letterSpacing: 1.2, color: PD.inkMuted, textTransform: 'uppercase' }}>Měsíc</span>
+                      <span style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 16, fontWeight: 500 }}>{monthMax < 15000 ? `do ${monthMax.toLocaleString('cs')} Kč` : 'bez limitu'}</span>
+                    </div>
+                    <input type="range" min="2000" max="15000" step="500" value={monthMax} onChange={(e) => setMonthMax(+e.target.value)} style={{ width: '100%', accentColor: PD.margin }} />
+                  </div>
+                  <div>
+                    <div style={{ fontFamily: PD_FONT_MONO, fontSize: 11, letterSpacing: 1.2, color: PD.inkMuted, textTransform: 'uppercase', marginBottom: 6 }}>Kapacita (počet lidí)</div>
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      {[{ v: 0, l: 'libovolná' }, { v: 1, l: '1' }, { v: 4, l: '2–4' }, { v: 8, l: '5–8' }, { v: 20, l: '9–20' }, { v: 50, l: '20+' }].map((c) => (
+                        <button key={c.v} onClick={() => setMinCapacity(c.v)} style={{ padding: '4px 10px', fontSize: 12, border: `1.5px solid ${minCapacity === c.v ? PD.ink : PD.rule}`, background: minCapacity === c.v ? PD.ink : PD.paperLt, color: minCapacity === c.v ? PD.paperWhite : PD.inkSoft, fontFamily: 'inherit', cursor: 'pointer', borderRadius: 99 }}>{c.l}</button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-
-                {/* Price Filter Mobile */}
                 <div>
-                  <h3 className="font-bold text-gray-900 mb-3 text-sm">
-                    Max. cena/den: {maxPrice} Kč
-                  </h3>
-                  <input
-                    type="range"
-                    min="0"
-                    max="10000"
-                    step="100"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(Number(e.target.value))}
-                    className="w-full accent-blue-600"
-                  />
-                </div>
-
-                {/* Amenities Mobile */}
-                <div>
-                  <h3 className="font-bold text-gray-900 mb-3 text-sm">Vybavení</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {amenities.slice(0, 8).map((amenity) => (
-                      <label key={amenity} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedAmenities.includes(amenity)}
-                          onChange={() => toggleAmenity(amenity)}
-                          className="w-4 h-4 rounded accent-blue-600"
-                        />
-                        <span className="text-sm text-gray-700">
-                          {AMENITY_LABELS[amenity] || amenity}
-                        </span>
-                      </label>
-                    ))}
+                  <div style={{ fontFamily: PD_FONT_MONO, fontSize: 11, letterSpacing: 1.2, color: PD.inkMuted, textTransform: 'uppercase', marginBottom: 8 }}>Vybavení</div>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {TOP_AMENITIES.map((a) => {
+                      const on = selectedAmenities.includes(a);
+                      return (
+                        <button key={a} onClick={() => toggleAmenity(a)} style={{ padding: '5px 12px', fontSize: 12, border: `1.5px solid ${on ? PD.moss : PD.rule}`, background: on ? PD.moss : PD.paperLt, color: on ? '#fff' : PD.inkSoft, fontFamily: 'inherit', cursor: 'pointer', borderRadius: 99, display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <span style={{ fontSize: 10, opacity: on ? 1 : 0.4 }}>{on ? '✓' : '+'}</span>
+                          {AMENITY_LABELS[a] || a}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Results */}
-            <div>
-              {loading ? (
-                /* Skeleton cards while live data loads — no stale photos flash */
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="rounded-lg bg-white border border-gray-100 shadow-sm overflow-hidden animate-pulse">
-                      <div className="h-48 bg-gray-200" />
-                      <div className="p-4 space-y-3">
-                        <div className="h-5 bg-gray-200 rounded w-3/4" />
-                        <div className="h-4 bg-gray-100 rounded w-1/2" />
-                        <div className="h-4 bg-gray-100 rounded w-full" />
-                        <div className="h-4 bg-gray-100 rounded w-5/6" />
-                        <div className="h-10 bg-gray-200 rounded mt-4" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <>
-                  <p className="text-sm text-gray-600 mb-6">
-                    Nalezeno <span className="font-bold text-gray-900">{filteredCoworkings.length}</span> coworkingů
-                  </p>
-
-                  {filteredCoworkings.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      {filteredCoworkings.map((coworking) => (
-                        <CoworkingCard key={coworking.id} coworking={coworking} />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
-                      <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">
-                        Žádné výsledky
-                      </h3>
-                      <p className="text-gray-600 mb-6">
-                        Zkus změnit filtry nebo hledaný text
-                      </p>
-                      <button
-                        onClick={() => { setSearchQuery(''); clearAllFilters(); }}
-                        className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        Vymazat filtry
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
+            {/* Footer */}
+            <div className="flex flex-col md:flex-row" style={{ justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', borderTop: `1.5px solid ${PD.ink}`, background: PD.paperLt, gap: 8 }}>
+              <div style={{ fontSize: 13 }}>
+                <b style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 20, letterSpacing: '-0.015em' }}>{filtered.length}</b>
+                <span style={{ color: PD.inkSoft, marginLeft: 6 }}>
+                  {pluralize(filtered.length, 'coworking nalezen', 'coworkingy nalezeny', 'coworkingů nalezeno')}
+                  {activeFilters > 0 ? ` · ${activeFilters} aktivních filtrů` : ''}
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: 14, alignItems: 'center', fontSize: 13, flexWrap: 'wrap' }}>
+                {activeFilters > 0 && (
+                  <button onClick={reset} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: PD_FONT_HAND, fontSize: 18, color: PD.margin }}>
+                    vymazat filtry ✕
+                  </button>
+                )}
+                <Link href="/mapa" style={{ color: PD.inkMuted, textDecoration: 'none' }}>Zobrazit na mapě →</Link>
+              </div>
             </div>
           </div>
+
+          {/* Grid */}
+          {loading ? (
+            <div style={{ padding: '60px 0', textAlign: 'center', fontFamily: PD_FONT_HAND, fontSize: 22, color: PD.inkMuted }}>
+              ↻ načítám…
+            </div>
+          ) : filtered.length === 0 ? (
+            <div style={{ padding: '60px 0', textAlign: 'center' }}>
+              <div style={{ fontFamily: PD_FONT_HAND, fontSize: 36, color: PD.inkMuted, marginBottom: 8, transform: 'rotate(-2deg)', display: 'inline-block' }}>
+                ¯\_(ツ)_/¯
+              </div>
+              <div style={{ fontSize: 16, color: PD.inkSoft }}>Nic jsme nenašli. Zkus zmírnit filtry.</div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" style={{ gap: 22 }}>
+              {filtered.map((s, i) => {
+                const photo = s.photos?.find((p) => p.isPrimary)?.url ?? s.photos?.[0]?.url;
+                const tone = TONE_BY_CITY[s.city] || 'ink';
+                const fromHourly = s.prices?.hourly?.from;
+                const fromDay = s.prices?.dayPass?.from;
+                const fromMonth = s.prices?.openSpace?.from;
+                return (
+                  <Link key={s.id} href={`/coworking/${s.slug}`} style={{ background: PD.paperWhite, border: `1px solid ${PD.rule}`, padding: 10, transform: `rotate(${(i % 3 - 1) * 0.4}deg)`, boxShadow: '3px 4px 0 rgba(0,0,0,0.07)', position: 'relative', textDecoration: 'none', display: 'block' }}>
+                    {s.isVerified && (
+                      <div style={{ position: 'absolute', top: 14, right: 14, zIndex: 2 }}>
+                        <Stamp rotate={6}>ověřeno</Stamp>
+                      </div>
+                    )}
+                    {photo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={photo} alt={s.name} style={{ width: '100%', height: 170, objectFit: 'cover', display: 'block' }} />
+                    ) : (
+                      <PhotoPlaceholder label={s.name.toLowerCase()} tone={tone} style={{ height: 170 }} />
+                    )}
+                    <div style={{ padding: '12px 8px 4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 6 }}>
+                        <div style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 18, fontWeight: 500, letterSpacing: '-0.015em', color: PD.ink }}>
+                          {s.name}
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 12, color: PD.inkMuted, marginBottom: 8 }}>{s.city}</div>
+                      {s.amenities && s.amenities.length > 0 && (
+                        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 8 }}>
+                          {s.amenities.slice(0, 4).map((t) => (
+                            <span key={t} style={{ fontSize: 10, padding: '2px 7px', border: `1px solid ${selectedAmenities.includes(t) ? PD.moss : PD.rule}`, borderRadius: 99, color: selectedAmenities.includes(t) ? PD.moss : PD.inkSoft, fontFamily: PD_FONT_MONO, fontWeight: selectedAmenities.includes(t) ? 700 : 400 }}>
+                              {AMENITY_LABELS[t] || t}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 8, borderTop: `1px dashed ${PD.ruleSoft}`, fontSize: 11, color: PD.inkMuted, gap: 4, flexWrap: 'wrap' }}>
+                        <span>
+                          {fromHourly != null && <>od <b style={{ color: PD.ink, fontSize: 13 }}>{fromHourly}</b>/h</>}
+                          {fromHourly == null && fromDay != null && <>den od <b style={{ color: PD.ink, fontSize: 13 }}>{fromDay} Kč</b></>}
+                          {fromHourly == null && fromDay == null && fromMonth != null && <>měsíc od <b style={{ color: PD.ink, fontSize: 13 }}>{fromMonth} Kč</b></>}
+                          {fromHourly == null && fromDay == null && fromMonth == null && <>cena na vyžádání</>}
+                        </span>
+                        <span style={{ fontFamily: PD_FONT_HAND, fontSize: 16, color: PD.margin }}>zobrazit →</span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
-      </div>
+      </NotebookPaper>
     </div>
   );
 }
 
 export default function CoworkingyPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-500">Načítám...</div></div>}>
+    <Suspense fallback={<div style={{ padding: 80, textAlign: 'center', fontFamily: PD_FONT_HAND, fontSize: 24, color: PD.inkMuted }}>↻ načítám…</div>}>
       <CoworkingyPageInner />
     </Suspense>
   );
