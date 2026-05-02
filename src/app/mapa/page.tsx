@@ -1,15 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapPin, Search, X, Users, DollarSign, Calendar, ExternalLink } from 'lucide-react';
-import { coworkingsData } from '@/lib/data/coworkings';
-import { CoworkingSpace } from '@/lib/types';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { coworkingsData } from '@/lib/data/coworkings';
+import { CoworkingSpace } from '@/lib/types';
 import { getMarkerCoords } from '@/components/GoogleMap';
+import { PD, PD_FONT_DISPLAY, PD_FONT_BODY, PD_FONT_HAND, PD_FONT_MONO } from '@/components/paper-diary/tokens';
+import { Stamp, PhotoPlaceholder } from '@/components/paper-diary/primitives';
 
-// Dynamically import GoogleMap to avoid SSR issues with the Google Maps JS API
+// Google Maps musí načíst client-side (žádné SSR)
 const GoogleMap = dynamic(() => import('@/components/GoogleMap'), { ssr: false });
+
+const TONE_BY_CITY: Record<string, 'amber' | 'moss' | 'coral' | 'accent' | 'ink'> = {
+  Praha: 'accent', Brno: 'moss', Ostrava: 'coral', Plzeň: 'amber',
+};
 
 export default function MapaPage() {
   const [coworkings, setCoworkings] = useState<CoworkingSpace[]>(coworkingsData);
@@ -17,37 +22,31 @@ export default function MapaPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
 
-  // Fetch live data (with DB overrides)
   useEffect(() => {
     fetch('/api/admin/coworkings')
       .then((r) => r.json())
       .then((data) => { if (Array.isArray(data)) setCoworkings(data); })
-      .catch(() => {/* fallback to static */});
+      .catch(() => { /* fallback to static */ });
   }, []);
 
-  const cities = [...new Set(coworkings.map((cw) => cw.city))].sort();
-
-  const filteredCoworkings = coworkings.filter((cw) => {
-    const matchSearch = !searchQuery || cw.name.toLowerCase().includes(searchQuery.toLowerCase()) || cw.city.toLowerCase().includes(searchQuery.toLowerCase());
+  const cities = Array.from(new Set(coworkings.map((cw) => cw.city))).sort();
+  const filtered = coworkings.filter((cw) => {
+    const q = searchQuery.toLowerCase();
+    const matchSearch = !q || cw.name.toLowerCase().includes(q) || cw.city.toLowerCase().includes(q);
     const matchCity = !selectedCity || cw.city.toLowerCase().includes(selectedCity.toLowerCase());
     return matchSearch && matchCity;
   });
 
-  // Build marker data — skip coworkings that have no known coordinates
-  const mapMarkers = filteredCoworkings
+  const mapMarkers = filtered
     .map((cw) => {
       const coords = getMarkerCoords(cw.latitude, cw.longitude, cw.city);
       if (!coords) return null;
       return {
-        id: cw.id,
-        name: cw.name,
-        city: cw.city,
+        id: cw.id, name: cw.name, city: cw.city,
         address: cw.address ?? '',
-        lat: coords.lat,
-        lng: coords.lng,
+        lat: coords.lat, lng: coords.lng,
         slug: cw.slug,
-        prices: cw.prices,
-        capacity: cw.capacity,
+        prices: cw.prices, capacity: cw.capacity,
         isVerified: cw.isVerified,
         photoUrl: cw.photos?.[0]?.url,
       };
@@ -55,48 +54,50 @@ export default function MapaPage() {
     .filter((m): m is NonNullable<typeof m> => m !== null);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div style={{ maxWidth: 1440, margin: '0 auto', background: PD.paper, fontFamily: PD_FONT_BODY }}>
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-6">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Mapa coworkingů</h1>
-          <div className="flex gap-4 flex-col sm:flex-row">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Hledej coworking nebo město..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-field pl-12 w-full"
-              />
-            </div>
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              className="input-field flex-1"
+      <div style={{ padding: '24px 20px 18px', borderBottom: `1.5px solid ${PD.ink}`, background: PD.paperLt }} className="md:!pl-24 md:!pr-14 md:!py-7">
+        <div style={{ fontFamily: PD_FONT_HAND, fontSize: 22, color: PD.accent, marginBottom: 4, transform: 'rotate(-1deg)', display: 'inline-block' }}>
+          ↘ kde tě čekají
+        </div>
+        <h1 className="text-[32px] md:text-[44px]" style={{ fontFamily: PD_FONT_DISPLAY, letterSpacing: '-0.025em', lineHeight: 0.95, fontWeight: 500, margin: '0 0 14px', color: PD.ink }}>
+          Mapa coworkingů
+        </h1>
+
+        {/* Filter bar */}
+        <div className="flex flex-col md:flex-row" style={{ gap: 10, alignItems: 'stretch' }}>
+          <input
+            type="text"
+            placeholder="Hledej coworking nebo město…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ flex: 1, padding: '11px 14px', border: `1.5px solid ${PD.ink}`, background: PD.paperWhite, fontFamily: 'inherit', fontSize: 14, outline: 'none', color: PD.ink }}
+          />
+          <select
+            value={selectedCity}
+            onChange={(e) => setSelectedCity(e.target.value)}
+            style={{ padding: '11px 14px', border: `1.5px solid ${PD.ink}`, background: PD.paperWhite, fontFamily: 'inherit', fontSize: 14, outline: 'none', color: PD.ink, minWidth: 160 }}
+          >
+            <option value="">Všechna města</option>
+            {cities.map((city) => (
+              <option key={city} value={city}>{city}</option>
+            ))}
+          </select>
+          {(searchQuery || selectedCity) && (
+            <button
+              onClick={() => { setSearchQuery(''); setSelectedCity(''); }}
+              style={{ padding: '11px 18px', background: 'transparent', color: PD.margin, border: `1.5px solid ${PD.margin}`, fontFamily: PD_FONT_HAND, fontSize: 18, cursor: 'pointer' }}
             >
-              <option value="">Všechna města</option>
-              {cities.map((city) => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-            {(searchQuery || selectedCity) && (
-              <button
-                onClick={() => { setSearchQuery(''); setSelectedCity(''); }}
-                className="px-4 py-3 text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            )}
-          </div>
+              ✕ vymazat
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex h-[calc(100vh-200px)]">
-        {/* Google Map */}
-        <div className="flex-1 relative overflow-hidden">
+      {/* Content: map + sidebar */}
+      <div className="flex flex-col lg:flex-row" style={{ height: 'calc(100vh - 240px)', minHeight: 540 }}>
+        {/* Map */}
+        <div style={{ flex: 1, position: 'relative', overflow: 'hidden', minHeight: 360 }}>
           <GoogleMap
             markers={mapMarkers}
             selectedId={selectedCoworking}
@@ -105,66 +106,80 @@ export default function MapaPage() {
         </div>
 
         {/* Sidebar */}
-        <div className="w-full sm:w-96 bg-white border-l border-gray-200 overflow-y-auto flex flex-col">
-          <div className="p-4 border-b border-gray-100 flex-shrink-0">
-            <p className="text-sm text-gray-600">
-              Nalezeno <span className="font-bold text-gray-900">{filteredCoworkings.length}</span> coworkingů
-            </p>
+        <aside style={{ width: '100%', maxWidth: '100%', background: PD.paperLt, borderLeft: `1.5px solid ${PD.ink}`, display: 'flex', flexDirection: 'column' }} className="lg:!w-[400px] lg:!max-w-[400px]">
+          <div style={{ padding: '12px 16px', borderBottom: `1px dashed ${PD.rule}`, background: PD.paperWhite, flexShrink: 0 }}>
+            <span style={{ fontFamily: PD_FONT_MONO, fontSize: 11, letterSpacing: 1.5, color: PD.inkMuted, textTransform: 'uppercase' }}>
+              Nalezeno <b style={{ color: PD.ink, fontFamily: PD_FONT_DISPLAY, fontSize: 18, letterSpacing: '-0.015em' }}>{filtered.length}</b>{' '}
+              {filtered.length === 1 ? 'coworking' : (filtered.length >= 2 && filtered.length <= 4 ? 'coworkingy' : 'coworkingů')}
+            </span>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {filteredCoworkings.length > 0 ? filteredCoworkings.map((cw) => (
-              <div
-                key={cw.id}
-                onClick={() => setSelectedCoworking(cw.id === selectedCoworking ? null : cw.id)}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                  selectedCoworking === cw.id
-                    ? 'border-orange-400 bg-orange-50 shadow-md'
-                    : 'border-gray-100 hover:border-blue-300 bg-white'
-                }`}
-              >
-                {/* Thumbnail */}
-                {cw.photos && cw.photos[0] && (
-                  <div className="relative w-full h-28 mb-3 rounded-lg overflow-hidden bg-gray-100">
-                    <img src={cw.photos[0].url} alt={cw.name} className="w-full h-full object-cover" />
-                  </div>
-                )}
-
-                <h3 className="font-bold text-gray-900 mb-1">{cw.name}</h3>
-                <p className="text-xs text-gray-500 flex items-center gap-1 mb-2">
-                  <MapPin className="w-3 h-3" />{cw.city}
-                </p>
-                <p className="text-xs text-gray-600 line-clamp-2 mb-3">{cw.shortDescription}</p>
-
-                {/* Mini stats */}
-                <div className="flex flex-wrap gap-3 mb-3 text-xs text-gray-600">
-                  {cw.capacity && (
-                    <span className="flex items-center gap-1"><Users className="w-3 h-3 text-blue-500" />{cw.capacity} míst</span>
-                  )}
-                  {(cw as any).prices?.dayPass?.enabled && (cw as any).prices.dayPass.from && (
-                    <span className="flex items-center gap-1"><DollarSign className="w-3 h-3 text-orange-500" />od {(cw as any).prices.dayPass.from} Kč/den</span>
-                  )}
-                  {(cw as any).prices?.openSpace?.enabled && (cw as any).prices.openSpace.from && (
-                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-green-500" />od {(cw as any).prices.openSpace.from} Kč/měs</span>
-                  )}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {filtered.length === 0 ? (
+              <div style={{ padding: '40px 0', textAlign: 'center' }}>
+                <div style={{ fontFamily: PD_FONT_HAND, fontSize: 28, color: PD.inkMuted, marginBottom: 6, transform: 'rotate(-2deg)', display: 'inline-block' }}>
+                  ¯\_(ツ)_/¯
                 </div>
-
-                <Link
-                  href={`/coworking/${cw.slug}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                <div style={{ fontSize: 13, color: PD.inkSoft }}>Žádné výsledky</div>
+              </div>
+            ) : filtered.map((cw, i) => {
+              const isSelected = selectedCoworking === cw.id;
+              const tone = TONE_BY_CITY[cw.city] || 'ink';
+              return (
+                <div
+                  key={cw.id}
+                  onClick={() => setSelectedCoworking(isSelected ? null : cw.id)}
+                  style={{
+                    background: PD.paperWhite,
+                    border: `1.5px solid ${isSelected ? PD.margin : PD.rule}`,
+                    padding: 12, position: 'relative', cursor: 'pointer',
+                    transform: `rotate(${(i % 2 === 0 ? -0.3 : 0.3)}deg)`,
+                    boxShadow: isSelected ? `4px 4px 0 ${PD.margin}` : '2px 3px 0 rgba(0,0,0,0.06)',
+                    transition: 'transform 0.18s, box-shadow 0.18s',
+                  }}
                 >
-                  Detail <ExternalLink className="w-3 h-3" />
-                </Link>
-              </div>
-            )) : (
-              <div className="text-center py-12">
-                <MapPin className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-600 text-sm">Žádné výsledky</p>
-              </div>
-            )}
+                  {cw.isVerified && (
+                    <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 2 }}>
+                      <Stamp rotate={4}>ověřeno</Stamp>
+                    </div>
+                  )}
+                  {cw.photos && cw.photos[0] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={cw.photos[0].url} alt={cw.name} style={{ width: '100%', height: 110, objectFit: 'cover', display: 'block' }} />
+                  ) : (
+                    <PhotoPlaceholder label={cw.name.toLowerCase()} tone={tone} style={{ height: 110 }} />
+                  )}
+                  <div style={{ padding: '10px 4px 4px' }}>
+                    <div style={{ fontFamily: PD_FONT_DISPLAY, fontSize: 16, fontWeight: 500, letterSpacing: '-0.015em', color: PD.ink, marginBottom: 2 }}>
+                      {cw.name}
+                    </div>
+                    <div style={{ fontSize: 12, color: PD.inkMuted, marginBottom: 6 }}>
+                      📍 {cw.city}
+                    </div>
+                    {cw.shortDescription && (
+                      <p style={{ fontSize: 12, color: PD.inkSoft, lineHeight: 1.4, margin: '0 0 8px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {cw.shortDescription}
+                      </p>
+                    )}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, fontSize: 11, color: PD.inkMuted, fontFamily: PD_FONT_MONO, marginBottom: 8 }}>
+                      {cw.capacity && <span>👥 {cw.capacity} míst</span>}
+                      {(cw as any).prices?.dayPass?.enabled && (cw as any).prices.dayPass.from && (
+                        <span>od {(cw as any).prices.dayPass.from} Kč/den</span>
+                      )}
+                    </div>
+                    <Link
+                      href={`/coworking/${cw.slug}`}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ display: 'inline-block', padding: '6px 14px', background: PD.ink, color: PD.paperWhite, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}
+                    >
+                      Detail →
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   );

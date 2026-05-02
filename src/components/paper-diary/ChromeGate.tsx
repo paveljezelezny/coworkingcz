@@ -30,6 +30,8 @@ const PD_PREFIXES = [
   '/soukromi',
   '/cookies',
   '/mapa',
+  '/prihlaseni',
+  '/registrace',
 ];
 
 function isPdRoute(pathname: string): boolean {
