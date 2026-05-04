@@ -208,6 +208,134 @@ body {
   border-radius: 0 !important;
 }
 
+/* ── PD body: agresivnější přebití zbytku Tailwind palety ────────────
+   Pokrývá gradient utility, hover varianty, indigo/sky/teal aliases.
+   Pavel měl modré tlačítka i po prvním kole overrides — ty patrně
+   pocházely z gradient nebo indigo třídy. */
+
+/* Gradient utility (from-blue-* / to-blue-* / from-indigo-* atd.) */
+.pd-body [class*="from-blue-"],
+.pd-body [class*="to-blue-"],
+.pd-body [class*="from-indigo-"],
+.pd-body [class*="to-indigo-"],
+.pd-body .bg-gradient-to-r,
+.pd-body .bg-gradient-to-br,
+.pd-body .bg-gradient-to-bl,
+.pd-body .bg-gradient-to-l {
+  background-image: none !important;
+  background-color: var(--pd-ink) !important;
+  color: var(--pd-paper-white) !important;
+}
+
+/* Specifické gradient avatary v profilu — nepřebíjet bg-blue-50 a podobné světlé */
+.pd-body .from-blue-50,
+.pd-body .to-orange-50,
+.pd-body .from-amber-50,
+.pd-body .to-amber-50,
+.pd-body .from-purple-50,
+.pd-body .to-indigo-50,
+.pd-body .from-green-50,
+.pd-body .to-teal-50 {
+  background-image: none !important;
+  background-color: var(--pd-paper-lt) !important;
+  color: inherit !important;
+}
+
+/* Indigo varianty */
+.pd-body .bg-indigo-600,
+.pd-body .hover\:bg-indigo-700:hover,
+.pd-body .bg-indigo-500,
+.pd-body .bg-indigo-700 {
+  background-color: var(--pd-ink) !important;
+  color: var(--pd-paper-white) !important;
+}
+
+.pd-body .text-indigo-600,
+.pd-body .text-indigo-700 {
+  color: var(--pd-margin) !important;
+}
+
+/* Background blue gradient pro stránku (login/register style) */
+.pd-body .bg-gradient-to-br.from-blue-50.to-orange-50,
+.pd-body .from-blue-50.to-indigo-50,
+.pd-body .bg-blue-100,
+.pd-body .bg-orange-50,
+.pd-body .bg-amber-50 {
+  background-image: none !important;
+  background-color: var(--pd-paper-lt) !important;
+}
+
+/* Tabs underline → margin coral */
+.pd-body .border-blue-600 {
+  border-color: var(--pd-margin) !important;
+}
+
+/* Loader/border-b-2 → margin */
+.pd-body .border-b-2.border-blue-600 {
+  border-color: var(--pd-margin) !important;
+}
+
+/* Modrá indikace v toggles, dots, etc. */
+.pd-body .text-blue-500,
+.pd-body .text-sky-600 {
+  color: var(--pd-accent) !important;
+}
+
+/* Avatar gradient v profilu — používá from-blue-500 to-indigo-600 */
+.pd-body .from-blue-400,
+.pd-body .from-blue-500,
+.pd-body .from-indigo-500,
+.pd-body .from-indigo-600 {
+  --tw-gradient-from: var(--pd-ink) !important;
+}
+.pd-body .to-blue-600,
+.pd-body .to-indigo-600,
+.pd-body .to-indigo-700 {
+  --tw-gradient-to: var(--pd-ink) !important;
+}
+
+/* PD body — sjednocení rounded-* na 0 pro karty (vyhladí všechny rounded-2xl, rounded-3xl) */
+.pd-body .rounded-2xl,
+.pd-body .rounded-3xl,
+.pd-body .rounded-xl {
+  border-radius: 0 !important;
+}
+
+/* Avatary, badges, kruh — explicitní výjimka */
+.pd-body img.rounded-full,
+.pd-body .avatar-circle,
+.pd-body .rounded-full {
+  border-radius: 999px !important;
+}
+
+/* Yellow/amber badges (membership tier, featured) → PD amber paper */
+.pd-body .bg-amber-100,
+.pd-body .bg-yellow-50 {
+  background-color: #f6e8c8 !important;
+}
+.pd-body .text-amber-700,
+.pd-body .text-amber-800,
+.pd-body .text-yellow-700 {
+  color: #8a6710 !important;
+}
+
+/* Šedá → PD ink-soft */
+.pd-body .text-gray-900 {
+  color: var(--pd-ink) !important;
+}
+.pd-body .text-gray-700,
+.pd-body .text-gray-800 {
+  color: var(--pd-ink-soft) !important;
+}
+.pd-body .text-gray-500,
+.pd-body .text-gray-600 {
+  color: var(--pd-ink-muted) !important;
+}
+.pd-body .bg-gray-50,
+.pd-body .bg-gray-100 {
+  background-color: var(--pd-paper-lt) !important;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
