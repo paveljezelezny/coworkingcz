@@ -200,7 +200,7 @@ export default function NovaInzeratPage() {
   // ── Loading ──
   if (status === 'loading' || loadingQuota) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center" style={{minHeight:320}}>
         <div className="text-gray-400 text-sm">Načítám…</div>
       </div>
     );
@@ -209,7 +209,7 @@ export default function NovaInzeratPage() {
   // ── Success screen ──
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="flex items-center justify-center px-4" style={{minHeight:320}}>
         <div className="max-w-md w-full bg-white rounded-2xl border border-gray-100 p-10 text-center shadow-sm">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-8 h-8 text-green-600" />
@@ -236,21 +236,26 @@ export default function NovaInzeratPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div style={{paddingBottom:60,background:"#efe9dc"}}>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-8">
 
         {/* Back link */}
         <Link
           href="/marketplace"
-          className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-800 text-sm mb-8 transition-colors"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: '"Caveat", cursive', fontSize: 18, color: '#c76a54', textDecoration: 'none', marginBottom: 24 }}
         >
-          <ArrowLeft className="w-4 h-4" /> Zpět do marketplace
+          ← zpět do marketplace
         </Link>
 
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Nový inzerát</h1>
-          <p className="text-gray-500">Vyplňte formulář a oslovte komunitu coworkerů.</p>
+        <div style={{ marginBottom: 26 }}>
+          <div style={{ fontFamily: '"Caveat", cursive', fontSize: 22, color: '#6d8862', marginBottom: 4, transform: 'rotate(-1deg)', display: 'inline-block' }}>
+            ↘ co potřebuješ?
+          </div>
+          <h1 style={{ fontFamily: '"Inter Tight", sans-serif', fontSize: 40, fontWeight: 500, letterSpacing: '-0.025em', color: '#1a1a1a', margin: '4px 0 8px' }} className="md:!text-[48px]">
+            Nový inzerát
+          </h1>
+          <p style={{ fontSize: 14, color: '#6b6558', margin: 0 }}>Vyplň formulář a oslov komunitu coworkerů.</p>
         </div>
 
         {/* Quota banner */}

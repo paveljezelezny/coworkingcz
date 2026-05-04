@@ -74,6 +74,140 @@ body {
   opacity: 0.85;
 }
 
+/* ── PD admin: přebití starých Tailwind modrých na PD barvy ──────────────
+   Aplikuje se v .pd-body kontextu (admin/spravce/profil). Body má .pd-body
+   skrz ChromeGate. Tím dosáhneme PD vzhledu i v 2486-řádkovém /profil/page.tsx
+   bez nutnosti přepisovat každý button. */
+
+.pd-body .bg-blue-600 {
+  background-color: var(--pd-ink) !important;
+  color: var(--pd-paper-white) !important;
+  border-radius: 0 !important;
+  box-shadow: 2px 2px 0 var(--pd-margin);
+  font-weight: 600;
+  transition: transform 120ms ease;
+}
+.pd-body .bg-blue-600:hover {
+  background-color: var(--pd-ink) !important;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--pd-margin);
+  opacity: 1 !important;
+}
+
+.pd-body .bg-blue-700,
+.pd-body .hover\:bg-blue-700:hover {
+  background-color: var(--pd-ink) !important;
+}
+
+.pd-body .text-blue-600 {
+  color: var(--pd-margin) !important;
+}
+.pd-body .hover\:text-blue-700:hover {
+  color: var(--pd-coral) !important;
+}
+
+/* Modré utility chipy → PD accent */
+.pd-body .bg-blue-50 {
+  background-color: #e6edf5 !important;
+}
+.pd-body .text-blue-700 {
+  color: var(--pd-accent) !important;
+}
+.pd-body .border-blue-200 {
+  border-color: var(--pd-accent) !important;
+}
+
+/* Modrý gradient avatary → PD ink */
+.pd-body .bg-gradient-primary,
+.pd-body .from-blue-400.to-blue-600,
+.pd-body .from-blue-500.to-indigo-600 {
+  background: var(--pd-ink) !important;
+}
+
+/* Borders v PD body */
+.pd-body .border-gray-200 {
+  border-color: var(--pd-rule) !important;
+}
+.pd-body .border-gray-100 {
+  border-color: var(--pd-rule-soft) !important;
+}
+
+/* Karty v PD body — ploché bílé na cream → ink-rule borders */
+.pd-body .bg-white {
+  background-color: var(--pd-paper-white) !important;
+}
+
+/* Section heading utility v PD body */
+.pd-body .section-title {
+  font-family: var(--pd-font-display) !important;
+  letter-spacing: -0.025em;
+}
+
+/* Loading spinner border */
+.pd-body .border-blue-600 {
+  border-color: var(--pd-margin) !important;
+}
+
+/* Tlačítka, která mají rounded-lg / rounded-xl v PD body — sjednotit */
+.pd-body button.rounded-lg,
+.pd-body a.rounded-lg,
+.pd-body button.rounded-xl,
+.pd-body a.rounded-xl {
+  border-radius: 0 !important;
+}
+
+/* Yellow / amber featured badge → PD amber */
+.pd-body .bg-yellow-100 {
+  background-color: #f6e8c8 !important;
+}
+.pd-body .text-yellow-800 {
+  color: #6a4a10 !important;
+}
+
+/* Green success → PD moss */
+.pd-body .bg-green-100 {
+  background-color: #d6e4cc !important;
+}
+.pd-body .text-green-800 {
+  color: #3e5530 !important;
+}
+.pd-body .bg-green-50 {
+  background-color: #eaf2e3 !important;
+}
+.pd-body .text-green-700 {
+  color: var(--pd-moss) !important;
+}
+
+/* Red destructive → PD coral */
+.pd-body .bg-red-600 {
+  background-color: var(--pd-coral) !important;
+  color: white !important;
+  border-radius: 0 !important;
+}
+.pd-body .text-red-600 {
+  color: var(--pd-coral) !important;
+}
+.pd-body .bg-red-50 {
+  background-color: #f4d9d2 !important;
+}
+
+/* Purple super admin badge → PD accent */
+.pd-body .bg-purple-100,
+.pd-body .from-purple-50 {
+  background-color: #e6e0f0 !important;
+}
+.pd-body .text-purple-700,
+.pd-body .text-purple-900 {
+  color: var(--pd-accent) !important;
+}
+
+/* PD body: input field default — podtrh starší rounded-lg */
+.pd-body input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+.pd-body select,
+.pd-body textarea {
+  border-radius: 0 !important;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

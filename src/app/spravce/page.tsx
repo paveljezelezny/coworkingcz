@@ -129,94 +129,104 @@ export default function SprvcePage() {
           <p style={{ fontSize: 13, color: '#6b6558', marginTop: 4 }}>Spravuj profily svých coworkingů a udržuj informace aktuální.</p>
         </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <p className="text-sm text-gray-500 mb-1">Moje coworkingy</p>
-            <p className="text-3xl font-bold text-gray-900">{claims.length}</p>
+        {/* Stats row — PD style */}
+        <div className="grid grid-cols-1 sm:grid-cols-3" style={{ gap: 14, marginBottom: 28 }}>
+          <div style={{ background: '#fdfbf4', border: '1.5px solid #2e5fa1', boxShadow: '2px 3px 0 rgba(0,0,0,0.06)', padding: '12px 16px' }}>
+            <div style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, letterSpacing: 1.5, color: '#2e5fa1', textTransform: 'uppercase', fontWeight: 700, marginBottom: 4 }}>Moje coworkingy</div>
+            <div style={{ fontFamily: '"Inter Tight", sans-serif', fontSize: 32, fontWeight: 500, letterSpacing: '-0.025em', color: '#1a1a1a', lineHeight: 1 }}>{claims.length}</div>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <p className="text-sm text-gray-500 mb-1">Role</p>
-            <p className="text-lg font-bold text-blue-600 capitalize">{(session?.user as any)?.role?.replace('_', ' ')}</p>
+          <div style={{ background: '#fdfbf4', border: '1.5px solid #c59a3a', boxShadow: '2px 3px 0 rgba(0,0,0,0.06)', padding: '12px 16px' }}>
+            <div style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, letterSpacing: 1.5, color: '#c59a3a', textTransform: 'uppercase', fontWeight: 700, marginBottom: 4 }}>Role</div>
+            <div style={{ fontFamily: '"Inter Tight", sans-serif', fontSize: 18, fontWeight: 500, letterSpacing: '-0.015em', color: '#1a1a1a', textTransform: 'capitalize' }}>{(session?.user as any)?.role?.replace('_', ' ') || '—'}</div>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <p className="text-sm text-gray-500 mb-1">Email</p>
-            <p className="text-sm font-semibold text-gray-900 truncate">{session?.user?.email}</p>
+          <div style={{ background: '#fdfbf4', border: '1.5px solid #6d8862', boxShadow: '2px 3px 0 rgba(0,0,0,0.06)', padding: '12px 16px' }}>
+            <div style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, letterSpacing: 1.5, color: '#6d8862', textTransform: 'uppercase', fontWeight: 700, marginBottom: 4 }}>Email</div>
+            <div style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 13, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis' }}>{session?.user?.email}</div>
           </div>
         </div>
 
-        {/* Coworkings list */}
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">Moje coworkingy</h2>
+        {/* Coworkings list header */}
+        <div className="flex items-center justify-between" style={{ marginBottom: 14, gap: 12 }}>
+          <h3 style={{ fontFamily: '"Inter Tight", sans-serif', fontSize: 22, fontWeight: 500, letterSpacing: '-0.02em', color: '#1a1a1a', margin: 0 }}>
+            Moje coworkingy
+          </h3>
           <Link
             href="/coworkingy"
-            className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-semibold"
+            style={{ fontFamily: '"Caveat", cursive', fontSize: 19, color: '#c76a54', textDecoration: 'none' }}
           >
-            <Plus className="w-4 h-4" />
-            Přivlastnit další
+            + přivlastnit další →
           </Link>
         </div>
 
         {claims.length === 0 ? (
-          <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-12 text-center">
-            <Building2 className="w-14 h-14 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Zatím žádné coworkingy</h3>
-            <p className="text-gray-500 mb-6 max-w-sm mx-auto">
-              Najdi svůj coworking v adresáři a klikni na tlačítko "Přivlastnit si coworking" na jeho profilu.
+          <div style={{ background: '#fdfbf4', border: '1.5px dashed #d9d1bf', padding: '36px 20px', textAlign: 'center' }}>
+            <div style={{ fontFamily: '"Caveat", cursive', fontSize: 32, color: '#6b6558', marginBottom: 8, transform: 'rotate(-2deg)', display: 'inline-block' }}>
+              ¯\_(ツ)_/¯
+            </div>
+            <h4 style={{ fontFamily: '"Inter Tight", sans-serif', fontSize: 18, fontWeight: 500, color: '#1a1a1a', margin: '0 0 6px' }}>
+              Zatím žádné coworkingy
+            </h4>
+            <p style={{ fontSize: 13, color: '#6b6558', margin: '0 auto 18px', maxWidth: 380 }}>
+              Najdi svůj coworking v adresáři a klikni na tlačítko „Přivlastnit si coworking" na jeho profilu.
             </p>
             <Link
               href="/coworkingy"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+              style={{ display: 'inline-block', padding: '12px 22px', background: '#1a1a1a', color: '#fdfbf4', fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 600, textDecoration: 'none', boxShadow: '3px 3px 0 #c76a54' }}
             >
-              <Plus className="w-5 h-5" />
-              Najít svůj coworking
+              Najít svůj coworking →
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {claims.map((claim) => (
+          <div style={{ display: 'grid', gap: 12 }}>
+            {claims.map((claim, i) => (
               <div
                 key={claim.coworkingSlug}
-                className="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-between hover:shadow-md transition-shadow"
+                style={{
+                  background: '#fdfbf4', border: '1.5px solid #d9d1bf', padding: '16px 18px',
+                  display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                  transform: `rotate(${i % 2 === 0 ? -0.3 : 0.3}deg)`,
+                  boxShadow: '3px 4px 0 rgba(0,0,0,0.06)',
+                }}
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: '1 1 240px', minWidth: 0 }}>
+                  <div style={{ width: 44, height: 44, background: '#2e5fa1', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Inter Tight", sans-serif', fontWeight: 600, fontSize: 18, flexShrink: 0 }}>
                     {claim.coworkingName.charAt(0)}
                   </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900">{claim.coworkingName}</h3>
-                    <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      Přivlastněno {new Date(claim.createdAt).toLocaleDateString('cs-CZ')}
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontFamily: '"Inter Tight", sans-serif', fontSize: 17, fontWeight: 500, letterSpacing: '-0.015em', color: '#1a1a1a' }}>
+                      {claim.coworkingName}
+                    </div>
+                    <div style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 11, color: '#6b6558', marginTop: 2 }}>
+                      přivlastněno {new Date(claim.createdAt).toLocaleDateString('cs-CZ')}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                   <Link
                     href={`/spravce/${claim.coworkingSlug}/cow-os`}
-                    className={`flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg transition-colors ${
-                      cowOsActive[claim.coworkingSlug]
-                        ? 'text-white bg-emerald-600 hover:bg-emerald-700'
-                        : 'text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100'
-                    }`}
+                    style={{
+                      padding: '7px 12px', fontSize: 12, fontWeight: 600,
+                      background: cowOsActive[claim.coworkingSlug] ? '#6d8862' : '#fdfbf4',
+                      color: cowOsActive[claim.coworkingSlug] ? '#fff' : '#c59a3a',
+                      border: `1.5px solid ${cowOsActive[claim.coworkingSlug] ? '#6d8862' : '#c59a3a'}`,
+                      textDecoration: 'none',
+                      fontFamily: 'Inter, sans-serif',
+                    }}
                   >
-                    🐄
-                    <span className="hidden sm:inline">{cowOsActive[claim.coworkingSlug] ? 'Vstoupit do COW.OS' : 'COW.OS'}</span>
+                    🐄 <span className="hidden sm:inline">{cowOsActive[claim.coworkingSlug] ? 'Vstoupit COW.OS' : 'COW.OS'}</span>
                   </Link>
                   <Link
                     href={`/coworking/${claim.coworkingSlug}`}
                     target="_blank"
-                    className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    style={{ padding: '7px 12px', fontSize: 12, color: '#3a3a3a', border: '1.5px solid #d9d1bf', background: '#fdfbf4', textDecoration: 'none', fontFamily: 'Inter, sans-serif' }}
                   >
-                    <ExternalLink className="w-4 h-4" />
-                    <span className="hidden sm:inline">Zobrazit</span>
+                    ↗ <span className="hidden sm:inline">zobrazit</span>
                   </Link>
                   <Link
                     href={`/spravce/${claim.coworkingSlug}`}
-                    className="flex items-center gap-1.5 px-4 py-2 text-sm bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                    style={{ padding: '7px 12px', fontSize: 12, fontWeight: 600, background: '#1a1a1a', color: '#fdfbf4', textDecoration: 'none', fontFamily: 'Inter, sans-serif', boxShadow: '2px 2px 0 #c76a54' }}
                   >
-                    <Settings className="w-4 h-4" />
-                    <span className="hidden sm:inline">Editovat</span>
+                    ⚙ <span className="hidden sm:inline">editovat</span>
                   </Link>
                 </div>
               </div>
@@ -226,16 +236,20 @@ export default function SprvcePage() {
 
         {/* Pending claims */}
         {pendingClaims.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Čekající žádosti</h3>
-            <div className="space-y-3">
+          <div style={{ marginTop: 26 }}>
+            <div style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 11, letterSpacing: 1.5, color: '#6b6558', textTransform: 'uppercase', fontWeight: 700, marginBottom: 10 }}>
+              — Čekající žádosti
+            </div>
+            <div style={{ display: 'grid', gap: 10 }}>
               {pendingClaims.map((c) => (
-                <div key={c.coworkingSlug} className="bg-yellow-50 border border-yellow-200 rounded-xl px-5 py-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-yellow-600" />
-                    <span className="text-gray-800 font-medium">{c.coworkingName}</span>
+                <div key={c.coworkingSlug} style={{ background: '#f6e8c8', border: '1.5px dashed #c59a3a', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 16 }}>⏳</span>
+                    <span style={{ fontSize: 14, fontWeight: 500, color: '#1a1a1a' }}>{c.coworkingName}</span>
                   </div>
-                  <span className="text-xs font-semibold text-yellow-700 bg-yellow-100 px-2.5 py-1 rounded-full">Čeká na schválení</span>
+                  <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, letterSpacing: 1, padding: '2px 8px', border: '1px solid #c59a3a', color: '#c59a3a', textTransform: 'uppercase', fontWeight: 700 }}>
+                    čeká na schválení
+                  </span>
                 </div>
               ))}
             </div>
@@ -243,11 +257,13 @@ export default function SprvcePage() {
         )}
 
         {/* Help box */}
-        <div className="mt-10 p-5 bg-blue-50 border border-blue-200 rounded-xl">
-          <h4 className="font-bold text-blue-900 mb-1">Potřebuješ pomoc?</h4>
-          <p className="text-sm text-blue-700">
+        <div style={{ marginTop: 30, padding: '16px 20px', background: '#e6edf5', border: '1.5px dashed #2e5fa1' }}>
+          <div style={{ fontFamily: '"Inter Tight", sans-serif', fontSize: 16, fontWeight: 600, color: '#2e5fa1', marginBottom: 4 }}>
+            💡 Potřebuješ pomoc?
+          </div>
+          <p style={{ fontSize: 13, color: '#3a3a3a', margin: 0 }}>
             Pokud tvůj coworking v adresáři není, kontaktuj nás na{' '}
-            <a href="mailto:info@coworkings.cz" className="font-semibold underline">info@coworkings.cz</a>{' '}
+            <a href="mailto:info@coworkings.cz" style={{ color: '#c76a54', fontWeight: 600 }}>info@coworkings.cz</a>{' '}
             a přidáme ho ručně.
           </p>
         </div>

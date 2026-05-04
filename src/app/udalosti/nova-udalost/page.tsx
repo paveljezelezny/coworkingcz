@@ -147,7 +147,7 @@ export default function NovaUdalostPage() {
   // ── Loading ──
   if (status === 'loading' || paidAccess === null) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center" style={{minHeight:320}}>
         <div className="text-gray-400 text-sm">Načítám…</div>
       </div>
     );
@@ -156,7 +156,7 @@ export default function NovaUdalostPage() {
   // ── Not paid ──
   if (!paidAccess) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="flex items-center justify-center px-4" style={{minHeight:320}}>
         <div className="max-w-md w-full bg-white rounded-2xl border border-gray-100 p-10 text-center shadow-sm">
           <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Lock className="w-8 h-8 text-amber-600" />
@@ -187,7 +187,7 @@ export default function NovaUdalostPage() {
   // ── Success ──
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="flex items-center justify-center px-4" style={{minHeight:320}}>
         <div className="max-w-md w-full bg-white rounded-2xl border border-gray-100 p-10 text-center shadow-sm">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-8 h-8 text-green-600" />
@@ -214,16 +214,21 @@ export default function NovaUdalostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div style={{paddingBottom:60,background:"#efe9dc"}}>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-8">
 
-        <Link href="/udalosti" className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-800 text-sm mb-8 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Zpět na kalendář akcí
+        <Link href="/udalosti" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: '"Caveat", cursive', fontSize: 18, color: '#c76a54', textDecoration: 'none', marginBottom: 24 }}>
+          ← zpět na kalendář akcí
         </Link>
 
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Nový event</h1>
-          <p className="text-gray-500">Přidejte akci do kalendáře coworkingové komunity.</p>
+        <div style={{ marginBottom: 22 }}>
+          <div style={{ fontFamily: '"Caveat", cursive', fontSize: 22, color: '#c59a3a', marginBottom: 4, transform: 'rotate(-1deg)', display: 'inline-block' }}>
+            ↘ uspořádej akci
+          </div>
+          <h1 style={{ fontFamily: '"Inter Tight", sans-serif', fontSize: 40, fontWeight: 500, letterSpacing: '-0.025em', color: '#1a1a1a', margin: '4px 0 8px' }} className="md:!text-[48px]">
+            Nová událost
+          </h1>
+          <p style={{ fontSize: 14, color: '#6b6558', margin: 0 }}>Přidej akci do kalendáře coworkingové komunity.</p>
         </div>
 
         <div className="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 flex items-center gap-3">
