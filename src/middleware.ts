@@ -34,3 +34,10 @@ export default withAuth(
 export const config = {
   matcher: ['/spravce/:path*', '/profil/:path*', '/admin/:path*', '/admin'],
 };
+
+
+// Defender install: přidejte následující řádky do svého middleware:
+// import { SENSITIVE_PATH_RE } from "@grovetech/defender";
+// if (SENSITIVE_PATH_RE.test(req.nextUrl.pathname)) {
+//   return new Response("Blocked by Defender", { status: 403 });
+// }

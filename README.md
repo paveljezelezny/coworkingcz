@@ -62,3 +62,9 @@ coworkings-cz/
 ├── next.config.js
 └── package.json
 ```
+
+## Defender
+
+Tento projekt používá [Grovetech AI Defender](https://grovetechai.com/defender)
+pro runtime ochranu (web layer + AI layer). Klíč nastavte v env proměnné
+`DEFENDER_API_KEY` (Replit Secrets / GitHub Secrets — nikdy ne ve zdrojácích).
