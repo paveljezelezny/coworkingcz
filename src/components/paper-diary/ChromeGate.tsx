@@ -38,6 +38,14 @@ const PD_PREFIXES = [
 // nepoužívají PDFooter (footer by zabíral screen real estate).
 const NO_FOOTER_PREFIXES = ['/admin', '/spravce', '/profil'];
 
+// Cesty s úplně vlastním chromem (bez PDNav/PDFooter i bez legacy Navbar/Footer).
+// Pre-landing /zakladame je samostatná uvítací plocha.
+const STANDALONE_PREFIXES = ['/zakladame'];
+
+function isStandalone(pathname: string): boolean {
+  return STANDALONE_PREFIXES.some(p => pathname === p || pathname.startsWith(p + '/'));
+}
+
 function isPdRoute(pathname: string): boolean {
   if (pathname === '/') return true;
   return PD_PREFIXES.some(p => pathname === p || pathname.startsWith(p + '/'));
@@ -49,6 +57,12 @@ function shouldHideFooter(pathname: string): boolean {
 
 export function ChromeGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '/';
+
+  // Pre-landing a podobné — žádný chrome, jen obsah.
+  if (isStandalone(pathname)) {
+    return <main className="flex-1">{children}</main>;
+  }
+
   const usePD = isPdRoute(pathname);
   const hideFooter = shouldHideFooter(pathname);
 

@@ -3,6 +3,7 @@ import { PDAdminLayout, type PDAdminNavItem } from '@/components/paper-diary/PDA
 const NAV: PDAdminNavItem[] = [
   { href: '/admin',           label: 'Dashboard',  icon: '📊', exact: true },
   { href: '/admin/uzivatele', label: 'Uživatelé',  icon: '👥' },
+  { href: '/admin/pozvanky',  label: 'Pozvánky',   icon: '✉️' },
   { href: '/admin/zadosti',   label: 'Žádosti',    icon: '📨' },
   { href: '/admin/eventy',    label: 'Eventy',     icon: '📅' },
   { href: '/admin/inzeraty',  label: 'Inzeráty',   icon: '🏷️' },
