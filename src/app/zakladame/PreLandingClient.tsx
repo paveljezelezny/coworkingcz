@@ -4,7 +4,6 @@
 // Vizuál v Paper Diary stylu (paper background, ink barvy, handwritten Caveat font).
 
 import { useState, useEffect, FormEvent } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   PD,
@@ -119,51 +118,84 @@ export default function PreLandingClient() {
       <div
         style={{
           flex: 1,
+          width: '100%',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '4rem 1.5rem 2rem',
+          padding: '3.5rem 1.25rem 2rem',
           textAlign: 'center',
           maxWidth: 640,
           margin: '0 auto',
+          boxSizing: 'border-box',
+          overflowWrap: 'break-word',
         }}
       >
-        {/* Logo */}
-        <Image
-          src="/logo-kings.png"
-          alt="COWORKINGS.cz"
-          width={140}
-          height={140}
-          priority
-          style={{ width: 120, height: 'auto', marginBottom: '2rem' }}
-        />
+        {/* Logo — stejné jako v PDNav (text + handwritten .cz), jen větší */}
+        <div
+          aria-label="COWORKINGS.cz"
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'center',
+            gap: 2,
+            marginBottom: '2.5rem',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: PD_FONT_DISPLAY,
+              fontWeight: 600,
+              fontSize: 'clamp(2rem, 7vw, 2.8rem)',
+              letterSpacing: '-1.2px',
+              color: PD.ink,
+              lineHeight: 1,
+            }}
+          >
+            coworkings
+          </span>
+          <span
+            style={{
+              fontFamily: PD_FONT_HAND,
+              fontSize: 'clamp(2.2rem, 7.5vw, 3.1rem)',
+              color: PD.margin,
+              marginLeft: 4,
+              transform: 'translateY(-4px)',
+              display: 'inline-block',
+              lineHeight: 1,
+            }}
+          >
+            .cz
+          </span>
+        </div>
 
-        {/* Hero copy */}
+        {/* Hero copy — žádné <br>, ať se to lámně přirozeně podle viewportu */}
         <h1
           style={{
             fontFamily: PD_FONT_DISPLAY,
             fontWeight: 700,
-            fontSize: 'clamp(1.6rem, 4.5vw, 2.4rem)',
-            lineHeight: 1.2,
-            letterSpacing: '-0.02em',
+            fontSize: 'clamp(1.25rem, 4.2vw, 2.1rem)',
+            lineHeight: 1.25,
+            letterSpacing: '-0.015em',
             margin: 0,
             color: PD.ink,
+            maxWidth: 560,
+            textWrap: 'balance' as any,
           }}
         >
-          Jste připraveni na spuštění
-          <br />
-          největší coworkingové platformy v ČR?
+          Jste připraveni na spuštění největší coworkingové platformy v ČR?
         </h1>
 
         <p
           style={{
             fontFamily: PD_FONT_HAND,
-            fontSize: 'clamp(1.6rem, 5vw, 2.2rem)',
+            fontSize: 'clamp(1.35rem, 5vw, 2rem)',
             color: PD.coral,
-            margin: '2rem 0 0',
+            margin: '1.75rem 0 0',
             transform: 'rotate(-1.5deg)',
-            lineHeight: 1.1,
+            lineHeight: 1.15,
+            maxWidth: 560,
+            textWrap: 'balance' as any,
           }}
         >
           My ještě ne :) ale makáme na tom.
@@ -171,8 +203,8 @@ export default function PreLandingClient() {
 
         <p
           style={{
-            marginTop: '2.5rem',
-            fontSize: '1.05rem',
+            marginTop: '2.25rem',
+            fontSize: 'clamp(0.95rem, 2.6vw, 1.05rem)',
             lineHeight: 1.55,
             color: PD.inkSoft,
             maxWidth: 520,
