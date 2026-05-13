@@ -477,3 +477,30 @@ model CowOsResourceBooking {
   @@index([memberId, date])
   @@index([invoiceId])
 }
+
+// ==========================================
+// PRE-LAUNCH INVITATIONS (pozvánky na soft launch)
+// ==========================================
+
+/// Emaily získané přes pre-landing stránku (gate před hlavním webem).
+/// Super admin pak ručně rozesílá pozvánkové kódy a označuje status.
+model Invitation {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  status    String   @default("pending") // pending | sent | redeemed | declined
+  note      String?  @db.Text
+  source    String?  // referrer / hostname
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmTerm     String?
+  utmContent  String?
+  ipHash    String?  // SHA-256 IP pro rate-limit / spam analytiku, nikoliv plain IP
+  userAgent String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sentAt    DateTime?
+
+  @@index([status])
+  @@index([createdAt])
+}

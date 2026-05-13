@@ -29,6 +29,28 @@ const migrations = [
          ON DELETE SET NULL ON UPDATE CASCADE;
      END IF;
    END $$`,
+
+  // ── Pre-launch invitations (pre-landing email capture) ──────────────────
+  `CREATE TABLE IF NOT EXISTS "Invitation" (
+     "id"          TEXT PRIMARY KEY,
+     "email"       TEXT NOT NULL,
+     "status"      TEXT NOT NULL DEFAULT 'pending',
+     "note"        TEXT,
+     "source"      TEXT,
+     "utmSource"   TEXT,
+     "utmMedium"   TEXT,
+     "utmCampaign" TEXT,
+     "utmTerm"     TEXT,
+     "utmContent"  TEXT,
+     "ipHash"      TEXT,
+     "userAgent"   TEXT,
+     "createdAt"   TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     "updatedAt"   TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     "sentAt"      TIMESTAMP(3)
+   )`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS "Invitation_email_key" ON "Invitation"("email")`,
+  `CREATE INDEX IF NOT EXISTS "Invitation_status_idx" ON "Invitation"("status")`,
+  `CREATE INDEX IF NOT EXISTS "Invitation_createdAt_idx" ON "Invitation"("createdAt")`,
 ];
 
 async function run() {
