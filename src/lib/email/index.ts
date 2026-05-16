@@ -59,3 +59,13 @@ export async function sendWelcomeMemberEmail(args: SendArgs<Parameters<typeof t.
   const res = await sendEmail({ to: args.to, replyTo: args.replyTo, subject, html, text, tag: 'welcome-member' });
   return logIfFailed(res, 'welcome-member');
 }
+
+/**
+ * Pre-launch waitlist confirmation.
+ * Volá se z POST /api/invitations po úspěšném zápisu emailu do `Invitation`.
+ */
+export async function sendInviteConfirmationEmail(args: SendArgs<Parameters<typeof t.inviteConfirmation>[0]>) {
+  const { subject, html, text } = t.inviteConfirmation(args.props);
+  const res = await sendEmail({ to: args.to, replyTo: args.replyTo, subject, html, text, tag: 'invite-confirmation' });
+  return logIfFailed(res, 'invite-confirmation');
+}

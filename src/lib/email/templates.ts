@@ -162,3 +162,67 @@ Platnost: do ${fmtDate(p.endDate)}
 Profil: https://coworkings.cz/profil/cow-os`;
   return { subject, html, text };
 }
+
+// ── Pre-launch invite (waitlist) ──────────────────────────────────────────────
+// Vlastní layout — pre-launch waitlist není COW.OS workflow, takže nechceme
+// COW.OS branding hlavičky. Čistá paper-diary plocha s coworkings.cz brandem.
+
+interface InviteConfirmationProps {
+  email: string;
+}
+
+const preLaunchLayout = (innerHtml: string) => `<!doctype html>
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#efe9dc;font-family:'Inter','Helvetica Neue',Arial,sans-serif;color:#1a1a1a;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#efe9dc;padding:40px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;background:#fdfbf4;border:1px solid #d9d1bf;border-radius:6px;padding:32px;">
+        <tr><td style="text-align:center;">
+          <p style="margin:0 0 8px;font-size:30px;font-weight:600;letter-spacing:-1.2px;color:#1a1a1a;">
+            coworkings<span style="color:#c76a54;font-family:'Bradley Hand',cursive;">.cz</span>
+          </p>
+          <p style="margin:0 0 24px;font-size:13px;color:#6b6558;text-transform:uppercase;letter-spacing:0.08em;">
+            největší coworkingová platforma v ČR
+          </p>
+          ${innerHtml}
+        </td></tr>
+      </table>
+      <p style="margin:18px 0 0;font-size:11px;color:#8a8470;">
+        Tenhle mail ti přišel, protože jsi nechal/a svůj email na coworkings.cz/zakladame.
+      </p>
+    </td></tr>
+  </table>
+</body></html>`;
+
+export function inviteConfirmation(_p: InviteConfirmationProps) {
+  const subject = 'Jsi na seznamu — díky! ✉️ COWORKINGS.cz';
+  const html = preLaunchLayout(`
+    <h1 style="margin:0 0 14px;font-size:22px;font-weight:700;line-height:1.3;color:#1a1a1a;">
+      Díky! Zapsali jsme tě na seznam.
+    </h1>
+    <p style="margin:0 0 16px;font-size:16px;line-height:1.55;color:#3a3a3a;">
+      Jakmile spustíme, dostaneš od nás osobní pozvánku s kódem,
+      kterým se dostaneš dovnitř <strong>dřív než ostatní</strong>.
+    </p>
+    <p style="margin:0 0 28px;font-size:16px;line-height:1.55;color:#3a3a3a;">
+      Mezitím makáme &mdash; a kdyby tě v hlavě napadla
+      jakákoliv otázka, můžeš na tenhle email rovnou odpovědět.
+    </p>
+    <p style="margin:0;font-family:'Bradley Hand','Caveat',cursive;font-size:24px;color:#c76a54;">
+      Brzy na viděnou! &mdash; tým Cokoliv s.r.o.
+    </p>
+  `);
+  const text = [
+    'Díky! Zapsali jsme tě na seznam.',
+    '',
+    'Jakmile COWORKINGS.cz spustíme, dostaneš od nás osobní pozvánku s kódem,',
+    'kterým se dostaneš dovnitř dřív než ostatní.',
+    '',
+    'Mezitím makáme — a kdyby tě v hlavě napadla jakákoliv otázka,',
+    'můžeš na tenhle email rovnou odpovědět.',
+    '',
+    'Brzy na viděnou!',
+    '— tým Cokoliv s.r.o.',
+  ].join('\n');
+  return { subject, html, text };
+}
