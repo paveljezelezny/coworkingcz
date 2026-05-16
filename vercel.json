@@ -10,8 +10,18 @@
     "src/app/api/stripe/**": {
       "maxDuration": 60,
       "memory": 512
+    },
+    "src/app/api/cow-os/cron/**": {
+      "maxDuration": 300,
+      "memory": 512
     }
   },
+  "crons": [
+    {
+      "path": "/api/cow-os/cron/prolongation",
+      "schedule": "0 3 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

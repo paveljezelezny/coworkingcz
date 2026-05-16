@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Users, Search, X, Plus, Edit2, Trash2, AlertCircle, Loader, ChevronLeft, ChevronRight,
+  Users, Search, X, Plus, Edit2, Trash2, AlertCircle, Loader, ChevronLeft, ChevronRight, Upload,
 } from 'lucide-react';
 
 interface Member {
@@ -308,6 +308,24 @@ export default function MembersPage() {
     }
   };
 
+  const handleToggleAutoRenew = async (member: Member) => {
+    // Optimistic update
+    const newValue = !member.autoRenew;
+    setMembers(prev => prev.map(m => m.id === member.id ? { ...m, autoRenew: newValue } : m));
+    try {
+      const res = await fetch(`/api/cow-os/members?slug=${slug}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: member.id, autoRenew: newValue }),
+      });
+      if (!res.ok) throw new Error('Chyba při změně auto-renew');
+    } catch (err) {
+      // Revert on error
+      setMembers(prev => prev.map(m => m.id === member.id ? { ...m, autoRenew: !newValue } : m));
+      setError((err as Error).message);
+    }
+  };
+
   const filtered = members.filter(m =>
     m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     m.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -335,13 +353,22 @@ export default function MembersPage() {
             <h1 className="text-3xl font-bold text-gray-900">Členové</h1>
             <p className="text-gray-600 mt-1">{members.length} celkem</p>
           </div>
-          <button
-            onClick={handleOpenCreate}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Přidat člena
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/spravce/${slug}/cow-os/clenove/import`}
+              className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 flex items-center gap-2"
+            >
+              <Upload className="w-4 h-4" />
+              Hromadný import
+            </Link>
+            <button
+              onClick={handleOpenCreate}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Přidat člena
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -420,8 +447,9 @@ export default function MembersPage() {
                           <input
                             type="checkbox"
                             checked={member.autoRenew}
-                            readOnly
-                            className="rounded border-gray-300"
+                            onChange={() => handleToggleAutoRenew(member)}
+                            className="rounded border-gray-300 cursor-pointer"
+                            title="Automatická obnova členství"
                           />
                         </td>
                         <td className="px-4 py-3 text-right">
