@@ -3,7 +3,12 @@ import { prisma } from '@/lib/prisma';
 import { verifyCowOsOwner, verifyAuthenticated } from '@/lib/cow-os/auth';
 import { ensureCowOsTables } from '@/lib/cow-os/ensure-tables';
 import { generateSpayd, czechAccountToIban } from '@/lib/cow-os/spayd';
+import { sendInvoiceIssuedEmail } from '@/lib/email';
 import { randomUUID } from 'crypto';
+
+function publicAppUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://coworkings.cz';
+}
 
 export async function GET(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get('slug');
@@ -146,6 +151,15 @@ export async function POST(req: NextRequest) {
     }
 
     const member = memberResult[0];
+
+    // Block invoicing for cancelled or expired members
+    const memberStatus = member.status as string;
+    if (memberStatus === 'cancelled' || memberStatus === 'expired') {
+      return NextResponse.json(
+        { error: `Nelze vystavit fakturu pro člena se stavem "${memberStatus}". Nejdřív ho znovu aktivujte.` },
+        { status: 400 }
+      );
+    }
 
     // Fetch billing profile
     const billingResult = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
@@ -354,6 +368,38 @@ export async function PUT(req: NextRequest) {
     );
 
     const updated = result.length > 0 ? result[0] : null;
+
+    // Side effect: when an invoice transitions draft → issued, notify the member by email.
+    // Failures are logged inside the email helper and never block the API response.
+    if (currentStatus === 'draft' && status === 'issued' && updated) {
+      const memberRes = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
+        `SELECT m."email", m."name",
+                COALESCE(ce."data"->>'name', m."coworkingSlug") as "coworkingName"
+         FROM "CowOsMember" m
+         LEFT JOIN "CoworkingEdit" ce ON ce."coworkingSlug" = m."coworkingSlug"
+         WHERE m."id" = $1`,
+        updated.memberId
+      );
+      const memberEmail = memberRes[0]?.email as string | undefined;
+      const memberName = memberRes[0]?.name as string | undefined;
+      const coworkingName = (memberRes[0]?.coworkingName as string | undefined) || auth.coworkingSlug || 'Coworking';
+      if (memberEmail) {
+        sendInvoiceIssuedEmail({
+          to: memberEmail,
+          props: {
+            coworkingName,
+            memberName: memberName || 'kolego',
+            invoiceNumber: updated.invoiceNumber as string,
+            total: Number(updated.total),
+            dueDate: new Date(updated.dueDate as string),
+            invoiceUrl: `${publicAppUrl()}/profil/cow-os/doklad/${updated.id}`,
+            variableSymbol: updated.variableSymbol as string,
+            iban: (updated.iban as string) || undefined,
+          },
+        }).catch(() => { /* logged inside */ });
+      }
+    }
+
     return NextResponse.json(updated, { status: 200 });
   } catch (error) {
     console.error('PUT invoice error:', error);

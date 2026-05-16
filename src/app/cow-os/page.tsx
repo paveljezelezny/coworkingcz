@@ -88,7 +88,7 @@ export default function CowOsPage() {
                 {activeCows.slice(0, 1).map((cow) => (
                   <Link
                     key={cow.slug}
-                    href={`/cow-os/${cow.slug}/dashboard`}
+                    href={`/spravce/${cow.slug}/cow-os`}
                     style={{ padding: '14px 24px', background: PD.ink, color: PD.paperWhite, fontSize: 15, fontWeight: 600, textDecoration: 'none', boxShadow: `3px 3px 0 ${PD.margin}` }}
                   >
                     Otevřít admin: {cow.name} →

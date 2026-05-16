@@ -148,6 +148,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Block assigning a deactivated plan to a new member
+    if (plan[0].isActive === false) {
+      return NextResponse.json(
+        { error: 'Tento plán je deaktivovaný — nelze ho přiřadit novému členovi.' },
+        { status: 400 }
+      );
+    }
+
     // Calculate nextRenewalDate based on billingInterval
     const startDate = new Date();
     const nextRenewalDate = new Date(startDate);

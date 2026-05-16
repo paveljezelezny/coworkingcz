@@ -345,11 +345,14 @@ export default function SettingsPage() {
                     Chcete více než 5 členů?
                   </p>
                   <p className="text-sm text-blue-800 mb-3">
-                    Upgradujte na Standard tarif za 750 Kč/měsíc a získejte neomezený počet členů.
+                    Upgradujte na vyšší tarif a získejte více kapacity. Malý (do 25 členů) za 490 Kč/měs, Střední (do 100) za 990 Kč/měs, Velký (neomezeně) za 1 900 Kč/měs.
                   </p>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
-                    Upgradovat na Standard
-                  </button>
+                  <Link
+                    href="/ceniky"
+                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                  >
+                    Zobrazit ceník →
+                  </Link>
                 </div>
               )}
             </div>

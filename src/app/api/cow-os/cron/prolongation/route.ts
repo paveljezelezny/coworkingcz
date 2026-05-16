@@ -4,7 +4,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { ensureCowOsTables } from '@/lib/cow-os/ensure-tables';
 import { generateSpayd, czechAccountToIban } from '@/lib/cow-os/spayd';
+import { sendInvoiceIssuedEmail } from '@/lib/email';
 import { randomUUID } from 'crypto';
+
+function publicAppUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://coworkings.cz';
+}
 
 /**
  * Daily prolongation engine for auto-renewing members.
@@ -195,6 +200,31 @@ export async function POST(req: NextRequest) {
 
         processed.push(memberId);
         invoicesGenerated.push(invoiceId);
+
+        // Notify member by email. Fire-and-forget — never block the cron loop.
+        const memberEmail = member.email as string | undefined;
+        const memberName = member.name as string | undefined;
+        if (memberEmail) {
+          // Best-effort coworking display name lookup
+          const ceRow = await prisma.$queryRawUnsafe<{ name: string | null }[]>(
+            `SELECT "data"->>'name' as name FROM "CoworkingEdit" WHERE "coworkingSlug" = $1`,
+            coworkingSlug
+          ).catch(() => [] as { name: string | null }[]);
+          const coworkingName = ceRow[0]?.name || coworkingSlug;
+          sendInvoiceIssuedEmail({
+            to: memberEmail,
+            props: {
+              coworkingName,
+              memberName: memberName || 'kolego',
+              invoiceNumber,
+              total,
+              dueDate,
+              invoiceUrl: `${publicAppUrl()}/profil/cow-os/doklad/${invoiceId}`,
+              variableSymbol,
+              iban: iban || undefined,
+            },
+          }).catch(() => { /* logged inside */ });
+        }
       } catch (error) {
         console.error(`Error processing member ${memberId}:`, error);
         errors.push({
@@ -214,3 +244,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Chyba při běhu prolongace' }, { status: 500 });
   }
 }
+
+// Vercel Cron Jobs invoke endpoints via GET — alias to POST so the same handler runs.
+export const GET = POST;
