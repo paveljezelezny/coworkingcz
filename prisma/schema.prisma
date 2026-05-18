@@ -150,16 +150,39 @@ model CoworkingClaim {
   user          User     @relation(fields: [userId], references: [id])
   coworkingSlug String
   coworkingName String
+  // status:
+  //   pending           — čeká na schválení super_adminem
+  //   approved          — schváleno, vytvořil se CoworkingEdit
+  //   rejected          — zamítnuto
+  //   transfer_pending  — coworking už spravuje jiný user, čeká se na schválení převodu
   status        String   @default("approved")
   businessEmail String?
   message       String?  @db.Text
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  auditLogs     ClaimAuditLog[]
 
   @@unique([userId, coworkingSlug])
   @@index([userId])
   @@index([status])
   @@index([coworkingSlug])
+}
+
+// Audit trail pro každou akci nad claimem (created, auto_approved, approved, rejected, transfer_requested, transfer_approved)
+model ClaimAuditLog {
+  id            String   @id @default(cuid())
+  claimId       String
+  claim         CoworkingClaim @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  action        String   // e.g. 'created', 'auto_approved', 'approved', 'rejected', 'transfer_requested'
+  actorUserId   String?  // kdo akci provedl (null = system/cron)
+  fromStatus    String?
+  toStatus      String?
+  note          String?  @db.Text
+  createdAt     DateTime @default(now())
+
+  @@index([claimId])
+  @@index([actorUserId])
+  @@index([createdAt])
 }
 
 model CoworkingEdit {

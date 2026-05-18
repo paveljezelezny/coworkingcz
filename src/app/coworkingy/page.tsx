@@ -33,6 +33,7 @@ function CoworkingyPageInner() {
   const [expanded, setExpanded] = useState(false);
   const [coworkings, setCoworkings] = useState<CoworkingSpace[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ownershipStatuses, setOwnershipStatuses] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let mounted = true;
@@ -41,6 +42,11 @@ function CoworkingyPageInner() {
       .then((d) => mounted && setCoworkings(Array.isArray(d) ? d : coworkingsData))
       .catch(() => mounted && setCoworkings(coworkingsData))
       .finally(() => mounted && setLoading(false));
+    // Best-effort fetch of ownership statuses (works only when authenticated; silently fails otherwise)
+    fetch('/api/coworking-edits/bulk-status')
+      .then((r) => (r.ok ? r.json() : { statuses: {} }))
+      .then((d) => mounted && setOwnershipStatuses(d.statuses || {}))
+      .catch(() => { /* silent */ });
     return () => { mounted = false; };
   }, []);
 
@@ -227,6 +233,16 @@ function CoworkingyPageInner() {
                         <Stamp rotate={6}>ověřeno</Stamp>
                       </div>
                     )}
+                    {(() => {
+                      const st = ownershipStatuses[s.slug];
+                      if (!st) return null;
+                      const badgeBase = { position: 'absolute', top: 12, left: 12, zIndex: 2, fontSize: 10, padding: '3px 8px', borderRadius: 3, fontFamily: PD_FONT_MONO, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase' as const };
+                      if (st === 'owned_by_me') return <div style={{ ...badgeBase, background: '#dcfce7', color: '#15803d', border: '1px solid #15803d' } as any}>✓ Spravuješ</div>;
+                      if (st === 'pending_mine') return <div style={{ ...badgeBase, background: '#fef3c7', color: '#b45309', border: '1px solid #b45309' } as any}>⏳ Čekáš</div>;
+                      if (st === 'transfer_pending_mine') return <div style={{ ...badgeBase, background: '#dbeafe', color: '#1e40af', border: '1px solid #1e40af' } as any}>⇄ Převod</div>;
+                      if (st === 'owned_by_other') return <div style={{ ...badgeBase, background: '#f3f4f6', color: '#4b5563', border: '1px solid #9ca3af' } as any}>🔒 Spravováno</div>;
+                      return null;
+                    })()}
                     {photo ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={photo} alt={s.name} style={{ width: '100%', height: 170, objectFit: 'cover', display: 'block' }} />

@@ -26,6 +26,13 @@ interface Claim {
   createdAt: string;
 }
 
+interface OnboardingState {
+  hasCowOs: boolean;
+  hasBillingProfile: boolean;
+  planCount: number;
+  memberCount: number;
+}
+
 export default function SprvcePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -33,6 +40,7 @@ export default function SprvcePage() {
   const [loading, setLoading] = useState(true);
   const [cowOsActive, setCowOsActive] = useState<Record<string, boolean>>({});
   const [pendingClaims, setPendingClaims] = useState<Claim[]>([]);
+  const [onboarding, setOnboarding] = useState<Record<string, OnboardingState>>({});
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -53,21 +61,42 @@ export default function SprvcePage() {
         const approvedClaims = allClaims.filter((c: Claim) => c.status === 'approved');
         setPendingClaims(allClaims.filter((c: Claim) => c.status === 'pending'));
         setClaims(approvedClaims);
-        // Check COW.OS subscription status for each coworking in parallel
+        // For each approved coworking, gather onboarding state in parallel:
+        // cow.os subscription, billing profile, plan count, member count.
+        // This drives the per-coworking onboarding checklist.
         const checks = approvedClaims.map(async (claim: Claim) => {
+          const state: OnboardingState = { hasCowOs: false, hasBillingProfile: false, planCount: 0, memberCount: 0 };
           try {
-            const r = await fetch(`/api/cow-os/subscription?slug=${claim.coworkingSlug}`);
-            if (r.ok) {
-              const sub = await r.json();
-              return { slug: claim.coworkingSlug, active: !!sub?.id };
+            const [subR, billR, dashR] = await Promise.all([
+              fetch(`/api/cow-os/subscription?slug=${claim.coworkingSlug}`).catch(() => null),
+              fetch(`/api/cow-os/billing-profile?slug=${claim.coworkingSlug}`).catch(() => null),
+              fetch(`/api/cow-os/dashboard?slug=${claim.coworkingSlug}`).catch(() => null),
+            ]);
+            if (subR && subR.ok) {
+              const sub = await subR.json();
+              state.hasCowOs = !!sub?.id;
+            }
+            if (billR && billR.ok) {
+              const bill = await billR.json();
+              state.hasBillingProfile = !!bill?.companyName;
+            }
+            if (dashR && dashR.ok) {
+              const dash = await dashR.json();
+              state.planCount = Number(dash?.detail?.activePlans ?? 0);
+              state.memberCount = Number(dash?.activeMembers ?? 0);
             }
           } catch {}
-          return { slug: claim.coworkingSlug, active: false };
+          return { slug: claim.coworkingSlug, state };
         });
         const results = await Promise.all(checks);
-        const map: Record<string, boolean> = {};
-        results.forEach((r) => { map[r.slug] = r.active; });
-        setCowOsActive(map);
+        const subMap: Record<string, boolean> = {};
+        const onMap: Record<string, OnboardingState> = {};
+        results.forEach((r) => {
+          subMap[r.slug] = r.state.hasCowOs;
+          onMap[r.slug] = r.state;
+        });
+        setCowOsActive(subMap);
+        setOnboarding(onMap);
       }
     } finally {
       setLoading(false);
@@ -151,7 +180,7 @@ export default function SprvcePage() {
             Moje coworkingy
           </h3>
           <Link
-            href="/coworkingy"
+            href="/spravce/coworkingy"
             style={{ fontFamily: '"Caveat", cursive', fontSize: 19, color: '#c76a54', textDecoration: 'none' }}
           >
             + přivlastnit další →
@@ -170,22 +199,28 @@ export default function SprvcePage() {
               Najdi svůj coworking v adresáři a klikni na tlačítko „Přivlastnit si coworking" na jeho profilu.
             </p>
             <Link
-              href="/coworkingy"
+              href="/spravce/coworkingy"
               style={{ display: 'inline-block', padding: '12px 22px', background: '#1a1a1a', color: '#fdfbf4', fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 600, textDecoration: 'none', boxShadow: '3px 3px 0 #c76a54' }}
             >
               Najít svůj coworking →
             </Link>
           </div>
         ) : (
-          <div style={{ display: 'grid', gap: 12 }}>
-            {claims.map((claim, i) => (
+          <div style={{ display: 'grid', gap: 18 }}>
+            {claims.map((claim, i) => {
+              const ob = onboarding[claim.coworkingSlug];
+              const stepsTotal = 4;
+              const stepsDone = ob ? [ob.hasCowOs, ob.hasBillingProfile, ob.planCount > 0, ob.memberCount > 0].filter(Boolean).length : 0;
+              const showChecklist = ob && stepsDone < stepsTotal;
+              return (
+              <div key={claim.coworkingSlug} style={{ display: 'grid', gap: 0 }}>
               <div
-                key={claim.coworkingSlug}
                 style={{
                   background: '#fdfbf4', border: '1.5px solid #d9d1bf', padding: '16px 18px',
                   display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12,
                   transform: `rotate(${i % 2 === 0 ? -0.3 : 0.3}deg)`,
                   boxShadow: '3px 4px 0 rgba(0,0,0,0.06)',
+                  borderBottom: showChecklist ? 'none' : '1.5px solid #d9d1bf',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: '1 1 240px', minWidth: 0 }}>
@@ -230,7 +265,76 @@ export default function SprvcePage() {
                   </Link>
                 </div>
               </div>
-            ))}
+              {showChecklist && ob && (
+                <div style={{
+                  background: '#fffaee', border: '1.5px solid #d9d1bf', borderTop: 'none',
+                  padding: '14px 18px',
+                  transform: `rotate(${i % 2 === 0 ? -0.3 : 0.3}deg)`,
+                  boxShadow: '3px 4px 0 rgba(0,0,0,0.06)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                    <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, letterSpacing: 1.5, color: '#c59a3a', textTransform: 'uppercase', fontWeight: 700 }}>
+                      ↘ Nastav cow.os ({stepsDone}/{stepsTotal})
+                    </span>
+                    <div style={{ flex: 1, height: 4, background: '#f0e6d0', borderRadius: 2, overflow: 'hidden' }}>
+                      <div style={{ width: `${(stepsDone / stepsTotal) * 100}%`, height: '100%', background: '#6d8862', transition: 'width 0.3s' }} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid', gap: 6 }}>
+                    {/* Step 1: cow.os subscription */}
+                    {ob.hasCowOs ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#6d8862' }}>
+                        <CheckCircle className="w-4 h-4" style={{ flexShrink: 0 }} />
+                        <span style={{ textDecoration: 'line-through', opacity: 0.7 }}>1. Aktivovat COW.OS</span>
+                      </div>
+                    ) : (
+                      <Link href={`/spravce/${claim.coworkingSlug}/cow-os`} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#1a1a1a', textDecoration: 'none' }}>
+                        <span style={{ width: 16, height: 16, border: '1.5px solid #c59a3a', borderRadius: 2, flexShrink: 0 }} />
+                        <span><b>1. Aktivovat COW.OS</b> — vytvoř si subscription pro tento coworking →</span>
+                      </Link>
+                    )}
+                    {/* Step 2: billing profile */}
+                    {ob.hasBillingProfile ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#6d8862' }}>
+                        <CheckCircle className="w-4 h-4" style={{ flexShrink: 0 }} />
+                        <span style={{ textDecoration: 'line-through', opacity: 0.7 }}>2. Vyplnit fakturační údaje</span>
+                      </div>
+                    ) : (
+                      <Link href={`/spravce/${claim.coworkingSlug}/cow-os/nastaveni`} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: ob.hasCowOs ? '#1a1a1a' : '#a09886', textDecoration: 'none', pointerEvents: ob.hasCowOs ? 'auto' : 'none' }}>
+                        <span style={{ width: 16, height: 16, border: '1.5px solid #c59a3a', borderRadius: 2, flexShrink: 0 }} />
+                        <span><b>2. Vyplnit fakturační údaje</b> — IČO, banka, prefix faktur →</span>
+                      </Link>
+                    )}
+                    {/* Step 3: at least 1 plan */}
+                    {ob.planCount > 0 ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#6d8862' }}>
+                        <CheckCircle className="w-4 h-4" style={{ flexShrink: 0 }} />
+                        <span style={{ textDecoration: 'line-through', opacity: 0.7 }}>3. Vytvořit alespoň 1 tarif</span>
+                      </div>
+                    ) : (
+                      <Link href={`/spravce/${claim.coworkingSlug}/cow-os/tarify`} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: ob.hasCowOs ? '#1a1a1a' : '#a09886', textDecoration: 'none', pointerEvents: ob.hasCowOs ? 'auto' : 'none' }}>
+                        <span style={{ width: 16, height: 16, border: '1.5px solid #c59a3a', borderRadius: 2, flexShrink: 0 }} />
+                        <span><b>3. Vytvořit tarify</b> — měsíční membership, day pass, ... →</span>
+                      </Link>
+                    )}
+                    {/* Step 4: at least 1 member */}
+                    {ob.memberCount > 0 ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#6d8862' }}>
+                        <CheckCircle className="w-4 h-4" style={{ flexShrink: 0 }} />
+                        <span style={{ textDecoration: 'line-through', opacity: 0.7 }}>4. Přidat členy ({ob.memberCount})</span>
+                      </div>
+                    ) : (
+                      <Link href={`/spravce/${claim.coworkingSlug}/cow-os/clenove/import`} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: ob.hasCowOs ? '#1a1a1a' : '#a09886', textDecoration: 'none', pointerEvents: ob.hasCowOs ? 'auto' : 'none' }}>
+                        <span style={{ width: 16, height: 16, border: '1.5px solid #c59a3a', borderRadius: 2, flexShrink: 0 }} />
+                        <span><b>4. Naimportovat členy</b> — hromadný CSV import →</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              )}
+              </div>
+              );
+            })}
           </div>
         )}
 

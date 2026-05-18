@@ -9,6 +9,7 @@ import { NotebookPaper, Washi } from '@/components/paper-diary/primitives';
 interface ActiveCow {
   slug: string;
   name: string;
+  hasCowOs: boolean;
 }
 
 const FEATURES = [
@@ -32,9 +33,23 @@ export default function CowOsPage() {
     }
     fetch('/api/claims')
       .then((r) => r.ok ? r.json() : { claims: [] })
-      .then((data) => {
+      .then(async (data) => {
         const claims = (data?.claims || data || []).filter((c: any) => c?.status === 'approved');
-        setActiveCows(claims.map((c: any) => ({ slug: c.coworkingSlug, name: c.coworkingName || c.coworkingSlug })));
+        // Check cow.os subscription status for each approved claim in parallel
+        const enriched = await Promise.all(
+          claims.map(async (c: any) => {
+            let hasCowOs = false;
+            try {
+              const r = await fetch(`/api/cow-os/subscription?slug=${c.coworkingSlug}`);
+              if (r.ok) {
+                const sub = await r.json();
+                hasCowOs = !!sub?.id;
+              }
+            } catch {}
+            return { slug: c.coworkingSlug, name: c.coworkingName || c.coworkingSlug, hasCowOs };
+          })
+        );
+        setActiveCows(enriched);
       })
       .catch(() => setActiveCows([]))
       .finally(() => setCowsChecked(true));
@@ -81,33 +96,73 @@ export default function CowOsPage() {
             </svg>
           </div>
 
-          {/* CTA */}
+          {/* CTA — 4 stavy podle session a stavu coworkingu/cow.os */}
           <div style={{ display: 'flex', gap: 12, marginTop: 32, flexWrap: 'wrap' }}>
-            {status === 'authenticated' && cowsChecked && activeCows.length > 0 ? (
-              <>
-                {activeCows.slice(0, 1).map((cow) => (
+            {(() => {
+              // 1) Loading / unauthenticated — public marketing CTA
+              if (status !== 'authenticated' || !cowsChecked) {
+                return (
+                  <>
+                    <Link href="/registrace" style={{ padding: '14px 24px', background: PD.ink, color: PD.paperWhite, fontSize: 15, fontWeight: 600, textDecoration: 'none', boxShadow: `3px 3px 0 ${PD.margin}` }}>
+                      Vyzkoušet 30 dní zdarma →
+                    </Link>
+                    <Link href="/ceniky" style={{ padding: '14px 24px', background: PD.paperWhite, color: PD.ink, border: `1.5px solid ${PD.ink}`, fontSize: 15, fontWeight: 600, textDecoration: 'none' }}>
+                      Ceník
+                    </Link>
+                  </>
+                );
+              }
+
+              // 2) Authenticated bez claimu — push do claim flow
+              if (activeCows.length === 0) {
+                return (
+                  <>
+                    <Link href="/spravce/coworkingy" style={{ padding: '14px 24px', background: PD.ink, color: PD.paperWhite, fontSize: 15, fontWeight: 600, textDecoration: 'none', boxShadow: `3px 3px 0 ${PD.margin}` }}>
+                      Přivlastnit svůj coworking →
+                    </Link>
+                    <Link href="/ceniky" style={{ padding: '14px 24px', background: PD.paperWhite, color: PD.ink, border: `1.5px solid ${PD.ink}`, fontSize: 15, fontWeight: 600, textDecoration: 'none' }}>
+                      Ceník
+                    </Link>
+                  </>
+                );
+              }
+
+              // 3 + 4) Authenticated s claimem — rozliš podle cow.os subscription
+              const firstCow = activeCows[0];
+              if (firstCow.hasCowOs) {
+                return (
+                  <>
+                    <Link
+                      href={`/spravce/${firstCow.slug}/cow-os`}
+                      style={{ padding: '14px 24px', background: PD.moss, color: PD.paperWhite, fontSize: 15, fontWeight: 600, textDecoration: 'none', boxShadow: `3px 3px 0 ${PD.margin}` }}
+                    >
+                      🐄 Vstoupit do COW.OS: {firstCow.name} →
+                    </Link>
+                    {activeCows.length > 1 && (
+                      <Link href="/spravce" style={{ padding: '14px 24px', background: PD.paperWhite, color: PD.ink, border: `1.5px solid ${PD.ink}`, fontSize: 15, fontWeight: 600, textDecoration: 'none' }}>
+                        Všechny moje coworkingy ({activeCows.length})
+                      </Link>
+                    )}
+                  </>
+                );
+              }
+              // Has claim but cow.os subscription not yet activated
+              return (
+                <>
                   <Link
-                    key={cow.slug}
-                    href={`/spravce/${cow.slug}/cow-os`}
+                    href={`/spravce/${firstCow.slug}/cow-os`}
                     style={{ padding: '14px 24px', background: PD.ink, color: PD.paperWhite, fontSize: 15, fontWeight: 600, textDecoration: 'none', boxShadow: `3px 3px 0 ${PD.margin}` }}
                   >
-                    Otevřít admin: {cow.name} →
+                    🐄 Aktivovat COW.OS pro {firstCow.name} →
                   </Link>
-                ))}
-                <Link href="/spravce" style={{ padding: '14px 24px', background: PD.paperWhite, color: PD.ink, border: `1.5px solid ${PD.ink}`, fontSize: 15, fontWeight: 600, textDecoration: 'none' }}>
-                  Všechny moje coworkingy
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/registrace" style={{ padding: '14px 24px', background: PD.ink, color: PD.paperWhite, fontSize: 15, fontWeight: 600, textDecoration: 'none', boxShadow: `3px 3px 0 ${PD.margin}` }}>
-                  Vyzkoušet 30 dní zdarma →
-                </Link>
-                <Link href="/ceniky" style={{ padding: '14px 24px', background: PD.paperWhite, color: PD.ink, border: `1.5px solid ${PD.ink}`, fontSize: 15, fontWeight: 600, textDecoration: 'none' }}>
-                  Ceník
-                </Link>
-              </>
-            )}
+                  {activeCows.length > 1 && (
+                    <Link href="/spravce" style={{ padding: '14px 24px', background: PD.paperWhite, color: PD.ink, border: `1.5px solid ${PD.ink}`, fontSize: 15, fontWeight: 600, textDecoration: 'none' }}>
+                      Všechny moje coworkingy ({activeCows.length})
+                    </Link>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       </NotebookPaper>
