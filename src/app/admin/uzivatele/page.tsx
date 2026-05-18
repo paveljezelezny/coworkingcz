@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Users, Shield, User, Building2, Search, X, Check, Edit2, Tag, Calendar, Zap, ClipboardList } from 'lucide-react';
+import { Users, Shield, User, Building2, Search, X, Check, Edit2, Tag, Calendar, Zap, ClipboardList, Eraser, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
 interface CoworkingClaim {
@@ -163,6 +163,9 @@ export default function AdminUsersPage() {
   const [successId, setSuccessId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editingMembership, setEditingMembership] = useState<AdminUser | null>(null);
+  const [resetTarget, setResetTarget] = useState<AdminUser | null>(null);
+  const [resetting, setResetting] = useState(false);
+  const [resetResult, setResetResult] = useState<string | null>(null);
 
   useEffect(() => { fetchUsers(); }, []);
 
@@ -225,6 +228,40 @@ export default function AdminUsersPage() {
     }
   };
 
+  // Full reset — wipe all coworking ownership + claims + cow.os data
+  const handleFullReset = async (user: AdminUser) => {
+    setResetting(true);
+    setError(null);
+    setResetResult(null);
+    try {
+      const res = await fetch(`/api/admin/users/${user.id}/full-reset`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Reset selhal');
+        return;
+      }
+      const c = data.counts || {};
+      const parts: string[] = [];
+      if (c.coworkingEdits) parts.push(`${c.coworkingEdits} ownership`);
+      if (c.coworkingClaims) parts.push(`${c.coworkingClaims} claims`);
+      if (c.cowOsSubscriptions) parts.push(`${c.cowOsSubscriptions} subscriptions`);
+      if (c.cowOsBillingProfiles) parts.push(`${c.cowOsBillingProfiles} billing`);
+      if (c.cowOsMembershipPlans) parts.push(`${c.cowOsMembershipPlans} plans`);
+      if (c.cowOsMembers) parts.push(`${c.cowOsMembers} members`);
+      if (c.cowOsInvoices) parts.push(`${c.cowOsInvoices} invoices`);
+      if (c.rolDowngrade) parts.push('role → coworker');
+      setResetResult(parts.length > 0 ? `Smazáno: ${parts.join(', ')}` : 'Nic ke smazání — uživatel byl už čistý');
+      // Refresh user list
+      await fetchUsers();
+      setTimeout(() => setResetResult(null), 6000);
+    } catch (err) {
+      setError('Chyba sítě při resetu');
+    } finally {
+      setResetting(false);
+      setResetTarget(null);
+    }
+  };
+
   // Sync ownership → give full yearly membership
   const handleSyncOwnerMembership = async (userId: string) => {
     setSavingId(userId);
@@ -265,6 +302,65 @@ export default function AdminUsersPage() {
     <div>
       {editingMembership && (
         <MembershipModal user={editingMembership} onClose={() => setEditingMembership(null)} onSave={handleMembershipSave} />
+      )}
+
+      {resetTarget && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => !resetting && setResetTarget(null)}>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="p-5 border-b border-gray-200 flex items-start gap-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div className="flex-1">
+                <h2 className="font-bold text-gray-900">Plný reset uživatele</h2>
+                <p className="text-xs text-gray-500 mt-0.5">{resetTarget.name || resetTarget.email}</p>
+              </div>
+              <button onClick={() => !resetting && setResetTarget(null)}><X className="w-5 h-5 text-gray-500" /></button>
+            </div>
+            <div className="p-5 space-y-3">
+              <p className="text-sm text-gray-700">
+                Akce <strong>nelze vrátit</strong>. Smaže pro tohoto uživatele:
+              </p>
+              <ul className="text-xs text-gray-600 list-disc pl-5 space-y-0.5">
+                <li>Všechny <strong>claims</strong> (pending, approved, transfer)</li>
+                <li>Všechny <strong>ownership</strong> v CoworkingEdit tabulce</li>
+                <li>COW.OS <strong>subscription</strong> + billing profile + tarify + členy + faktury (jen pro coworkingy, které vlastnil)</li>
+                <li>Pokud byl <code>coworking_admin</code> → degrade role na <code>coworker</code></li>
+              </ul>
+              <p className="text-xs text-gray-500">
+                User account ZŮSTÁVÁ — jen se odpojí od coworkingů. Pending claims jiných uživatelů na stejné coworkingy zůstanou.
+              </p>
+              {resetTarget.coworkingClaims.length > 0 && (
+                <div className="p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-800">
+                  <strong>Spravuje:</strong> {resetTarget.coworkingClaims.map(c => c.coworkingName).join(', ')}
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2 p-5 border-t border-gray-200">
+              <button
+                onClick={() => setResetTarget(null)}
+                disabled={resetting}
+                className="flex-1 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Zrušit
+              </button>
+              <button
+                onClick={() => handleFullReset(resetTarget)}
+                disabled={resetting}
+                className="flex-1 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {resetting ? 'Mažu…' : <><Eraser className="w-4 h-4" /> Resetovat</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {resetResult && (
+        <div className="fixed top-4 right-4 z-50 bg-green-50 border border-green-300 text-green-800 px-4 py-3 rounded-lg shadow-lg max-w-sm text-sm">
+          <strong>✓ Reset hotov.</strong>
+          <div className="text-xs mt-1">{resetResult}</div>
+        </div>
       )}
 
       {/* Top Bar */}
@@ -425,7 +521,7 @@ export default function AdminUsersPage() {
                         )}
                       </td>
 
-                      {/* Role */}
+                      {/* Role + Reset */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${ROLE_COLORS[user.role] || 'bg-gray-100 text-gray-700'}`}>
@@ -438,6 +534,16 @@ export default function AdminUsersPage() {
                             <option value="coworking_admin">Správce</option>
                             <option value="super_admin">Super Admin</option>
                           </select>
+                          {(user.hasCoworkingOwnership || user.coworkingClaims.length > 0) && (
+                            <button
+                              onClick={() => setResetTarget(user)}
+                              disabled={savingId === user.id || resetting}
+                              className="p-1.5 rounded text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors disabled:opacity-40"
+                              title="Plný reset — smazat všechny coworking propojení"
+                            >
+                              <Eraser className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
