@@ -214,7 +214,7 @@ export default function NovaUdalostPage() {
   }
 
   return (
-    <div style={{paddingBottom:60,background:"#efe9dc"}}>
+    <div style={{paddingBottom:60,background:"#fbfbf2"}}>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-8">
 
         <Link href="/udalosti" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: '"Caveat", cursive', fontSize: 18, color: '#c76a54', textDecoration: 'none', marginBottom: 24 }}>
