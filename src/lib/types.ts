@@ -72,6 +72,8 @@ export interface CoworkingSpace {
   isFeatured: boolean;
   /** Special Deal — coworking si zapne při roční registraci */
   specialDeal?: SpecialDeal;
+  /** Červené upozornění zobrazené nahoře detailu — např. "Není pro veřejnost", "Zavřeno na rekonstrukci". */
+  accessWarning?: string | null;
   amenities: string[];
   photos: Photo[];
   locations: Location[];

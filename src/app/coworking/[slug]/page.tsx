@@ -102,6 +102,7 @@ export default async function CoworkingDetailPage({ params }: CoworkingDetailPag
     website: merged.website ?? null,
     shortDescription: merged.shortDescription ?? null,
     description: merged.description ?? null,
+    accessWarning: merged.accessWarning ?? null,
     isVerified: !!merged.isVerified,
     isFeatured: !!merged.isFeatured,
     capacity: merged.capacity ?? null,

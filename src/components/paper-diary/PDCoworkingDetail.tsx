@@ -22,6 +22,7 @@ export interface PDDetailCoworking {
   website?: string | null;
   shortDescription?: string | null;
   description?: string | null;
+  accessWarning?: string | null;
   isVerified?: boolean;
   isFeatured?: boolean;
   capacity?: number | null;
@@ -143,6 +144,15 @@ export function PDCoworkingDetail({ cw }: { cw: PDDetailCoworking }) {
               <img key={p.id ?? i} src={p.url} alt={p.caption || cw.name} style={{ width: '100%', height: 130, objectFit: 'cover', display: 'block', border: `1px solid ${PD.rule}`, transform: `rotate(${(i % 2 === 0 ? -0.4 : 0.4)}deg)`, boxShadow: '2px 3px 0 rgba(0,0,0,0.07)' }} />
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Access warning — červené upozornění (např. není pro veřejnost, rekonstrukce) */}
+      {cw.accessWarning && (
+        <div style={{ padding: '14px 24px', background: '#fef2f2', borderTop: `1px solid ${PD.rule}`, borderBottom: `2px solid #dc2626` }} className="md:!pl-24 md:!pr-14">
+          <p style={{ fontSize: 14, lineHeight: 1.5, color: '#b91c1c', fontWeight: 600, margin: 0, maxWidth: 720, whiteSpace: 'pre-line' }}>
+            ⚠ {cw.accessWarning}
+          </p>
         </div>
       )}
 

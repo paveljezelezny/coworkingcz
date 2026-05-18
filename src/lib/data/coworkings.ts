@@ -19,7 +19,12 @@ const createCoworking = (
 ): CoworkingSpace => {
   const base: CoworkingSpace = {
     id,
-    slug: name.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-'),
+    slug: name
+      .toLowerCase()
+      .normalize('NFD')                      // rozbije akcentované znaky na základ + diakritickou značku (ř → r + ̌)
+      .replace(/[̀-ͯ]/g, '')       // odstraní diakritické značky (Combining Diacritical Marks block)
+      .replace(/[^\w\s-]/g, '')              // odstraní vše ostatní mimo a-z 0-9 _ space -
+      .replace(/\s+/g, '-'),                 // mezery → pomlčky
     name,
     description: `${name} je moderní coworkingový prostor v ${city}, který nabízí kvalitní pracovní prostředí pro freelancery, startupery a týmy. Prostor je vybaven všem potřebným vybavením a podporuje komunitu tvůrců a inovátorů.`,
     shortDescription: `Moderní coworkingový prostor v ${city}`,
@@ -442,23 +447,44 @@ export const coworkingsData: CoworkingSpace[] = [
     prices: { hourly: { enabled: false, from: null }, dayPass: { enabled: true, from: 350 }, openSpace: { enabled: true, from: 3900 }, fixDesk: { enabled: false, from: null }, office: { enabled: true, from: 4500 } },
     shortDescription: 'Coworking na Žižkově pro freelancery a malé týmy — Žerotínova 32, vstup přes recepci Telehouse. Ceny bez DPH.',
   }),
-  createCoworking('cw_pracovna_vlkova', 'Pracovna Vlkova 36 a Zlatnická 12', 'Praha', 'Praha', {
+  // Pracovna = shared brand, ale dvě nezávislé pobočky (franchise) s vlastními provozovateli.
+  // Proto dva samostatné záznamy, ne jeden sloučený.
+  createCoworking('cw_pracovna_vlkova_36', 'Pracovna Vlkova 36', 'Praha', 'Praha', {
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'reception'],
-    capacity: 40,
-    areaM2: 700,
-  
-    photos: [{ id: 'cw_pracovna_vlkova_p1', url: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=800&q=80', caption: 'Pracovna Vlkova 36 a Zlatnická 12', isPrimary: true }],
-  
+    capacity: 20,
+    areaM2: 350,
+
+    photos: [{ id: 'cw_pracovna_vlkova_36_p1', url: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=800&q=80', caption: 'Pracovna Vlkova 36', isPrimary: true }],
+
     address: 'Vlkova 628/36',
     zipCode: '130 00',
     prices: {
-      hourly:    { enabled: false,  from: null   },
-      dayPass:   { enabled: false,  from: null  },
-      openSpace: { enabled: true,  from: 950 },
+      hourly:    { enabled: false, from: null },
+      dayPass:   { enabled: false, from: null },
+      openSpace: { enabled: true,  from: 950  },
       fixDesk:   { enabled: false, from: null },
       office:    { enabled: false, from: null },
     },
     shortDescription: 'Dostupný a přátelský coworking na Žižkově pro freelancery a malé týmy.',
+    website: 'https://www.pracovna.co',
+  }),
+  createCoworking('cw_pracovna_zlatnicka_12', 'Pracovna Zlatnická 12', 'Praha', 'Praha', {
+    amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
+    capacity: 20,
+    areaM2: 350,
+
+    photos: [{ id: 'cw_pracovna_zlatnicka_12_p1', url: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?auto=format&fit=crop&w=800&q=80', caption: 'Pracovna Zlatnická 12', isPrimary: true }],
+
+    address: 'Zlatnická 12',
+    zipCode: '110 00',
+    prices: {
+      hourly:    { enabled: false, from: null },
+      dayPass:   { enabled: false, from: null },
+      openSpace: { enabled: false, from: null },
+      fixDesk:   { enabled: false, from: null },
+      office:    { enabled: false, from: null },
+    },
+    shortDescription: 'Coworking v centru Prahy na Novém Městě — sesterská pobočka Pracovny Vlkova.',
     website: 'https://www.pracovna.co',
   }),
   createCoworking('cw_co_labs', 'Co-Labs', 'Praha', 'Praha', {
@@ -1216,6 +1242,7 @@ export const coworkingsData: CoworkingSpace[] = [
     ],
   }),
   createCoworking('cw_clubco_brno', 'Clubco', 'Brno', 'Jihomoravský kraj', {
+    slug: 'clubco-2',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 50,
     areaM2: 900,
@@ -1384,6 +1411,7 @@ export const coworkingsData: CoworkingSpace[] = [
     ],
   }),
   createCoworking('cw_clubco_ostrava', 'Clubco', 'Ostrava', 'Moravskoslezský kraj', {
+    slug: 'clubco-3',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer', 'events'],
     capacity: 45,
     areaM2: 800,
@@ -2057,6 +2085,7 @@ export const coworkingsData: CoworkingSpace[] = [
     ],
   }),
   createCoworking('cw_kanov_cheb', 'Kanov', 'Cheb', 'Karlovarský kraj', {
+    slug: 'kanov-2',
     website: 'https://www.kanov.cz/coworking/',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
@@ -2452,6 +2481,7 @@ export const coworkingsData: CoworkingSpace[] = [
     shortDescription: 'Sdílené kanceláře Teplice – flexibilní coworking v centru Teplic.',
   }),
   createCoworking('cw_hnizdo_uherske_hradiste', 'Hnízdo', 'Uherské Hradiště', 'Zlínský kraj', {
+    slug: 'hnizdo-2',
     amenities: ['wifi', 'meeting_rooms', 'kitchen', 'printer'],
     capacity: 20,
     areaM2: 400,
