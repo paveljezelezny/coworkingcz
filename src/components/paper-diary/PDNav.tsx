@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
@@ -23,6 +23,24 @@ export function PDNav() {
   const { data: session } = useSession();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  const role = (session?.user as any)?.role as string | undefined;
+  const isSuperAdmin = role === 'super_admin';
+  const isCoworkingAdmin = role === 'coworking_admin' || isSuperAdmin;
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [userMenuOpen]);
 
   return (
     <>
@@ -102,21 +120,90 @@ export function PDNav() {
               📔 můj dnešek
             </button>
             {session ? (
-              <>
-                <Link href="/profil" style={{ color: PD.inkMuted, fontSize: 14, textDecoration: 'none' }}>
-                  {session.user?.name || 'Profil'}
-                </Link>
+              <div ref={userMenuRef} style={{ position: 'relative' }}>
                 <button
-                  onClick={() => signOut({ callbackUrl: '/' })}
+                  onClick={() => setUserMenuOpen(o => !o)}
                   style={{
-                    padding: '8px 16px', background: PD.ink, color: PD.paperWhite,
-                    border: 'none', fontFamily: PD_FONT_BODY, fontSize: 13, fontWeight: 600,
-                    cursor: 'pointer',
+                    background: 'none', border: 'none',
+                    color: PD.inkMuted, fontSize: 14, cursor: 'pointer',
+                    fontFamily: PD_FONT_BODY,
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '4px 8px',
                   }}
+                  aria-label="Menu uživatele"
+                  aria-expanded={userMenuOpen}
                 >
-                  Odhlásit
+                  <span>{session.user?.name || session.user?.email || 'Profil'}</span>
+                  {isSuperAdmin && (
+                    <span
+                      style={{
+                        fontSize: 9, padding: '2px 6px', borderRadius: 99,
+                        background: '#f3e8ff', color: '#7e22ce',
+                        fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase',
+                      }}
+                      title="Super Admin"
+                    >
+                      admin
+                    </span>
+                  )}
+                  <span style={{ fontSize: 10, color: PD.inkMuted }}>▾</span>
                 </button>
-              </>
+                {userMenuOpen && (
+                  <div
+                    style={{
+                      position: 'absolute', right: 0, top: '100%', marginTop: 8,
+                      minWidth: 220,
+                      background: PD.paperWhite,
+                      border: `1.5px solid ${PD.ink}`,
+                      boxShadow: '3px 4px 0 rgba(0,0,0,0.08)',
+                      zIndex: 100,
+                    }}
+                  >
+                    <div style={{ padding: '10px 14px', borderBottom: `1px solid ${PD.ruleSoft}` }}>
+                      <div style={{ fontSize: 12, color: PD.inkMuted }}>Přihlášen jako</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: PD.ink, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {session.user?.email}
+                      </div>
+                    </div>
+                    <Link
+                      href="/profil"
+                      onClick={() => setUserMenuOpen(false)}
+                      style={{ display: 'block', padding: '10px 14px', fontSize: 14, color: PD.ink, textDecoration: 'none', borderBottom: `1px solid ${PD.ruleSoft}` }}
+                    >
+                      👤 Můj profil
+                    </Link>
+                    {isCoworkingAdmin && (
+                      <Link
+                        href="/spravce"
+                        onClick={() => setUserMenuOpen(false)}
+                        style={{ display: 'block', padding: '10px 14px', fontSize: 14, color: PD.ink, textDecoration: 'none', borderBottom: `1px solid ${PD.ruleSoft}`, fontWeight: 500 }}
+                      >
+                        ⚙️ Šuplík správce
+                      </Link>
+                    )}
+                    {isSuperAdmin && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setUserMenuOpen(false)}
+                        style={{ display: 'block', padding: '10px 14px', fontSize: 14, color: '#7e22ce', textDecoration: 'none', borderBottom: `1px solid ${PD.ruleSoft}`, fontWeight: 600, background: '#faf5ff' }}
+                      >
+                        🛡️ Super Admin Panel
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => { setUserMenuOpen(false); signOut({ callbackUrl: '/' }); }}
+                      style={{
+                        display: 'block', width: '100%', textAlign: 'left',
+                        padding: '10px 14px', fontSize: 14,
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        color: '#dc2626', fontFamily: PD_FONT_BODY,
+                      }}
+                    >
+                      🚪 Odhlásit
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <Link href="/prihlaseni" style={{ color: PD.inkMuted, fontSize: 14, textDecoration: 'none' }}>
@@ -182,6 +269,47 @@ export function PDNav() {
                   </Link>
                 );
               })}
+              {session && (
+                <>
+                  <Link
+                    href="/profil"
+                    onClick={() => setMobileOpen(false)}
+                    style={{
+                      textDecoration: 'none', color: PD.ink, fontWeight: 500,
+                      padding: '10px 0', borderBottom: `1px solid ${PD.ruleSoft}`,
+                      fontSize: 16, display: 'flex', alignItems: 'center', gap: 8,
+                    }}
+                  >
+                    👤 Můj profil
+                  </Link>
+                  {isCoworkingAdmin && (
+                    <Link
+                      href="/spravce"
+                      onClick={() => setMobileOpen(false)}
+                      style={{
+                        textDecoration: 'none', color: PD.ink, fontWeight: 500,
+                        padding: '10px 0', borderBottom: `1px solid ${PD.ruleSoft}`,
+                        fontSize: 16, display: 'flex', alignItems: 'center', gap: 8,
+                      }}
+                    >
+                      ⚙️ Šuplík správce
+                    </Link>
+                  )}
+                  {isSuperAdmin && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMobileOpen(false)}
+                      style={{
+                        textDecoration: 'none', color: '#7e22ce', fontWeight: 600,
+                        padding: '10px 0', borderBottom: `1px solid ${PD.ruleSoft}`,
+                        fontSize: 16, display: 'flex', alignItems: 'center', gap: 8,
+                      }}
+                    >
+                      🛡️ Super Admin Panel
+                    </Link>
+                  )}
+                </>
+              )}
             </nav>
             <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
               <button
