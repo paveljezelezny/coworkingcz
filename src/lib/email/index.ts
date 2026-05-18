@@ -59,3 +59,29 @@ export async function sendWelcomeMemberEmail(args: SendArgs<Parameters<typeof t.
   const res = await sendEmail({ to: args.to, replyTo: args.replyTo, subject, html, text, tag: 'welcome-member' });
   return logIfFailed(res, 'welcome-member');
 }
+
+// ─── AUTH FLOW e-maily ────────────────────────────────────────────────────────
+
+export async function sendPasswordResetEmail(args: SendArgs<Parameters<typeof t.passwordResetRequest>[0]>) {
+  const { subject, html, text } = t.passwordResetRequest(args.props);
+  const res = await sendEmail({ to: args.to, replyTo: args.replyTo, subject, html, text, tag: 'password-reset' });
+  return logIfFailed(res, 'password-reset');
+}
+
+export async function sendPasswordChangedEmail(args: SendArgs<Parameters<typeof t.passwordChanged>[0]>) {
+  const { subject, html, text } = t.passwordChanged(args.props);
+  const res = await sendEmail({ to: args.to, replyTo: args.replyTo, subject, html, text, tag: 'password-changed' });
+  return logIfFailed(res, 'password-changed');
+}
+
+export async function sendVerificationEmail(args: SendArgs<Parameters<typeof t.emailVerification>[0]>) {
+  const { subject, html, text } = t.emailVerification(args.props);
+  const res = await sendEmail({ to: args.to, replyTo: args.replyTo, subject, html, text, tag: 'email-verification' });
+  return logIfFailed(res, 'email-verification');
+}
+
+export async function sendRegistrationWelcomeEmail(args: SendArgs<Parameters<typeof t.registrationWelcome>[0]>) {
+  const { subject, html, text } = t.registrationWelcome(args.props);
+  const res = await sendEmail({ to: args.to, replyTo: args.replyTo, subject, html, text, tag: 'registration-welcome' });
+  return logIfFailed(res, 'registration-welcome');
+}

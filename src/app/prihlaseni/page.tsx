@@ -20,6 +20,7 @@ function PrihlaseniForm() {
 
   const callbackUrl = searchParams.get('callbackUrl') || '/';
   const verified = searchParams.get('verified') === '1';
+  const resetDone = searchParams.get('reset') === '1';
   const verifyError = searchParams.get('error');
 
   // Redirect if already logged in
@@ -97,6 +98,14 @@ function PrihlaseniForm() {
                 <div style={{ marginBottom: 16, padding: '10px 14px', background: '#eaf2e3', border: `1.5px solid ${PD.moss}`, color: '#3e5530', fontSize: 13, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                   <span>✓</span>
                   <span>Email úspěšně ověřen! Teď se můžeš přihlásit.</span>
+                </div>
+              )}
+
+              {/* Password reset done */}
+              {resetDone && (
+                <div style={{ marginBottom: 16, padding: '10px 14px', background: '#eaf2e3', border: `1.5px solid ${PD.moss}`, color: '#3e5530', fontSize: 13, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                  <span>✓</span>
+                  <span>Nové heslo je uložené. Přihlas se jím níže.</span>
                 </div>
               )}
 
@@ -180,6 +189,14 @@ function PrihlaseniForm() {
                     >
                       {showPassword ? '🙈' : '👁'}
                     </button>
+                  </div>
+                  <div style={{ textAlign: 'right', marginTop: 6 }}>
+                    <Link
+                      href="/prihlaseni/zapomenute-heslo"
+                      style={{ fontSize: 12, color: PD.inkMuted, textDecoration: 'underline dotted', textUnderlineOffset: 3 }}
+                    >
+                      Zapomenuté heslo?
+                    </Link>
                   </div>
                 </div>
 

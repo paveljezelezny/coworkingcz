@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { sendVerificationEmail } from '@/lib/email';
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -37,12 +38,22 @@ export async function POST(req: NextRequest) {
       data: { identifier: email, token, expires },
     });
 
-    // Build verification URL for when email sending is configured
-    const baseUrl = process.env.NEXTAUTH_URL ?? 'https://coworkingcz.vercel.app';
+    // Build verification URL — Resend posílá link odsud
+    const baseUrl = process.env.NEXTAUTH_URL ?? 'https://coworkings.cz';
     const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`;
 
-    // TODO: Send verification email here once email provider is configured
-    // await sendVerificationEmail({ to: email, name, verifyUrl });
+    // Pošli verifikační mail. Selhání nesmí shodit registraci (token v DB je, user
+    // si může vyžádat resend přes /prihlaseni/zapomenute-heslo nebo support).
+    try {
+      await sendVerificationEmail({
+        to: email,
+        replyTo: process.env.RESEND_REPLY_TO,
+        props: { name, email, verifyUrl },
+      });
+    } catch (mailErr) {
+      console.warn('[register] verification mail failed', mailErr);
+    }
+    // Backup log pro debug / pokud mail selže
     console.log(`[VERIFY] Email verification link for ${email}: ${verifyUrl}`);
 
     return NextResponse.json({
