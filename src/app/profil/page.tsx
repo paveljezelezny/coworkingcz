@@ -13,6 +13,7 @@ import {
   FileText, Download, AlertTriangle,
 } from 'lucide-react';
 import Link from 'next/link';
+import ChangePasswordCard from '@/components/ChangePasswordCard';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -2430,6 +2431,9 @@ function ProfilPageInner() {
                 )}
               </div>
             </div>
+
+            {/* Change password */}
+            <ChangePasswordCard />
 
             {/* Danger zone */}
             <div className="bg-white rounded-xl border border-gray-200 p-5">
