@@ -2,9 +2,10 @@
 // Mirror of CSS proměnných v globals.css. Pro inline style v TSX.
 
 export const PD = {
-  paper:      '#efe9dc',
-  paperLt:    '#f6f1e5',
-  paperWhite: '#fdfbf4',
+  paper:      '#fbfbf2',  // hlavní BG (změna z #efe9dc — bělejší tón)
+  paperLt:    '#f5f3e6',  // lehce krémový akcent (sidebary, hover BG)
+  paperWhite: '#ffffff',  // karty, dialogy — čistá bílá pro elevation
+  paperWarm:  '#fdfbf4',  // původní krémová — pro letterhead a maily
   ink:        '#1a1a1a',
   inkSoft:    '#3a3a3a',
   inkMuted:   '#6b6558',

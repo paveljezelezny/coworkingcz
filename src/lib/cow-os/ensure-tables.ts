@@ -160,6 +160,15 @@ export async function ensureCowOsTables(): Promise<void> {
       "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
     )`,
 
+    // RLS: nové tabulky nesmí vzniknout exponované přes PostgREST (viz docs/replan/lessons.md)
+    `ALTER TABLE "CowOsSubscription" ENABLE ROW LEVEL SECURITY`,
+    `ALTER TABLE "CowOsBillingProfile" ENABLE ROW LEVEL SECURITY`,
+    `ALTER TABLE "CowOsMembershipPlan" ENABLE ROW LEVEL SECURITY`,
+    `ALTER TABLE "CowOsMember" ENABLE ROW LEVEL SECURITY`,
+    `ALTER TABLE "CowOsInvoice" ENABLE ROW LEVEL SECURITY`,
+    `ALTER TABLE "CowOsResource" ENABLE ROW LEVEL SECURITY`,
+    `ALTER TABLE "CowOsResourceBooking" ENABLE ROW LEVEL SECURITY`,
+
     // Indexes
     `CREATE INDEX IF NOT EXISTS "CowOsSubscription_userId_idx" ON "CowOsSubscription"("userId")`,
     `CREATE INDEX IF NOT EXISTS "CowOsMember_coworkingSlug_idx" ON "CowOsMember"("coworkingSlug")`,

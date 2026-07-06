@@ -236,7 +236,7 @@ export default function NovaInzeratPage() {
   }
 
   return (
-    <div style={{paddingBottom:60,background:"#efe9dc"}}>
+    <div style={{paddingBottom:60,background:"#fbfbf2"}}>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-8">
 
         {/* Back link */}
