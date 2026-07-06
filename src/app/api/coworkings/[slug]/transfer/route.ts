@@ -99,9 +99,9 @@ export async function POST(
   });
 
   // TODO: Send actual email to toEmail with acceptance link
-  // For now, log the acceptance URL
+  // Note: acceptUrl se vrací jen autorizovanému odesílateli v response.
+  // Nelogovat — token v Vercel lozích = security leak.
   const acceptUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/auth/accept-transfer?token=${token}`;
-  console.log(`[Transfer] Acceptance URL for ${toEmail}: ${acceptUrl}`);
 
   return NextResponse.json({ transfer, acceptUrl }, { status: 201 });
 }

@@ -51,6 +51,9 @@ const migrations = [
   `CREATE UNIQUE INDEX IF NOT EXISTS "Invitation_email_key" ON "Invitation"("email")`,
   `CREATE INDEX IF NOT EXISTS "Invitation_status_idx" ON "Invitation"("status")`,
   `CREATE INDEX IF NOT EXISTS "Invitation_createdAt_idx" ON "Invitation"("createdAt")`,
+
+  // ── RLS: každá tabulka vytvořená tímto skriptem musí mít RLS (docs/replan/lessons.md) ──
+  `ALTER TABLE "Invitation" ENABLE ROW LEVEL SECURITY`,
 ];
 
 async function run() {
