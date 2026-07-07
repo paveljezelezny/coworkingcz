@@ -21,8 +21,8 @@ const COWORKING_BENEFITS = [
   'Zvýrazněný profil v katalogu',
   'Special Deal badge na kartě',
   'Přidávání eventů (neomezeno)',
-  'COW.OS — správa členů, fakturace, QR vstupy',
-  'Analytika a statistiky profilu',
+  'COW.OS — správa členů, fakturace, QR platby',
+  'Přehled členů a plateb v dashboardu',
 ];
 
 function RegistraceInner() {

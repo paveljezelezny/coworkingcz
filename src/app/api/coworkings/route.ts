@@ -24,13 +24,16 @@ export async function GET() {
       // DB unavailable — serve static data as-is
     }
 
-    // Merge overrides into static data and filter deleted
+    // Merge overrides into static data; filter deleted + closed (isActive === false)
     const merged = coworkingsData
       .map((cw) => {
         const override = overrides[cw.slug];
         return override ? { ...cw, ...override } : cw;
       })
-      .filter((cw) => !(cw as unknown as Record<string, unknown>).deleted);
+      .filter((cw) => {
+        const c = cw as unknown as Record<string, unknown>;
+        return !c.deleted && c.isActive !== false;
+      });
 
     return NextResponse.json(merged, {
       headers: { 'Cache-Control': 'no-store' },

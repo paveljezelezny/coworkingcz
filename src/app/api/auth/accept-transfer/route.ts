@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * GET /api/auth/accept-transfer?token=XXX
@@ -159,6 +160,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(new URL('/spravce?transfer=accepted', req.url));
     }
     console.error('Accept transfer error:', error);
+    Sentry.captureException(error, { tags: { area: 'accept-transfer' } });
     return NextResponse.redirect(
       new URL('/spravce?error=transfer-failed', req.url)
     );

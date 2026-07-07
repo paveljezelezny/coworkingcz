@@ -14,8 +14,8 @@ const BENEFITS = [
   { icon: '👀', title: 'Vidí tě 10k+ coworkerů', desc: 'Profil v adresáři + special deal badge na kartě.' },
   { icon: '📅', title: 'Eventy a workshopy', desc: 'Přidávej vlastní akce, dostávej je do kalendáře.' },
   { icon: '🏷️', title: 'Marketplace', desc: 'Inzeruj nabídky práce, zasedaček, sdílených stolů.' },
-  { icon: '🐄', title: 'COW.OS — admin v ceně', desc: 'Správa členů, automatická fakturace, QR vstupy.' },
-  { icon: '📊', title: 'Analytika profilu', desc: 'Statistiky návštěvnosti, MRR, top dny v měsíci.' },
+  { icon: '🐄', title: 'COW.OS — admin v ceně', desc: 'Správa členů, automatická fakturace, QR platby.' },
+  { icon: '📊', title: 'Přehled plateb', desc: 'Dashboard členů a faktur, stav plateb na jednom místě.' },
   { icon: '⭐', title: 'Email podpora', desc: 'Reagujeme do 24 h. Žádný robot, jen lidi.' },
 ];
 
@@ -33,7 +33,7 @@ export default function ProCoworkingPage() {
             <span style={{ fontStyle: 'italic', fontWeight: 400, color: PD.accent }}>Postav ho do reflektorů.</span>
           </h1>
           <p style={{ fontSize: 17, lineHeight: 1.5, color: PD.inkSoft, margin: 0, maxWidth: 680 }}>
-            Zviditelni profil, získej nové členy, spravuj fakturaci a QR vstupy přes COW.OS — to vše
+            Zviditelni profil, získej nové členy, spravuj členy a fakturaci přes COW.OS — to vše
             z jednoho ceníku. {PLATFORM_PRICING[0].monthlyPrice} Kč/měs s 20 % slevou ročně.
           </p>
 

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
+import { sendTrialEndingEmail, sendPaymentFailedEmail } from '@/lib/email';
+import * as Sentry from '@sentry/nextjs';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2026-03-25.dahlia' as const,
@@ -39,7 +41,7 @@ export async function POST(req: NextRequest) {
       case 'customer.subscription.trial_will_end': {
         const sub = event.data.object as Stripe.Subscription;
         console.log(`[stripe/webhook] Trial will end for subscription ${sub.id}`);
-        // TODO: poslat email uživateli "Za 3 dny začne nabíhat platba"
+        await notifyTrialEnding(sub);
         break;
       }
 
@@ -70,7 +72,7 @@ export async function POST(req: NextRequest) {
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
         console.warn(`[stripe/webhook] Payment failed for invoice ${invoice.id}`);
-        // TODO: poslat email uživateli
+        await notifyPaymentFailed(invoice);
         break;
       }
 
@@ -79,10 +81,64 @@ export async function POST(req: NextRequest) {
     }
   } catch (err) {
     console.error('[stripe/webhook] Handler error:', err);
+    Sentry.captureException(err, { tags: { area: 'stripe-webhook', eventType: event.type } });
     return NextResponse.json({ error: 'Handler failed' }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });
+}
+
+// ── E-mail notifikace (fire-and-safe: chyba mailu nesmí shodit webhook) ──────
+
+const SITE_URL = process.env.NEXTAUTH_URL || 'https://coworkings.cz';
+
+async function resolveCustomerEmail(customerId: string): Promise<{ email: string; name: string } | null> {
+  try {
+    const customer = await stripe.customers.retrieve(customerId);
+    if (customer.deleted || !customer.email) return null;
+    return { email: customer.email, name: customer.name || customer.email };
+  } catch {
+    return null;
+  }
+}
+
+async function notifyTrialEnding(sub: Stripe.Subscription) {
+  try {
+    const c = await resolveCustomerEmail(String(sub.customer));
+    if (!c) return;
+    const daysLeft = sub.trial_end
+      ? Math.max(1, Math.ceil((sub.trial_end * 1000 - Date.now()) / 86_400_000))
+      : 3;
+    await sendTrialEndingEmail({
+      to: c.email,
+      props: {
+        coworkingName: 'COWORKINGS.cz',
+        memberName: c.name,
+        daysLeft,
+        pricingUrl: `${SITE_URL}/ceniky`,
+      },
+    });
+  } catch (err) {
+    console.error('[stripe/webhook] trial-ending email error:', err);
+  }
+}
+
+async function notifyPaymentFailed(invoice: Stripe.Invoice) {
+  try {
+    const c = await resolveCustomerEmail(String(invoice.customer));
+    if (!c) return;
+    await sendPaymentFailedEmail({
+      to: c.email,
+      props: {
+        coworkingName: 'COWORKINGS.cz',
+        memberName: c.name,
+        amount: (invoice.amount_due ?? 0) / 100,
+        retryUrl: invoice.hosted_invoice_url || `${SITE_URL}/profil`,
+      },
+    });
+  } catch (err) {
+    console.error('[stripe/webhook] payment-failed email error:', err);
+  }
 }
 
 // ── Handlers ─────────────────────────────────────────────────────────────────

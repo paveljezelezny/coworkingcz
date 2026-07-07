@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashIp, getRequestIp, isValidEmail } from '@/lib/invite';
+import { sendInviteConfirmationEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs'; // crypto.createHash potřebuje Node runtime
@@ -44,7 +45,13 @@ export async function POST(req: NextRequest) {
   // proto cast na any. Na Vercel/lokál Prisma sám generuje při buildu.
   const db = prisma as any;
 
+  let isNewLead = false;
   try {
+    // Zjistíme, zda email už není v DB — jen novým leadům posíláme potvrzení,
+    // aby duplicitním submitem nešlo spamovat inbox.
+    const existing = await db.invitation.findUnique({ where: { email }, select: { id: true } });
+    isNewLead = !existing;
+
     await db.invitation.upsert({
       where: { email },
       create: {
@@ -69,6 +76,18 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error('[invitations] upsert failed', err);
     return NextResponse.json({ error: 'Nepodařilo se uložit, zkus to za chvíli.' }, { status: 500 });
+  }
+
+  // Potvrzovací mail jen pro nové leady. Selhání mailu NESMÍ shodit API —
+  // záznam je v DB, případnou pozvánku pošleš ručně z /admin/pozvanky.
+  if (isNewLead) {
+    // await, ne fire-and-forget — Vercel serverless funkce se ukončí hned po response,
+    // takže visící promise by se nedokončila. sendInviteConfirmationEmail nikdy nehází.
+    await sendInviteConfirmationEmail({
+      to: email,
+      replyTo: process.env.RESEND_REPLY_TO || process.env.INVITE_REPLY_TO,
+      props: { email },
+    });
   }
 
   return NextResponse.json({ ok: true });

@@ -23,7 +23,7 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: 'Co je COW.OS?',
-    a: 'COW.OS je nástroj pro provozovatele coworkingů — správa členů, fakturace, plány, QR vstupy. Součástí každého plánu provozovatele.',
+    a: 'COW.OS je nástroj pro provozovatele coworkingů — správa členů, fakturace, plány, QR platby. Součástí každého plánu provozovatele.',
   },
 ];
 
@@ -144,7 +144,7 @@ export default function CenikyPage() {
                         </li>
                         <li style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                           <span style={{ color: PD.moss }}>✓</span>
-                          <span>COW.OS — správa členů, fakturace, QR vstupy</span>
+                          <span>COW.OS — správa členů, fakturace, QR platby</span>
                         </li>
                         <li style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                           <span style={{ color: PD.moss }}>✓</span>

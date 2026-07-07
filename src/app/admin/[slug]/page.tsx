@@ -251,10 +251,14 @@ export default function EditCoworkingPage({ params }: EditPageProps) {
       const response = await fetch(`/api/admin/coworkings/${coworking.slug}`, {
         method: 'DELETE',
       });
-      if (!response.ok) throw new Error('Delete failed');
+      if (!response.ok) {
+        // Přečíst skutečnou chybu z API místo generické hlášky
+        const body = await response.json().catch(() => null);
+        throw new Error(body?.error || `Mazání selhalo (HTTP ${response.status})`);
+      }
       window.location.href = '/admin';
     } catch (error) {
-      alert('Chyba při mazání');
+      alert(`Chyba při mazání: ${error instanceof Error ? error.message : 'neznámá chyba'}`);
       setDeleting(false);
     }
   };

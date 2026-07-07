@@ -33,7 +33,7 @@ export default function NotFound() {
         </div>
 
         <div className="mt-12 text-gray-600">
-          <p>Potřebuješ pomoc? <Link href="#" className="text-blue-600 font-semibold hover:underline">Kontaktuj nás</Link></p>
+          <p>Potřebuješ pomoc? <a href="mailto:info@coworkings.cz" className="text-blue-600 font-semibold hover:underline">Kontaktuj nás</a></p>
         </div>
       </div>
     </div>

@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -24,36 +23,7 @@ export default function Footer() {
             <p className="text-gray-400 text-sm leading-relaxed">
               Propojujeme coworkery a coworkingové prostory v celé České republice. Najdi si ideální místo pro práci.
             </p>
-            <div className="flex gap-4">
-              <a
-                href="#"
-                aria-label="Facebook"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
-              >
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
-                aria-label="Twitter"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
-              >
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
-                aria-label="LinkedIn"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
-              >
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
-                aria-label="Instagram"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
-              >
-                <Instagram className="w-5 h-5" />
-              </a>
-            </div>
+            {/* Social ikony skryté, dokud neexistují reálné profily — až budou, vrátit <a> s odkazy */}
           </div>
 
           {/* Column 2: Pro coworkers */}
@@ -124,12 +94,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link
-                  href="#"
+                <a
+                  href="mailto:info@coworkings.cz"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Podpora
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -147,23 +117,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a
-                  href="tel:+420123456789"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  +420 123 456 789
-                </a>
-              </li>
-              <li>
                 <p className="text-gray-400">Česká republika</p>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Napsat nám
-                </Link>
               </li>
             </ul>
           </div>

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { randomBytes } from 'crypto';
+import { sendTransferInviteEmail } from '@/lib/email';
 
 /**
  * GET /api/coworkings/[slug]/transfer — get pending transfer for this coworking
@@ -98,10 +99,21 @@ export async function POST(
     },
   });
 
-  // TODO: Send actual email to toEmail with acceptance link
   // Note: acceptUrl se vrací jen autorizovanému odesílateli v response.
   // Nelogovat — token v Vercel lozích = security leak.
   const acceptUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/auth/accept-transfer?token=${token}`;
+
+  // Poslat příjemci accept link e-mailem (fire-and-safe — selhání neshodí response)
+  await sendTransferInviteEmail({
+    to: toEmail.toLowerCase(),
+    props: {
+      coworkingName: claim.coworkingName || slug,
+      fromName: session.user.name || session.user.email,
+      acceptUrl,
+      expiresDays: 7,
+      message: typeof message === 'string' && message.trim() ? message.trim() : undefined,
+    },
+  });
 
   return NextResponse.json({ transfer, acceptUrl }, { status: 201 });
 }

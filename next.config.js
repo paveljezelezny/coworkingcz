@@ -15,6 +15,8 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '8mb',
     },
+    // Sentry: aktivuje src/instrumentation.ts (na Next 15+ už netřeba)
+    instrumentationHook: true,
   },
 }
 

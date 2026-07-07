@@ -54,10 +54,26 @@ export async function sendPaymentFailedEmail(args: SendArgs<Parameters<typeof t.
   return logIfFailed(res, 'payment-failed');
 }
 
+export async function sendTransferInviteEmail(args: SendArgs<Parameters<typeof t.transferInvite>[0]>) {
+  const { subject, html, text } = t.transferInvite(args.props);
+  const res = await sendEmail({ to: args.to, replyTo: args.replyTo, subject, html, text, tag: 'transfer-invite' });
+  return logIfFailed(res, 'transfer-invite');
+}
+
 export async function sendWelcomeMemberEmail(args: SendArgs<Parameters<typeof t.welcomeMember>[0]>) {
   const { subject, html, text } = t.welcomeMember(args.props);
   const res = await sendEmail({ to: args.to, replyTo: args.replyTo, subject, html, text, tag: 'welcome-member' });
   return logIfFailed(res, 'welcome-member');
+}
+
+/**
+ * Pre-launch waitlist confirmation.
+ * Volá se z POST /api/invitations po úspěšném zápisu emailu do `Invitation`.
+ */
+export async function sendInviteConfirmationEmail(args: SendArgs<Parameters<typeof t.inviteConfirmation>[0]>) {
+  const { subject, html, text } = t.inviteConfirmation(args.props);
+  const res = await sendEmail({ to: args.to, replyTo: args.replyTo, subject, html, text, tag: 'invite-confirmation' });
+  return logIfFailed(res, 'invite-confirmation');
 }
 
 // ─── AUTH FLOW e-maily ────────────────────────────────────────────────────────

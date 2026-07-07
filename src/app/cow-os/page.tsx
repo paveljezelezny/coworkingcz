@@ -15,8 +15,8 @@ interface ActiveCow {
 const FEATURES = [
   { icon: '👥', title: 'Členové', desc: 'Přehled aktivních členů, end dates, automatické připomínky před koncem členství.', tone: PD.accent },
   { icon: '💳', title: 'Fakturace', desc: 'Generuje faktury, pošle je e-mailem, sleduje platby. QR kódy pro rychlý převod.', tone: PD.amber },
-  { icon: '📱', title: 'QR vstupy', desc: 'Členové se přihlásí QR kódem u recepce. Statistiky návštěvnosti rovnou v adminu.', tone: PD.moss },
-  { icon: '📊', title: 'Reporty', desc: 'Měsíční obsazenost, MRR, nejvytíženější dny, top členové. Bez Excelu.', tone: PD.coral },
+  { icon: '📱', title: 'QR platby', desc: 'Každá faktura má SPAYD QR kód — člen zaplatí naskenováním z bankovní aplikace.', tone: PD.moss },
+  { icon: '📊', title: 'Přehled', desc: 'Dashboard se stavem členů, faktur a plateb na jednom místě. Bez Excelu.', tone: PD.coral },
   { icon: '🏷️', title: 'Plány', desc: 'Definuj day pass, fix desk, virtual office. Cenotvorba, slevy, balíčky.', tone: PD.accent },
   { icon: '🎯', title: 'Marketing', desc: 'Tvůj profil v adresáři, SEO, push do marketplace, eventy. Vidí tě 10k+ coworkerů.', tone: PD.amber },
 ];
@@ -68,7 +68,7 @@ export default function CowOsPage() {
             <span style={{ fontStyle: 'italic', fontWeight: 400, color: PD.accent }}>pro tvůj coworking</span>.
           </h1>
           <p style={{ fontSize: 17, lineHeight: 1.5, color: PD.inkSoft, margin: 0, maxWidth: 680 }}>
-            Správa členů, automatická fakturace, QR platby, reporty. Vše v jednom adminu, který používáš z prohlížeče i z mobilu.
+            Správa členů, automatická fakturace, QR platby. Vše v jednom adminu, který používáš z prohlížeče i z mobilu.
           </p>
 
           {/* Hand-drawn cow */}
