@@ -70,6 +70,7 @@ export async function GET(req: NextRequest) {
     const fromUserId = transfer.fromUserId;
 
     // Atomic transaction: token claim first (idempotence — replay-safe), then mutations.
+    // Explicit timeout: ~10 sequential queries; Prisma default 5 s je těsný přes pooler.
     await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 0. Claim the token: pending → accepted atomically. Second click = count 0 → abort.
       const claimed = await tx.coworkingTransfer.updateMany({
@@ -147,12 +148,16 @@ export async function GET(req: NextRequest) {
         });
       }
     }
-    }); // end $transaction
+    }, { timeout: 10000 }); // end $transaction
 
     return NextResponse.redirect(
       new URL('/spravce?transfer=accepted', req.url)
     );
   } catch (error) {
+    // Dvojklik / e-mail prefetch: transfer už proběhl — z pohledu uživatele úspěch, ne chyba.
+    if (error instanceof Error && error.message === 'transfer-already-processed') {
+      return NextResponse.redirect(new URL('/spravce?transfer=accepted', req.url));
+    }
     console.error('Accept transfer error:', error);
     return NextResponse.redirect(
       new URL('/spravce?error=transfer-failed', req.url)

@@ -11,6 +11,9 @@ export async function ensureCowOsTables(): Promise<void> {
   if (tablesEnsured) return;
 
   // Quick check: does CowOsSubscription table exist?
+  // ⚠️ POZOR: existence JEDNÉ tabulky je proxy za "celé schéma existuje" — pokud sem
+  // někdy přidáš novou tabulku/ALTER, na existující DB se NIKDY nespustí (early return níž).
+  // Nové DDL pak musí i do ruční migrace (Supabase MCP / migrate.mjs). Viz docs/replan/lessons.md.
   try {
     const result = await prisma.$queryRawUnsafe<{ exists: boolean }[]>(
       `SELECT EXISTS (
